@@ -1,4 +1,2 @@
-export const baseUrl = "https://api-constructionsaarthi.techifyhouse.in";
+export const baseUrl = import.meta.env.VITE_BASE_URL;
 // export const baseUrl = "http://localhost:3500";
-
-
