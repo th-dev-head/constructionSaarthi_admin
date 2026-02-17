@@ -3,13 +3,11 @@ name: Deploy Admin to VPS
 on:
   push:
     branches:
-      - main
       - development
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Deploy admin via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -19,4 +17,10 @@ jobs:
           key: ${{ secrets.VPS_DEPLOY_KEY }}
           port: 22
           script: |
-            sudo -u deploy bash /home/deploy/deploy-admin.sh
+            set -e
+            cd /var/www/construction/dev/admin
+            git fetch origin
+            git reset --hard origin/development
+            npm install
+            npm run build
+            sudo systemctl reload nginx
