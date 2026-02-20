@@ -66,7 +66,7 @@ const Login = () => {
       <div className="relative z-10 bg-white shadow-lg rounded-lg p-8 w-11/12 max-w-md">
         <div className="flex justify-center gap-2 mb-8 text-center items-center">
           <img src={icon} alt="Logo" className="w-10" />
-          <p className="font-bold">ConstructionSaarthi</p>
+          <p className="font-bold">ConstructionSaarthiii</p>
         </div>
 
         <h2 className="text-2xl font-semibold text-center mb-4">Sign In</h2>
