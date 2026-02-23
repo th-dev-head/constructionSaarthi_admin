@@ -12,6 +12,7 @@ import userReducer from "./slice/UserSlice";
 import promptReducer from "./slice/PromptSlice";
 import promptReferenceReducer from "./slice/PromptReferenceSlice";
 import pmFeatureReducer from "./slice/PMFeatureSlice";
+import helpReducer from "./slice/HelpSlice";
 
 export const store = configureStore({
   reducer: {
@@ -28,5 +29,6 @@ export const store = configureStore({
     prompt: promptReducer,
     promptReference: promptReferenceReducer,
     pmFeature: pmFeatureReducer,
+    help: helpReducer,
   },
 });

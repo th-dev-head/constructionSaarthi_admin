@@ -54,6 +54,11 @@ export const MenuItems = [
     link: "/prompts",
     icon: <MessageCircle size={22} />,
   },
+  {
+    name: "Help Support",
+    link: "/help",
+    icon: <HelpCircle size={22} />,
+  },
   // {
   //   name: "Support Logs",
   //   link: "/support",

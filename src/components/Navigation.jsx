@@ -23,6 +23,7 @@ import CreatePrompt from "./page/prompts/CreatePrompt";
 import PromptsList from "./page/prompts/PromptsList";
 import PMFeatureManagement from "./page/prompts/PMFeatureManagement";
 import PromptReferenceManagement from "./page/prompts/PromptReferenceManagement";
+import Support from "./page/help/Support";
 
 const Navigation = () => (
   <BrowserRouter>
@@ -54,6 +55,10 @@ const Navigation = () => (
         <Route path="/prompts/view/:id" element={<CreatePrompt />} />
         <Route path="/prompts/features" element={<PMFeatureManagement />} />
         <Route path="/prompts/references" element={<PromptReferenceManagement />} />
+        <Route path="/help" element={<Support />} />
+        <Route path="/help/faqs" element={<Support />} />
+        <Route path="/help/tickets" element={<Support />} />
+        <Route path="/help/feedbacks" element={<Support />} />
       </Route>
     </Routes>
   </BrowserRouter>
