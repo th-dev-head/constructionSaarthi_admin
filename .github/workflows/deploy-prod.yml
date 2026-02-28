@@ -1,0 +1,20 @@
+name: 🚀 Admin Production Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy Admin
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_PROD_HOST }}
+          username: ${{ secrets.VPS_PROD_USER }}
+          key: ${{ secrets.VPS_DEPLOY_PROD_KEY }}
+          script: |
+            bash /home/deploy/deploy-admin.sh
