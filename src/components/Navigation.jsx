@@ -24,12 +24,14 @@ import PromptsList from "./page/prompts/PromptsList";
 import PMFeatureManagement from "./page/prompts/PMFeatureManagement";
 import PromptReferenceManagement from "./page/prompts/PromptReferenceManagement";
 import Support from "./page/help/Support";
+import BannerManagement from "./page/banner/BannerManagement";
+import CategoryManagement from "./page/category/CategoryManagement";
 
 const Navigation = () => (
   <BrowserRouter>
     <Routes>
       <Route path="/" element={<Login />} />
-        <Route path="/otp-send" element={<OTPSend />} />
+      <Route path="/otp-send" element={<OTPSend />} />
       <Route path="/forgot-pass" element={<ForgotPassword />} />
       <Route path="/reset-pass" element={<ResetPassword />} />
 
@@ -56,6 +58,8 @@ const Navigation = () => (
         <Route path="/prompts/features" element={<PMFeatureManagement />} />
         <Route path="/prompts/references" element={<PromptReferenceManagement />} />
         <Route path="/help" element={<Support />} />
+        <Route path="/banner-management" element={<BannerManagement />} />
+        <Route path="/category-management" element={<CategoryManagement />} />
         <Route path="/help/faqs" element={<Support />} />
         <Route path="/help/tickets" element={<Support />} />
         <Route path="/help/feedbacks" element={<Support />} />

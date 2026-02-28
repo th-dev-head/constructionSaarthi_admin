@@ -47,7 +47,7 @@ export const MenuItems = [
   {
     name: "Coupon Management",
     link: "/coupon-management",
-    icon: <RiDiscountPercentLine  size={22} />,
+    icon: <RiDiscountPercentLine size={22} />,
   },
   {
     name: "Prompts Management",
@@ -58,6 +58,16 @@ export const MenuItems = [
     name: "Help Support",
     link: "/help",
     icon: <HelpCircle size={22} />,
+  },
+  {
+    name: "Banner Management",
+    link: "/banner-management",
+    icon: <LayoutDashboard size={22} />,
+  },
+  {
+    name: "Category Management",
+    link: "/category-management",
+    icon: <FolderOpen size={22} />,
   },
   // {
   //   name: "Support Logs",
