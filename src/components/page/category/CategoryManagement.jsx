@@ -8,6 +8,7 @@ import {
     updateCategory,
 } from "../../../redux/slice/CategorySlice";
 import DataTable from "../../common/DataTable";
+import Modal from "../../common/Modal";
 
 const CategoryManagement = () => {
     const dispatch = useDispatch();
@@ -54,21 +55,6 @@ const CategoryManagement = () => {
             toast.error(error?.message || "Operation failed");
         }
     };
-
-    const Modal = ({ title, children, onClose }) => (
-        <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-xs bg-black/50">
-            <div className="bg-white rounded-xl w-[400px] p-6 relative">
-                <button
-                    onClick={onClose}
-                    className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
-                >
-                    <X size={20} />
-                </button>
-                <h2 className="text-xl font-semibold mb-4">{title}</h2>
-                {children}
-            </div>
-        </div>
-    );
 
     const columns = [
         { header: "Category Name", accessor: "name" },

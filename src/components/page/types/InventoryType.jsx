@@ -542,6 +542,7 @@ import {
   deleteInventory,
 } from "../../../redux/slice/Types/inventorySlice";
 import DataTable from "../../common/DataTable";
+import Modal from "../../common/Modal";
 
 const Inventory = () => {
   const dispatch = useDispatch();
@@ -606,21 +607,6 @@ const Inventory = () => {
       } else toast.error(res.payload || "Failed to delete inventory");
     });
   };
-
-  const Modal = ({ title, children, onClose }) => (
-    <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-xs bg-black/50">
-      <div className="bg-white rounded-xl w-[400px] p-6 relative">
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
-        >
-          <X size={20} />
-        </button>
-        <h2 className="text-xl font-semibold mb-4">{title}</h2>
-        {children}
-      </div>
-    </div>
-  );
 
   const columns = [
     // { header: "ID", accessor: "id" },
@@ -725,10 +711,10 @@ const Inventory = () => {
             modalType === "add"
               ? "Add Inventory"
               : modalType === "edit"
-              ? "Edit Inventory"
-              : modalType === "view"
-              ? "View Inventory"
-              : "Delete Inventory"
+                ? "Edit Inventory"
+                : modalType === "view"
+                  ? "View Inventory"
+                  : "Delete Inventory"
           }
           onClose={() => setShowModal(false)}
         >

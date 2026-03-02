@@ -81,7 +81,7 @@ const ManagePlan = () => {
         setLoadingDetails(true);
         setError(null);
         try {
-            const response = await apiInstance.get(`/api/subscription/getSubscriptionDetails/${planId}`);
+            const response = await apiInstance.get(`/api/subscription/getAdminSubscriptionDetails/${planId}`);
             if (response.data) {
                 setPlanDetails(response.data);
                 // Populate form with existing values
@@ -134,6 +134,7 @@ const ManagePlan = () => {
                 subscription_id: parseInt(selectedPlanId),
                 price_per_member: parseFloat(formData.add_member_price_per_member) || 0,
                 description: formData.add_member_description || "",
+                is_active: formData.add_memberIs_active,
             };
 
             const response = await apiInstance.put(
@@ -173,6 +174,7 @@ const ManagePlan = () => {
                 subscription_id: parseInt(selectedPlanId),
                 minimum_calculation: parseInt(formData.minimum_calculation) || 0,
                 price_per_member: parseFloat(formData.add_calculation_price_per_member) || 0,
+                is_active: formData.add_calculationIs_active,
             };
 
             const response = await apiInstance.put(

@@ -15,6 +15,8 @@ import pmFeatureReducer from "./slice/PMFeatureSlice";
 import helpReducer from "./slice/HelpSlice";
 import bannerReducer from "./slice/BannerSlice";
 import categoryReducer from "./slice/CategorySlice";
+import constructionReducer from "./slice/Types/ConstructionSlice";
+import contractTypeReducer from "./slice/Types/ContractTypeSlice";
 
 export const store = configureStore({
   reducer: {
@@ -34,5 +36,7 @@ export const store = configureStore({
     help: helpReducer,
     banner: bannerReducer,
     category: categoryReducer,
+    construction: constructionReducer,
+    contractType: contractTypeReducer,
   },
 });

@@ -26,6 +26,8 @@ import PromptReferenceManagement from "./page/prompts/PromptReferenceManagement"
 import Support from "./page/help/Support";
 import BannerManagement from "./page/banner/BannerManagement";
 import CategoryManagement from "./page/category/CategoryManagement";
+import ConstructionType from "./page/types/ConstructionType";
+import ContractType from "./page/types/ContractType";
 
 const Navigation = () => (
   <BrowserRouter>
@@ -50,6 +52,8 @@ const Navigation = () => (
         <Route path="/inventory" element={<Inventory />} />
         <Route path="/coupon" element={<Coupon />} />
         <Route path="/bank" element={<BankType />} />
+        <Route path="/construction" element={<ConstructionType />} />
+        <Route path="/contract-type" element={<ContractType />} />
         <Route path="/coupon-management" element={<CouponManagement />} />
         <Route path="/prompts" element={<PromptsList />} />
         <Route path="/prompts/create" element={<CreatePrompt />} />

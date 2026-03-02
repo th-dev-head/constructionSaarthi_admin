@@ -133,6 +133,16 @@ export const MenuItems = [
         link: "/bank",
         icon: <LifeBuoy size={22} />,
       },
+      {
+        name: "Construction",
+        link: "/construction",
+        icon: <LifeBuoy size={22} />,
+      },
+      {
+        name: "Contract Type",
+        link: "/contract-type",
+        icon: <LifeBuoy size={22} />,
+      },
     ],
   },
 
