@@ -5,7 +5,7 @@ import { apiInstance } from "../../config/axiosInstance";
 // Fetch all prompts
 export const fetchAllPrompts = createAsyncThunk(
   "prompt/fetchAllPrompts",
-  async ({ includeDeleted = false, onlyActive = true, feature_id = null } = {}, thunkAPI) => {
+  async ({ includeDeleted = false, onlyActive = true, feature_id = null, page = 1, limit = 10 } = {}, thunkAPI) => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -15,6 +15,8 @@ export const fetchAllPrompts = createAsyncThunk(
       const url = new URL(`${baseUrl}/api/prompt`);
       url.searchParams.append("includeDeleted", includeDeleted);
       url.searchParams.append("onlyActive", onlyActive);
+      url.searchParams.append("page", page);
+      url.searchParams.append("limit", limit);
       if (feature_id) {
         url.searchParams.append("feature_id", feature_id);
       }
@@ -123,6 +125,10 @@ const promptSlice = createSlice({
     currentPrompt: null,
     loading: false,
     error: null,
+    total: 0,
+    currentPage: 1,
+    totalPages: 1,
+    limit: 10,
   },
   reducers: {
     clearError: (state) => {
@@ -139,6 +145,10 @@ const promptSlice = createSlice({
       .addCase(fetchAllPrompts.fulfilled, (state, action) => {
         state.loading = false;
         state.prompts = action.payload.data || action.payload.prompts || [];
+        state.total = action.payload.total || 0;
+        state.currentPage = action.payload.currentPage || 1;
+        state.totalPages = action.payload.totalPages || 1;
+        state.limit = action.payload.limit || 10;
       })
       .addCase(fetchAllPrompts.rejected, (state, action) => {
         state.loading = false;

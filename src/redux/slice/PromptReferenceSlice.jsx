@@ -5,7 +5,7 @@ import { apiInstance } from "../../config/axiosInstance";
 // Fetch all prompt references
 export const fetchAllPromptReferences = createAsyncThunk(
   "promptReference/fetchAllPromptReferences",
-  async (_, thunkAPI) => {
+  async ({ page = 1, limit = 10 } = {}, thunkAPI) => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -13,7 +13,7 @@ export const fetchAllPromptReferences = createAsyncThunk(
       }
 
       const response = await fetch(
-        `${baseUrl}/api/prompt-reference/all`,
+        `${baseUrl}/api/prompt-reference/all?page=${page}&limit=${limit}`,
         {
           method: "GET",
           headers: {
@@ -103,6 +103,10 @@ const promptReferenceSlice = createSlice({
     promptReferences: [],
     loading: false,
     error: null,
+    total: 0,
+    currentPage: 1,
+    totalPages: 1,
+    limit: 10,
   },
   reducers: {
     clearError: (state) => {
@@ -118,7 +122,11 @@ const promptReferenceSlice = createSlice({
       })
       .addCase(fetchAllPromptReferences.fulfilled, (state, action) => {
         state.loading = false;
-        state.promptReferences = action.payload.data || action.payload.promptReferences || [];
+        state.promptReferences = action.payload.data || [];
+        state.total = action.payload.total || 0;
+        state.currentPage = action.payload.currentPage || 1;
+        state.totalPages = action.payload.totalPages || 1;
+        state.limit = action.payload.limit || 10;
       })
       .addCase(fetchAllPromptReferences.rejected, (state, action) => {
         state.loading = false;

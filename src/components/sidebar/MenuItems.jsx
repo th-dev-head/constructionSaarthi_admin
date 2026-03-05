@@ -124,11 +124,6 @@ export const MenuItems = [
         icon: <LifeBuoy size={22} />,
       },
       {
-        name: "Coupon Type",
-        link: "/coupon",
-        icon: <LifeBuoy size={22} />,
-      },
-      {
         name: "Bank",
         link: "/bank",
         icon: <LifeBuoy size={22} />,

@@ -134,9 +134,9 @@ const helpSlice = createSlice({
         state.loading = false;
         const payload = action.payload;
         state.categories =
-          payload?.data ||
-          payload?.categories ||
-          Array.isArray(payload) ? payload : state.categories;
+          (Array.isArray(payload?.data) ? payload.data : null) ||
+          (Array.isArray(payload?.categories) ? payload.categories : null) ||
+          (Array.isArray(payload) ? payload : state.categories || []);
       })
       .addCase(fetchHelpCategories.rejected, (state, action) => {
         state.loading = false;

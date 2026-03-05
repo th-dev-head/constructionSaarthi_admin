@@ -1,540 +1,7 @@
-// import { useEffect, useState } from "react";
-// import { EllipsisVertical, Eye, Lock, Ban, X } from "lucide-react";
-// import { useDispatch, useSelector } from "react-redux";
-// import {
-//   createInventory,
-//   fetchInventory,
-// } from "../../../redux/slice/Types/inventorySlice";
-
-// const Inventory = () => {
-//   const [openMenuId, setOpenMenuId] = useState(null);
-//   const [showAddModal, setShowAddModal] = useState(false);
-//   const [showOpenModal, setShowOpenModal] = useState(false);
-//   const [showEditModal, setShowEditModal] = useState(false);
-//   const [showDeleteModal, setShowDeleteModal] = useState(false);
-//   const [selectedUser, setSelectedUser] = useState(null);
-//   const [formState, setFormState] = useState({ name: "" });
-
-//   const dispatch = useDispatch();
-//   const { inventoryList, loading, error } = useSelector(
-//     (state) => state.inventory
-//   );
-
-//   useEffect(() => {
-//     dispatch(fetchInventory());
-//   }, [dispatch]);
-
-//   const handleCreate = async () => {
-//     if (!formState.name.trim()) return alert("Name is required");
-
-//     const result = await dispatch(createInventory(formState));
-
-//     if (createInventory.fulfilled.match(result)) {
-//       setShowAddModal(false);
-//       setFormState({ name: "" }); // reset form
-//       dispatch(fetchInventory()); // refresh data
-//       alert("Inventory added successfully!");
-//     } else {
-//       alert(result.payload || "Failed to create");
-//     }
-//   };
-//   const Modal = ({ title, children, onClose }) => (
-//     <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-xs bg-black/50">
-//       <div className="bg-white rounded-xl w-[400px] p-6 relative">
-//         <button
-//           onClick={onClose}
-//           className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
-//         >
-//           <X size={20} />
-//         </button>
-//         <div className="p-6">
-//           <h2 className="text-xl font-semibold mb-4">{title}</h2>
-//           {children}
-//         </div>
-//       </div>
-//     </div>
-//   );
-
-//   return (
-//     <div className="space-y-6 p-4 bg-gray-100 w-full min-h-screen">
-//       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-//         <div>
-//           <h1 className="text-2xl font-bold text-gray-900">Inventory</h1>
-//           {/* <p className="text-gray-600">Manage all user feature here.</p> */}
-//         </div>
-//         <button
-//           onClick={() => setShowAddModal(true)}
-//           className="mt-4 sm:mt-0 px-4 py-2 bg-[#B02E0C] text-white rounded-md hover:bg-[#8d270b]"
-//         >
-//           + Add Inventory Type
-//         </button>
-//       </div>
-
-//       <div className="bg-white shadow-sm border border-gray-200 mt-4 rounded-lg">
-//         <div className="flex justify-between items-center border-b border-gray-200 bg-gray-50 relative">
-//           <div className="flex items-center gap-3 p-4 relative">
-//             <input
-//               type="text"
-//               placeholder="Search Coupon..."
-//               className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#B02E0C]"
-//             />
-//           </div>
-//         </div>
-
-//         <table className="w-full text-left border-t border-gray-200">
-//           <thead className="bg-gray-50">
-//             <tr>
-//               <th className="py-3 px-4 border border-gray-300 text-sm font-semibold"></th>
-//               <th className="py-3 px-4 border border-gray-300 text-sm font-semibold">
-//                 Name
-//               </th>
-//               <th className="py-3 px-4 border border-gray-300 text-sm font-semibold">
-//                 Date
-//               </th>
-//               <th className="py-3 px-4 border border-gray-300 text-sm font-semibold text-center">
-//                 Action
-//               </th>
-//             </tr>
-//           </thead>
-
-//           <tbody>
-//             {loading ? (
-//               <tr>
-//                 <td colSpan="4" className="py-4 px-4 text-center text-gray-700">
-//                   Loading...
-//                 </td>
-//               </tr>
-//             ) : inventoryList && inventoryList.length > 0 ? (
-//               inventoryList.map((user) => (
-//                 <tr key={user.id}>
-//                   <td className="py-3 px-4 border border-gray-300">
-//                     <input
-//                       type="checkbox"
-//                       className="form-checkbox text-[#B02E0C] rounded focus:ring-[#B02E0C]"
-//                     />
-//                   </td>
-//                   <td className="py-2 px-4 border border-gray-300 text-gray-700">
-//                     {user.name}
-//                   </td>
-//                   <td className="py-2 px-4 border border-gray-300 text-gray-700">
-//                     {new Date(user.createdAt).toLocaleDateString()}
-//                   </td>
-//                   <td className="py-2 px-4 border border-gray-300 text-center relative">
-//                     <button
-//                       onClick={() =>
-//                         setOpenMenuId(openMenuId === user.id ? null : user.id)
-//                       }
-//                       className="p-2 rounded hover:bg-gray-100"
-//                     >
-//                       <EllipsisVertical className="text-gray-600" />
-//                     </button>
-
-//                     {openMenuId === user.id && (
-//                       <div className="absolute right-2 top-14 -mt-2 bg-white border-2 border-gray-300 shadow-lg rounded-md w-40 z-50">
-//                         <ul className="text-sm">
-//                           <li
-//                             onClick={() => {
-//                               setSelectedUser(user);
-//                               setShowOpenModal(true);
-//                               setOpenMenuId(null);
-//                             }}
-//                             className="px-4 py-2 flex items-center gap-2 hover:bg-gray-300 cursor-pointer"
-//                           >
-//                             <Eye size={16} /> Open
-//                           </li>
-//                           <li
-//                             onClick={() => {
-//                               setSelectedUser(user);
-//                               setShowEditModal(true);
-//                               setOpenMenuId(null);
-//                             }}
-//                             className="px-4 py-2 flex items-center gap-2 hover:bg-gray-300 cursor-pointer"
-//                           >
-//                             <Lock size={16} /> Edit
-//                           </li>
-//                           <li
-//                             onClick={() => {
-//                               setSelectedUser(user);
-//                               setShowDeleteModal(true);
-//                               setOpenMenuId(null);
-//                             }}
-//                             className="px-4 py-2 flex items-center gap-2 text-red-600 hover:bg-gray-300 cursor-pointer"
-//                           >
-//                             <Ban size={16} /> Delete
-//                           </li>
-//                         </ul>
-//                       </div>
-//                     )}
-//                   </td>
-//                 </tr>
-//               ))
-//             ) : (
-//               <tr>
-//                 <td colSpan="4" className="py-4 px-4 text-center text-gray-500">
-//                   No inventory available
-//                 </td>
-//               </tr>
-//             )}
-//           </tbody>
-//         </table>
-//       </div>
-
-//       {/* Add Feature Modal */}
-//       {showAddModal && (
-//         <Modal title="Add New Inventory" onClose={() => setShowAddModal(false)}>
-//           <form
-//             className="space-y-4"
-//             onSubmit={(e) => {
-//               e.preventDefault();
-//               handleCreate();
-//             }}
-//           >
-//             <label className="block text-sm font-medium text-gray-700">
-//               Name
-//             </label>
-
-//             <input
-//               type="text"
-//               placeholder="Enter Inventory Name"
-//               value={formState.name}
-//               onChange={(e) =>
-//                 setFormState({ ...formState, name: e.target.value })
-//               }
-//               className="w-full border border-gray-300 px-3 py-2 rounded-md"
-//               required
-//               autoFocus
-//             />
-//             <button
-//               type="submit"
-//               className="bg-[#B02E0C] text-white px-4 py-2 rounded-md hover:bg-[#8d270b]"
-//             >
-//               Save
-//             </button>
-//           </form>
-//         </Modal>
-//       )}
-
-//       {/* Open Modal */}
-//       {showOpenModal && selectedUser && (
-//         <Modal
-//           title="View Inventory Details"
-//           onClose={() => setShowOpenModal(false)}
-//         >
-//           <div className="space-y-2">
-//             <p>
-//               <strong>Inventory Name:</strong> {selectedUser.name}
-//             </p>
-//             <p>
-//               <strong>Date:</strong> {selectedUser.createdAt}
-//             </p>
-//           </div>
-//         </Modal>
-//       )}
-
-//       {/* Edit Modal */}
-//       {showEditModal && selectedUser && (
-//         <Modal title="Edit Inventory" onClose={() => setShowEditModal(false)}>
-//           <form className="space-y-4">
-//             <label className="block text-sm font-medium text-gray-700">
-//               Name
-//             </label>
-//             <input
-//               type="text"
-//               defaultValue={selectedUser.name}
-//               className="w-full border border-gray-300 px-3 py-2 rounded-md"
-//             />
-//             <button className="bg-[#B02E0C] text-white px-4 py-2 rounded-md hover:bg-[#8d270b]">
-//               Update
-//             </button>
-//           </form>
-//         </Modal>
-//       )}
-
-//       {/* Delete Modal */}
-//       {showDeleteModal && selectedUser && (
-//         <Modal title="Confirm Delete" onClose={() => setShowDeleteModal(false)}>
-//           <p>
-//             Are you sure you want to delete <strong>{selectedUser.name}</strong>
-//             ?
-//           </p>
-//           <div className="flex justify-end gap-3 mt-6">
-//             <button
-//               onClick={() => setShowDeleteModal(false)}
-//               className="px-4 py-2 bg-gray-200 rounded-md"
-//             >
-//               Cancel
-//             </button>
-//             <button
-//               onClick={() => {
-//                 setShowDeleteModal(false);
-//                 alert(`${selectedUser.name} deleted`);
-//               }}
-//               className="px-4 py-2 bg-red-600 text-white rounded-md"
-//             >
-//               Delete
-//             </button>
-//           </div>
-//         </Modal>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default Inventory;
-
-// import React, { useEffect, useState, useRef } from "react";
-// import { toast } from "react-toastify";
-// import { useDispatch, useSelector } from "react-redux";
-// import { EllipsisVertical, X } from "lucide-react";
-// import {
-//   createInventory,
-//   fetchInventory,
-// } from "../../../redux/slice/Types/inventorySlice";
-// import DataTable from "../../common/DataTable";
-
-// const Inventory = () => {
-//   const dispatch = useDispatch();
-//   const { inventoryList, loading, pagination } = useSelector(
-//     (state) => state.inventory
-//   );
-
-//   const [openMenuId, setOpenMenuId] = useState(null);
-//   const [showModal, setShowModal] = useState(false);
-//   const [modalType, setModalType] = useState("add"); // "add" | "edit" | "view" | "delete"
-//   const [selectedInventory, setSelectedInventory] = useState(null);
-//   const [formState, setFormState] = useState({ name: "" });
-//   const [page, setPage] = useState(pagination?.page || 1);
-//   const [limit, setLimit] = useState(pagination?.limit || 10);
-//   const [search, setSearch] = useState("");
-//   const nameRef = useRef(null);
-
-//   useEffect(() => {
-//     dispatch(fetchInventory({ page, limit, search }));
-//   }, [dispatch, page, limit, search]);
-
-//   useEffect(() => {
-//     if (showModal) setTimeout(() => nameRef.current?.focus(), 0);
-//   }, [showModal]);
-
-//   const handleFormChange = (e) => {
-//     setFormState({ ...formState, [e.target.name]: e.target.value });
-//   };
-
-//   const handleSave = () => {
-//     if (!formState.name.trim()) return toast.error("Name is required");
-//     dispatch(createInventory(formState)).then((res) => {
-//       if (!res.error) {
-//         toast.success("Inventory added successfully!");
-//         setShowModal(false);
-//         setFormState({ name: "" });
-//         dispatch(fetchInventory({ page, limit, search }));
-//       } else toast.error(res.payload || "Failed to create inventory");
-//     });
-//   };
-
-//   const Modal = ({ title, children, onClose }) => (
-//     <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-xs bg-black/50">
-//       {" "}
-//       <div className="bg-white rounded-xl w-[400px] p-6 relative">
-//         {" "}
-//         <button
-//           onClick={onClose}
-//           className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
-//         >
-//           {" "}
-//           <X size={20} />{" "}
-//         </button>{" "}
-//         <h2 className="text-xl font-semibold mb-4">{title}</h2>
-//         {children}{" "}
-//       </div>{" "}
-//     </div>
-//   );
-
-//   const columns = [
-//     { header: "Name", accessor: "name" },
-//     {
-//       header: "Date",
-//       accessor: "createdAt",
-//       cell: (r) => new Date(r.createdAt).toLocaleDateString(),
-//     },
-//   ];
-
-//   const renderActions = (item) => (
-//     <div className="relative">
-//       <button
-//         onClick={() => setOpenMenuId(openMenuId === item.id ? null : item.id)}
-//         className="p-2 rounded hover:bg-gray-100"
-//       >
-//         {" "}
-//         <EllipsisVertical />{" "}
-//       </button>
-//       {openMenuId === item.id && (
-//         <div className="absolute right-0 top-8 bg-white border border-gray-200 shadow-md rounded-md w-32 z-50">
-//           <button
-//             className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-//             onClick={() => {
-//               setSelectedInventory(item);
-//               setModalType("view");
-//               setShowModal(true);
-//               setOpenMenuId(null);
-//             }}
-//           >
-//             View{" "}
-//           </button>
-//           <button
-//             className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-//             onClick={() => {
-//               setSelectedInventory(item);
-//               setFormState({ ...item });
-//               setModalType("edit");
-//               setShowModal(true);
-//               setOpenMenuId(null);
-//             }}
-//           >
-//             Edit{" "}
-//           </button>
-//           <button
-//             className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600"
-//             onClick={() => {
-//               setSelectedInventory(item);
-//               setModalType("delete");
-//               setShowModal(true);
-//               setOpenMenuId(null);
-//             }}
-//           >
-//             Delete{" "}
-//           </button>{" "}
-//         </div>
-//       )}{" "}
-//     </div>
-//   );
-
-//   return (
-//     <div className="space-y-6 p-4 bg-gray-100 w-full min-h-screen">
-//       {" "}
-//       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-//         {" "}
-//         <div>
-//           {" "}
-//           <h1 className="text-2xl font-bold text-gray-900">
-//             Inventory Types
-//           </h1>{" "}
-//           <p className="text-gray-600">Manage all Inventory types here.</p>{" "}
-//         </div>
-//         <button
-//           onClick={() => {
-//             setModalType("add");
-//             setShowModal(true);
-//           }}
-//           className="mt-4 sm:mt-0 px-4 py-2 bg-[#B02E0C] text-white rounded-md hover:bg-[#8d270b]"
-//         >
-//           + Add Inventory{" "}
-//         </button>{" "}
-//       </div>
-//       <DataTable
-//         columns={columns}
-//         data={inventoryList}
-//         loading={loading}
-//         renderActions={renderActions}
-//         rowKey={(row) => row.id}
-//         showSearch={true}
-//         onSearch={(q) => {
-//           setSearch(q);
-//           setPage(1);
-//         }}
-//         pagination={pagination}
-//         onPageChange={setPage}
-//         onLimitChange={(l) => {
-//           setLimit(l);
-//           setPage(1);
-//         }}
-//       />
-//       {showModal && (
-//         <Modal
-//           title={
-//             modalType === "add"
-//               ? "Add Inventory"
-//               : modalType === "edit"
-//               ? "Edit Inventory"
-//               : modalType === "view"
-//               ? "View Inventory"
-//               : "Delete Inventory"
-//           }
-//           onClose={() => setShowModal(false)}
-//         >
-//           {(modalType === "add" || modalType === "edit") && (
-//             <form
-//               className="space-y-4"
-//               onSubmit={(e) => {
-//                 e.preventDefault();
-//                 modalType === "add" ? handleSave() : handleUpdate();
-//               }}
-//             >
-//               <label>Name</label>
-//                 <input
-//                   type="text"
-//                   name="name"
-//                   ref={nameRef}
-//                   value={formState.name}
-//                   onChange={handleFormChange}
-//                   className="w-full border px-3 py-2 rounded-md"
-//                 />
-//               <button
-//                 type="submit"
-//                 className="w-full px-4 py-2 bg-[#B02E0C] text-white rounded-md"
-//               >
-//                 {modalType === "add" ? "Save" : "Update"}
-//               </button>
-//             </form>
-//           )}
-
-//           {modalType === "view" && selectedInventory && (
-//             <div className="space-y-2">
-//               <p>
-//                 <strong>Name:</strong> {selectedInventory.name}
-//               </p>
-//               <p>
-//                 <strong>Date:</strong>{" "}
-//                 {new Date(selectedInventory.createdAt).toLocaleDateString()}
-//               </p>
-//             </div>
-//           )}
-
-//           {modalType === "delete" && selectedInventory && (
-//             <div>
-//               <p>
-//                 Are you sure you want to delete{" "}
-//                 <strong>{selectedInventory.name}</strong>?
-//               </p>
-//               <div className="flex justify-end gap-3 mt-4">
-//                 <button
-//                   onClick={() => setShowModal(false)}
-//                   className="px-4 py-2 bg-gray-200 rounded-md"
-//                 >
-//                   Cancel
-//                 </button>
-//                 <button
-//                   onClick={handleDelete}
-//                   className="px-4 py-2 bg-red-600 text-white rounded-md"
-//                 >
-//                   Delete
-//                 </button>
-//               </div>
-//             </div>
-//           )}
-//         </Modal>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default Inventory;
-
-
 import React, { useEffect, useState, useRef } from "react";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
-import { EllipsisVertical, X } from "lucide-react";
+import { EllipsisVertical, X, Plus, Calendar, Box, Trash2, Edit, Eye, Info, CheckCircle2, XCircle } from "lucide-react";
 import {
   createInventory,
   fetchInventory,
@@ -542,7 +9,6 @@ import {
   deleteInventory,
 } from "../../../redux/slice/Types/inventorySlice";
 import DataTable from "../../common/DataTable";
-import Modal from "../../common/Modal";
 
 const Inventory = () => {
   const dispatch = useDispatch();
@@ -559,130 +25,192 @@ const Inventory = () => {
   const [limit, setLimit] = useState(pagination?.limit || 10);
   const [search, setSearch] = useState("");
   const nameRef = useRef(null);
+  const menuRef = useRef(null);
 
   useEffect(() => {
     dispatch(fetchInventory({ page, limit, search }));
   }, [dispatch, page, limit, search]);
 
+  // Close menu when clicking outside
   useEffect(() => {
-    if (showModal) setTimeout(() => nameRef.current?.focus(), 0);
-  }, [showModal]);
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        if (!event.target.closest('button[class*="rounded-xl"]')) {
+          setOpenMenuId(null);
+        }
+      }
+    };
+    if (openMenuId) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [openMenuId]);
+
+  useEffect(() => {
+    if (showModal && (modalType === "add" || modalType === "edit")) {
+      setTimeout(() => nameRef.current?.focus(), 100);
+    }
+  }, [showModal, modalType]);
 
   const handleFormChange = (e) => {
     setFormState({ ...formState, [e.target.name]: e.target.value });
   };
 
   const handleSave = () => {
-    if (!formState.name.trim()) return toast.error("Name is required");
+    if (!formState.name.trim()) return toast.error("Asset Name is required");
     dispatch(createInventory(formState)).then((res) => {
       if (!res.error) {
-        toast.success("Inventory added successfully!");
+        toast.success("Inventory Node Initialized!");
         setShowModal(false);
         setFormState({ name: "" });
         dispatch(fetchInventory({ page, limit, search }));
-      } else toast.error(res.payload || "Failed to create inventory");
+      } else toast.error(res.payload || "Initialization Failed");
     });
   };
 
   const handleUpdate = () => {
-    if (!formState.name.trim()) return toast.error("Name is required");
+    if (!formState.name.trim()) return toast.error("Asset Name is required");
     dispatch(updateInventory({ id: selectedInventory.id, ...formState })).then((res) => {
       if (!res.error) {
-        toast.success("Inventory updated successfully!");
+        toast.success("Inventory Node Modified!");
         setShowModal(false);
         setSelectedInventory(null);
         setFormState({ name: "" });
         dispatch(fetchInventory({ page, limit, search }));
-      } else toast.error(res.payload || "Failed to update inventory");
+      } else toast.error(res.payload || "Modification Failed");
     });
   };
 
   const handleDelete = () => {
     dispatch(deleteInventory(selectedInventory.id)).then((res) => {
       if (!res.error) {
-        toast.success("Inventory deleted successfully!");
+        toast.success("Inventory Node Dismantled!");
         setShowModal(false);
         setSelectedInventory(null);
         dispatch(fetchInventory({ page, limit, search }));
-      } else toast.error(res.payload || "Failed to delete inventory");
+      } else toast.error(res.payload || "Elimination Failed");
     });
   };
 
   const columns = [
-    // { header: "ID", accessor: "id" },
-    { header: "Name", accessor: "name" },
-    { header: "Active", accessor: "is_active", cell: (r) => (r.is_active ? "Yes" : "No") },
     {
-      header: "Created At",
+      header: "Asset Identity",
+      accessor: "name",
+      cell: (r) => (
+        <div className="flex items-center gap-4">
+          <div className="w-10 h-10 rounded-xl bg-accent/5 flex items-center justify-center text-accent border border-accent/10">
+            <Box size={18} />
+          </div>
+          <div>
+            <p className="font-black text-[#0F172A]">{r.name}</p>
+            <p className="text-[10px] text-[#94A3B8] font-bold uppercase tracking-widest mt-0.5">Physical Resource Node</p>
+          </div>
+        </div>
+      )
+    },
+    {
+      header: "Operational Status",
+      accessor: "is_active",
+      cell: (r) => (
+        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg w-fit ${r.is_active ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-rose-50 text-rose-600 border border-rose-100'}`}>
+          {r.is_active ? <CheckCircle2 size={14} strokeWidth={3} /> : <XCircle size={14} strokeWidth={3} />}
+          <span className="text-[10px] font-black uppercase tracking-widest leading-none">{r.is_active ? 'Active' : 'Offline'}</span>
+        </div>
+      )
+    },
+    {
+      header: "Registry Date",
       accessor: "createdAt",
-      cell: (r) => new Date(r.createdAt).toLocaleDateString(),
+      cell: (r) => (
+        <div className="flex items-center gap-2 text-[#64748B] font-bold text-xs">
+          <Calendar size={14} className="text-[#94A3B8]" />
+          {new Date(r.createdAt).toLocaleDateString()}
+        </div>
+      )
     },
   ];
 
   const renderActions = (item) => (
-    <div className="relative">
+    <div className="relative" ref={openMenuId === item.id ? menuRef : null}>
       <button
-        onClick={() => setOpenMenuId(openMenuId === item.id ? null : item.id)}
-        className="p-2 rounded hover:bg-gray-100"
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpenMenuId(openMenuId === item.id ? null : item.id);
+        }}
+        className={`p-3 rounded-xl transition-all duration-200 cursor-pointer ${openMenuId === item.id ? 'bg-accent text-white shadow-lg shadow-accent/20' : 'hover:bg-accent/5 text-[#94A3B8] hover:text-accent'}`}
       >
-        <EllipsisVertical />
+        <EllipsisVertical size={20} />
       </button>
+
       {openMenuId === item.id && (
-        <div className="absolute right-0 top-8 bg-white border border-gray-200 shadow-md rounded-md w-32 z-50">
-          <button
-            className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-            onClick={() => {
-              setSelectedInventory(item);
-              setModalType("view");
-              setShowModal(true);
-              setOpenMenuId(null);
-            }}
-          >
-            View
-          </button>
-          <button
-            className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-            onClick={() => {
-              setSelectedInventory(item);
-              setFormState({ ...item });
-              setModalType("edit");
-              setShowModal(true);
-              setOpenMenuId(null);
-            }}
-          >
-            Edit
-          </button>
-          <button
-            className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600"
-            onClick={() => {
-              setSelectedInventory(item);
-              setModalType("delete");
-              setShowModal(true);
-              setOpenMenuId(null);
-            }}
-          >
-            Delete
-          </button>
+        <div className="absolute right-12 top-0 bg-white border border-[#E2E8F0] shadow-2xl rounded-2xl w-48 z-[100] py-2 animate-in zoom-in-95 duration-200 origin-top-right">
+          <ul className="text-[#475569] text-sm font-bold">
+            <li
+              onClick={() => {
+                setSelectedInventory(item);
+                setModalType("view");
+                setShowModal(true);
+                setOpenMenuId(null);
+              }}
+              className="px-4 py-3 flex items-center gap-3 hover:bg-[#F8FAFC] hover:text-accent cursor-pointer transition-all mx-2 rounded-xl"
+            >
+              <div className="w-8 h-8 rounded-lg bg-accent/5 flex items-center justify-center text-accent border border-accent/10">
+                <Eye size={16} />
+              </div>
+              Inspect
+            </li>
+            <li
+              onClick={() => {
+                setSelectedInventory(item);
+                setFormState({ name: item.name });
+                setModalType("edit");
+                setShowModal(true);
+                setOpenMenuId(null);
+              }}
+              className="px-4 py-3 flex items-center gap-3 hover:bg-[#F8FAFC] hover:text-accent cursor-pointer transition-all mx-2 rounded-xl"
+            >
+              <div className="w-8 h-8 rounded-lg bg-accent/5 flex items-center justify-center text-accent border border-accent/10">
+                <Edit size={16} />
+              </div>
+              Modify
+            </li>
+            <li
+              onClick={() => {
+                setSelectedInventory(item);
+                setModalType("delete");
+                setShowModal(true);
+                setOpenMenuId(null);
+              }}
+              className="px-4 py-3 flex items-center gap-3 hover:bg-accent/5 hover:text-accent cursor-pointer transition-all mx-2 rounded-xl text-accent"
+            >
+              <div className="w-8 h-8 rounded-lg bg-accent/5 flex items-center justify-center text-accent border border-accent/10">
+                <Trash2 size={16} />
+              </div>
+              Purge
+            </li>
+          </ul>
         </div>
       )}
     </div>
   );
 
   return (
-    <div className="space-y-6 p-4 bg-gray-100 w-full min-h-screen">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Inventory Types</h1>
-          <p className="text-gray-600">Manage all Inventory types here.</p>
+    <div className="space-y-8 p-8 bg-[#F8FAFC] w-full min-h-screen" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-black text-[#0F172A] tracking-tight">Inventory-Metrix</h1>
+          <p className="text-sm font-medium text-[#64748B]">Management of physical raw materials and onsite resource classification.</p>
         </div>
+
         <button
           onClick={() => {
+            setSelectedInventory(null);
+            setFormState({ name: "" });
             setModalType("add");
             setShowModal(true);
           }}
-          className="mt-4 sm:mt-0 px-4 py-2 bg-[#B02E0C] text-white rounded-md hover:bg-[#8d270b]"
+          className="px-8 py-4 bg-accent text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#8D270B] shadow-xl shadow-accent/20 transition-all active:scale-95 flex items-center gap-2 cursor-pointer"
         >
-          + Add Inventory
+          <Plus size={18} strokeWidth={3} />
+          Initialize Asset
         </button>
       </div>
 
@@ -692,7 +220,7 @@ const Inventory = () => {
         loading={loading}
         renderActions={renderActions}
         rowKey={(row) => row.id}
-        showSearch={true}
+        showSearch
         onSearch={(q) => {
           setSearch(q);
           setPage(1);
@@ -706,84 +234,106 @@ const Inventory = () => {
       />
 
       {showModal && (
-        <Modal
-          title={
-            modalType === "add"
-              ? "Add Inventory"
-              : modalType === "edit"
-                ? "Edit Inventory"
-                : modalType === "view"
-                  ? "View Inventory"
-                  : "Delete Inventory"
-          }
-          onClose={() => setShowModal(false)}
-        >
-          {(modalType === "add" || modalType === "edit") && (
-            <form
-              className="space-y-4"
-              onSubmit={(e) => {
-                e.preventDefault();
-                modalType === "add" ? handleSave() : handleUpdate();
-              }}
-            >
-              <label>Name</label>
-              <input
-                type="text"
-                name="name"
-                ref={nameRef}
-                value={formState.name}
-                onChange={handleFormChange}
-                className="w-full border px-3 py-2 rounded-md"
-              />
-              <button
-                type="submit"
-                className="w-full px-4 py-2 bg-[#B02E0C] text-white rounded-md"
-              >
-                {modalType === "add" ? "Save" : "Update"}
-              </button>
-            </form>
-          )}
-
-          {modalType === "view" && selectedInventory && (
-            <div className="space-y-2">
-              <p>
-                <strong>ID:</strong> {selectedInventory.id}
-              </p>
-              <p>
-                <strong>Name:</strong> {selectedInventory.name}
-              </p>
-              <p>
-                <strong>Active:</strong> {selectedInventory.is_active ? "Yes" : "No"}
-              </p>
-              <p>
-                <strong>Created At:</strong>{" "}
-                {new Date(selectedInventory.createdAt).toLocaleDateString()}
-              </p>
-            </div>
-          )}
-
-          {modalType === "delete" && selectedInventory && (
-            <div>
-              <p>
-                Are you sure you want to delete <strong>{selectedInventory.name}</strong>?
-              </p>
-              <div className="flex justify-end gap-3 mt-4">
+        <div className="fixed inset-0 flex items-center justify-center z-[200] p-4 backdrop-blur-md bg-white/30 animate-in fade-in duration-300">
+          <div className="relative bg-white rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-2xl border border-[#E2E8F0] animate-in zoom-in-95 duration-300">
+            <div className="p-8">
+              <div className="flex justify-between items-center mb-10">
+                <div className="space-y-1">
+                  <h2 className="text-2xl font-black text-[#0F172A] tracking-tight text-center sm:text-left">
+                    {modalType === "add" ? "Initialize Asset" : modalType === "edit" ? "Modify Asset" : modalType === "view" ? "Asset Intelligence" : "Eliminate Asset"}
+                  </h2>
+                  <p className="text-[10px] font-black text-accent uppercase tracking-widest opacity-70 italic">Inventory Protocol Node</p>
+                </div>
                 <button
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 bg-gray-200 rounded-md"
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-[#64748B] hover:bg-[#F1F5F9] transition-all"
                 >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleDelete}
-                  className="px-4 py-2 bg-red-600 text-white rounded-md"
-                >
-                  Delete
+                  <X size={20} strokeWidth={3} />
                 </button>
               </div>
+
+              {(modalType === "add" || modalType === "edit") && (
+                <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); modalType === "add" ? handleSave() : handleUpdate(); }}>
+                  <div>
+                    <label className="block text-[10px] font-black text-[#64748B] uppercase tracking-widest mb-2 pl-1 italic">Asset Descriptor Identity</label>
+                    <input
+                      type="text"
+                      name="name"
+                      ref={nameRef}
+                      value={formState.name}
+                      onChange={handleFormChange}
+                      className="w-full px-5 py-4 bg-[#F8FAFC] border-2 border-[#E2E8F0] rounded-2xl text-sm font-bold text-[#0F172A] focus:ring-accent/20 focus:border-accent transition-all outline-none shadow-sm placeholder-[#94A3B8]"
+                      placeholder="Enter inventory label..."
+                      required
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-full py-5 bg-accent text-white rounded-2xl text-sm font-black uppercase tracking-widest shadow-lg shadow-accent/20 hover:bg-[#8D270B] transition-all active:scale-95 cursor-pointer mt-4"
+                  >
+                    {modalType === "add" ? "Commit Initialization" : "Commit Modifications"}
+                  </button>
+                </form>
+              )}
+
+              {modalType === "view" && selectedInventory && (
+                <div className="p-6 bg-[#F8FAFC] rounded-3xl border border-[#E2E8F0] space-y-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-accent/5 flex items-center justify-center text-accent border border-accent/10 shrink-0">
+                      <Box size={24} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black text-[#94A3B8] uppercase tracking-widest mb-1">Asset Identity</p>
+                      <p className="text-xl font-black text-[#0F172A]">{selectedInventory.name}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-accent/5 flex items-center justify-center text-accent border border-accent/10 shrink-0">
+                      <Info size={24} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black text-[#94A3B8] uppercase tracking-widest mb-1">System MetaData</p>
+                      <div className="space-y-2 mt-2">
+                        <div className="flex justify-between text-xs font-bold font-mono text-[#64748B]">
+                          <span>STATUS:</span>
+                          <span className={selectedInventory.is_active ? 'text-emerald-600' : 'text-rose-600'}>{selectedInventory.is_active ? 'OPERATIONAL' : 'DECOMMISSIONED'}</span>
+                        </div>
+                        <div className="flex justify-between text-xs font-bold font-mono text-[#64748B]">
+                          <span>TYPE:</span>
+                          <span>PHYSICAL_RESOURCE</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="pt-4 border-t border-[#E2E8F0] flex items-center justify-between text-[#64748B] text-xs font-bold font-mono">
+                    <span>ASSET ID: {String(selectedInventory.id).slice(-8).toUpperCase()}</span>
+                    <span>LOGGED: {new Date(selectedInventory.createdAt || selectedInventory.created_at).toLocaleDateString()}</span>
+                  </div>
+                </div>
+              )}
+
+              {modalType === "delete" && selectedInventory && (
+                <div className="flex flex-col text-center">
+                  <div className="w-20 h-20 bg-accent/5 rounded-[2.5rem] flex items-center justify-center text-accent mb-6 mx-auto shadow-sm">
+                    <Trash2 size={40} strokeWidth={2} />
+                  </div>
+                  <h3 className="text-2xl font-black text-[#0F172A] tracking-tight mb-2">Eliminate Asset?</h3>
+                  <div className="p-5 bg-accent/5 rounded-3xl border border-accent/10 mt-6 text-left">
+                    <p className="text-[10px] font-black text-accent uppercase tracking-widest mb-2 italic">Security Assessment</p>
+                    <p className="text-sm font-medium text-[#64748B] leading-relaxed">
+                      Removing <span className="text-accent font-black">"{selectedInventory.name}"</span> will permanently dismantle its presence from the core inventory ledger.
+                    </p>
+                  </div>
+
+                  <div className="flex gap-4 mt-8">
+                    <button onClick={() => setShowModal(false)} className="flex-1 py-4 px-6 rounded-2xl border-2 border-[#E2E8F0] bg-white text-sm font-black text-[#64748B] uppercase tracking-widest hover:bg-[#F1F5F9] transition-all cursor-pointer">Abort</button>
+                    <button onClick={handleDelete} className="flex-[2] py-4 px-8 bg-accent text-white rounded-2xl text-sm font-black uppercase tracking-widest shadow-lg shadow-accent/20 hover:bg-[#8D270B] transition-all cursor-pointer">Confirm Purge</button>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-        </Modal>
+          </div>
+        </div>
       )}
     </div>
   );

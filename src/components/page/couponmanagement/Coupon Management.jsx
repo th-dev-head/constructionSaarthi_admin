@@ -6,9 +6,15 @@ import {
   Trash2,
   Plus,
   Loader2,
+  Ticket,
+  EllipsisVertical,
+  Info,
+  CheckCircle2,
+  AlertCircle,
 } from "lucide-react";
-import { Search } from "lucide-react";
+
 import { apiInstance } from "../../../config/axiosInstance";
+import DataTable from "../../common/DataTable";
 
 const CouponManagement = () => {
 
@@ -17,10 +23,11 @@ const CouponManagement = () => {
   const [showEditModal, setShowEditModal] = useState(false);
 
   const [selectedCoupon, setSelectedCoupon] = useState(null);
+  const [criteria, setCriteria] = useState([]);
 
   // Coupon Criteria state
   const [showCriteriaModal, setShowCriteriaModal] = useState(false);
-  const [criteria, setCriteria] = useState([]);
+  const [showRules, setShowRules] = useState(false);
   const [loadingCriteria, setLoadingCriteria] = useState(false);
   const [errorCriteria, setErrorCriteria] = useState(null);
   const [successCriteria, setSuccessCriteria] = useState(null);
@@ -70,6 +77,10 @@ const CouponManagement = () => {
   const [success, setSuccess] = useState(null);
   const [allUsers, setAllUsers] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [openMenuId, setOpenMenuId] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const couponmanagement = [
     {
@@ -335,6 +346,7 @@ const CouponManagement = () => {
     });
   };
 
+
   // Handle coupon input change
   const handleCouponInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -523,6 +535,150 @@ const CouponManagement = () => {
     setShowEditModal(true);
   };
 
+  const filteredCoupons = coupons.filter(c =>
+    c.code?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    c.title?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const columns = [
+    {
+      header: "COUPON IDENTITY",
+      accessor: "code",
+      cell: (coupon) => (
+        <div className="flex items-center gap-4">
+          <div className="w-11 h-11 rounded-2xl bg-[#EEF2FF] border-2 border-white shadow-sm flex items-center justify-center text-[#B02E0C] font-black text-lg select-none">
+            <Ticket size={20} />
+          </div>
+          <div>
+            <p className="font-black text-[#0F172A]">{coupon.code}</p>
+            <p className="text-[10px] text-[#94A3B8] font-black uppercase tracking-widest mt-0.5">
+              {coupon.title || "No Title"}
+            </p>
+          </div>
+        </div>
+      )
+    },
+    {
+      header: "FINANCIAL VALUE",
+      accessor: "financial_value",
+      cell: (coupon) => (
+        <span className="text-sm font-black text-[#334155]">
+          ₹{coupon.financial_value || "0"}
+        </span>
+      )
+    },
+    {
+      header: "VALIDITY PERIOD",
+      accessor: "start_date",
+      cell: (coupon) => (
+        <div className="flex flex-col">
+          <p className="text-xs font-bold text-[#475569]">
+            {coupon.start_date ? new Date(coupon.start_date).toLocaleDateString() : "-"}
+          </p>
+          <p className="text-[10px] text-[#94A3B8] font-black italic">
+            to {coupon.end_date ? new Date(coupon.end_date).toLocaleDateString() : "-"}
+          </p>
+        </div>
+      )
+    },
+    {
+      header: "USAGE METRICS",
+      accessor: "usage",
+      cell: (coupon) => {
+        const tier = coupon.tiering?.[0];
+        const tierDetail = tier?.tier_details?.[0];
+        const limit = tierDetail?.current_tiering_limit || "-";
+        const used = tier?.used_total || 0;
+        return (
+          <div className="flex flex-col">
+            <p className="text-sm font-bold text-[#334155] tabular-nums">{used} / {limit}</p>
+            <p className="text-[10px] text-[#94A3B8] font-black uppercase tracking-tighter">Usage Logged</p>
+          </div>
+        );
+      }
+    },
+    {
+      header: "ACCOUNT STATE",
+      accessor: "status",
+      cell: (coupon) => (
+        <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest ${coupon.status
+          ? "bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100"
+          : "bg-red-50 text-red-600 ring-1 ring-red-100"
+          }`}>
+          <div className={`w-1.5 h-1.5 rounded-full ${coupon.status ? "bg-emerald-500 animate-pulse" : "bg-red-500"}`} />
+          {coupon.status ? "Active" : "Inactive"}
+        </div>
+      )
+    }
+  ];
+
+  const renderActions = (coupon) => (
+    <div className="relative">
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpenMenuId(openMenuId === coupon.id ? null : coupon.id);
+        }}
+        className={`p-2.5 rounded-xl border border-transparent transition-all active:scale-95 ${openMenuId === coupon.id ? 'bg-[#B02E0C] text-white shadow-lg shadow-[#B02E0C]/20' : 'hover:border-[#E2E8F0] hover:bg-white text-[#94A3B8]'}`}
+      >
+        <EllipsisVertical size={18} />
+      </button>
+
+      {openMenuId === coupon.id && (
+        <div className="absolute right-14 top-0 bg-white border border-[#E2E8F0] shadow-[0_20px_50px_rgba(0,0,0,0.1)] rounded-2xl w-52 z-[100] p-2 animate-in fade-in zoom-in slide-in-from-right-2 duration-300">
+          <div className="px-3 py-2 border-b border-[#F1F5F9] mb-1">
+            <span className="text-[10px] font-black text-[#94A3B8] uppercase tracking-widest">Coupon Node Actions</span>
+          </div>
+          <ul className="text-[#475569] text-sm font-bold space-y-1">
+            <li>
+              <button
+                onClick={() => {
+                  setSelectedCoupon(coupon);
+                  setShowOpenModal(true);
+                  setOpenMenuId(null);
+                }}
+                className="w-full px-3 py-2.5 flex items-center gap-3 hover:bg-[#F1F5F9] rounded-xl transition-all"
+              >
+                <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 ring-1 ring-indigo-100">
+                  <Eye size={16} />
+                </div>
+                Inspect
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => {
+                  handleEditCouponClick(coupon);
+                  setOpenMenuId(null);
+                }}
+                className="w-full px-3 py-2.5 flex items-center gap-3 hover:bg-[#F1F5F9] rounded-xl transition-all"
+              >
+                <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600 ring-1 ring-amber-100">
+                  <Pencil size={16} />
+                </div>
+                Modify
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => {
+                  handleDeleteCoupon(coupon.id);
+                  setOpenMenuId(null);
+                }}
+                className="w-full px-3 py-2.5 flex items-center gap-3 hover:bg-red-50 rounded-xl transition-all text-[#B02E0C]"
+              >
+                <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center text-red-600 ring-1 ring-red-200">
+                  <Trash2 size={16} />
+                </div>
+                Purge
+              </button>
+            </li>
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+
   const Modal = ({ title, children, onClose }) => (
     <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-xs bg-black/50">
       <div className="bg-white rounded-xl w-[400px] p-6 relative">
@@ -587,163 +743,23 @@ const CouponManagement = () => {
         </div>
       )}
 
-      <div className="bg-white shadow-sm border border-gray-200 mt-4 rounded-lg">
-        <div className="w-full p-4 bg-white flex items-center justify-between">
-          {/* Left Title */}
-          <h2 className="text-md font-semibold">
-            Coupons <span className="text-gray-400 font-normal">- All ({coupons.length})</span>
-          </h2>
-
-          {/* Right Section */}
-          <div className="flex items-center gap-4">
-            {/* Subscription Toggle */}
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600">Subscription Active</span>
-
-              {/* Switch */}
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="sr-only peer"
-                  defaultChecked
-                />
-                <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:bg-[#B02E0C] transition-all"></div>
-                <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
-              </label>
-            </div>
-
-            {/* Status Dropdown */}
-            <select className="border border-gray-300 rounded-md focus:outline-none px-1 py-1 text-sm bg-white">
-              <option>Status</option>
-              <option>Active</option>
-              <option>Inactive</option>
-            </select>
-
-            {/* Search Input */}
-            <div className="relative">
-              <Search className="absolute left-2 top-2 w-4 h-4 text-gray-400" />
-
-              <input
-                type="text"
-                placeholder="Search Coupons"
-                className="border border-gray-300 rounded-md focus:outline-none px-1 py-1 text-sm w-52 pl-7 placeholder:text-[#060C12]"
-              />
-            </div>
-          </div>
-        </div>
-        <table className=" overflow-x-auto overflow-scroll text-left border-t border-gray-200">
-          <thead className="bg-gray-50 w-10">
-            <tr>
-              <th className="py-3 px-4 border border-gray-300 text-sm"></th>
-              <th className="py-3 px-4 border border-gray-300 text-gray-700 font-normal">
-                Coupon Code
-              </th>
-              <th className="py-3 px-4 border border-gray-300 text-gray-700 font-normal">
-                Title
-              </th>
-              <th className="py-3 px-4 border border-gray-300 text-gray-700 font-normal">
-                Financial Value
-              </th>
-              <th className="py-3 px-4 border border-gray-300 text-gray-700 font-normal">
-                Valid From
-              </th>
-              <th className="py-3 px-4 border border-gray-300 text-gray-700 font-normal">
-                Expiry Date
-              </th>
-              <th className="py-3 px-4 border border-gray-300 text-gray-700 font-normal">
-                Usage Limit
-              </th>
-              <th className="py-3 px-4 border border-gray-300 text-gray-700 font-normal">
-                Used Count
-              </th>
-              <th className="py-3 px-4 border border-gray-300 text-gray-700 font-normal">
-                Status
-              </th>
-              <th className="py-3 px-4 border border-gray-300 text-sm">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loadingCoupons ? (
-              <tr>
-                <td colSpan="10" className="py-8 text-center">
-                  <div className="flex justify-center">
-                    <Loader2 className="animate-spin text-[#B02E0C]" size={32} />
-                  </div>
-                </td>
-              </tr>
-            ) : coupons.length === 0 ? (
-              <tr>
-                <td colSpan="10" className="py-8 text-center text-gray-500">
-                  No coupons found.
-                </td>
-              </tr>
-            ) : (
-              coupons.map((coupon) => {
-                const tier = coupon.tiering?.[0];
-                const tierDetail = tier?.tier_details?.[0];
-                return (
-                  <tr key={coupon.id}>
-                    <td className="py-3 px-4 border border-gray-300">
-                      <input
-                        type="checkbox"
-                        className="form-checkbox text-[#B02E0C] rounded focus:ring-[#B02E0C]"
-                      />
-                    </td>
-                    <td className="py-2 px-4 border border-gray-300 text-[#060C12] font-semibold">
-                      {coupon.code}
-                    </td>
-                    <td className="py-2 px-4 border border-gray-300 text-gray-700">
-                      {coupon.title}
-                    </td>
-                    <td className="py-2 px-4 border border-gray-300 text-gray-700">
-                      {coupon.financial_value}
-                    </td>
-                    <td className="py-2 px-4 border border-gray-300 text-gray-700">
-                      {coupon.start_date ? new Date(coupon.start_date).toLocaleDateString() : "-"}
-                    </td>
-                    <td className="py-2 px-4 border border-gray-300 text-gray-700">
-                      {coupon.end_date ? new Date(coupon.end_date).toLocaleDateString() : "-"}
-                    </td>
-                    <td className="py-2 px-4 border border-gray-300 text-gray-700">
-                      {tierDetail?.current_tiering_limit || "-"}
-                    </td>
-                    <td className="py-2 px-4 border border-gray-300 text-gray-700">
-                      {tier?.used_total || 0}
-                    </td>
-                    <td className="py-2 px-4 border border-gray-300">
-                      <div className={`px-2.5 py-1 middle none center rounded-full border ${coupon.status ? 'border-green-300 bg-green-100' : 'border-red-300 bg-red-100'} flex items-center gap-1 w-fit`}>
-                        <div className={`rounded-full w-2 h-2 ${coupon.status ? 'bg-[#04B440]' : 'bg-red-500'}`}></div>
-                        <span className={`${coupon.status ? 'text-[#04B440]' : 'text-red-500'} font-semibold text-xs`}>
-                          {coupon.status ? 'Active' : 'Inactive'}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="py-2 px-4 border border-gray-300 text-gray-700">
-                      <div className="flex flex-row gap-4">
-                        <Eye
-                          className="w-5 h-5 text-gray-600 cursor-pointer hover:text-[#B02E0C]"
-                          onClick={() => {
-                            setSelectedCoupon(coupon);
-                            setShowOpenModal(true);
-                          }}
-                        />
-                        <Pencil
-                          className="w-5 h-5 text-gray-600 cursor-pointer hover:text-[#B02E0C]"
-                          onClick={() => handleEditCouponClick(coupon)}
-                        />
-                        <Trash2
-                          className="w-5 h-5 text-gray-600 cursor-pointer hover:text-red-500"
-                          onClick={() => handleDeleteCoupon(coupon.id)}
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        columns={columns}
+        data={filteredCoupons}
+        loading={loadingCoupons}
+        renderActions={renderActions}
+        rowKey="id"
+        showSearch
+        onSearch={setSearchQuery}
+        pagination={{
+          page: currentPage,
+          limit: rowsPerPage,
+          totalPages: Math.ceil(filteredCoupons.length / rowsPerPage),
+          totalRecords: filteredCoupons.length
+        }}
+        onPageChange={setCurrentPage}
+        onLimitChange={(l) => { setRowsPerPage(l); setCurrentPage(1); }}
+      />
 
       {/* Coupon Criteria Modal */}
       {showCriteriaModal && (
@@ -752,6 +768,13 @@ const CouponManagement = () => {
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-2xl font-semibold">Coupon Criteria</h2>
               <div className="flex gap-3">
+                <button
+                  onClick={() => setShowRules(!showRules)}
+                  className={`px-4 py-2 rounded-md flex items-center gap-2 transition-all ${showRules ? "bg-blue-600 text-white shadow-lg" : "bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100"}`}
+                >
+                  <Info size={18} />
+                  Rules & Guide
+                </button>
                 <button
                   onClick={() => {
                     setShowAddCriteriaModal(true);
@@ -767,6 +790,7 @@ const CouponManagement = () => {
                     setShowCriteriaModal(false);
                     setErrorCriteria(null);
                     setSuccessCriteria(null);
+                    setShowRules(false);
                   }}
                   className="text-gray-500 hover:text-gray-700"
                 >
@@ -786,108 +810,189 @@ const CouponManagement = () => {
               </div>
             )}
 
-            {/* Criteria Table */}
-            <div className="bg-white shadow-sm border border-gray-200 rounded-lg overflow-hidden">
-              <div className="overflow-x-auto">
-                {loadingCriteria ? (
-                  <div className="flex justify-center items-center py-8">
-                    <Loader2 className="animate-spin text-[#B02E0C]" size={32} />
-                  </div>
-                ) : (
-                  <table className="w-full text-left">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="py-3 px-4 border border-gray-300 text-sm font-semibold">ID</th>
-                        <th className="py-3 px-4 border border-gray-300 text-sm font-semibold">Attach Phone</th>
-                        <th className="py-3 px-4 border border-gray-300 text-sm font-semibold">Attach Email</th>
-                        <th className="py-3 px-4 border border-gray-300 text-sm font-semibold">Reason Place ID</th>
-                        <th className="py-3 px-4 border border-gray-300 text-sm font-semibold">Date Range</th>
-                        <th className="py-3 px-4 border border-gray-300 text-sm font-semibold">For New</th>
-                        <th className="py-3 px-4 border border-gray-300 text-sm font-semibold">For Existing (Condition)</th>
-                        <th className="py-3 px-4 border border-gray-300 text-sm font-semibold">For Existing (Non-Condition)</th>
-                        <th className="py-3 px-4 border border-gray-300 text-sm font-semibold">Map Existing User</th>
-                        <th className="py-3 px-4 border border-gray-300 text-sm font-semibold">Map Upcoming User</th>
-                        <th className="py-3 px-4 border border-gray-300 text-sm font-semibold">Status</th>
-                        <th className="py-3 px-4 border border-gray-300 text-sm font-semibold text-center">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {criteria.length === 0 ? (
-                        <tr>
-                          <td colSpan="12" className="py-8 text-center text-gray-500">
-                            No criteria found. Click "Add Criteria" to add one.
-                          </td>
-                        </tr>
-                      ) : (
-                        criteria.map((item) => (
-                          <tr key={item.id} className="hover:bg-gray-50">
-                            <td className="py-3 px-4 border border-gray-300 text-gray-700">{item.id}</td>
-                            <td className="py-3 px-4 border border-gray-300 text-gray-700">
-                              {item.attach_phone ? "Yes" : "No"}
-                            </td>
-                            <td className="py-3 px-4 border border-gray-300 text-gray-700">
-                              {item.attach_email ? "Yes" : "No"}
-                            </td>
-                            <td className="py-3 px-4 border border-gray-300 text-gray-700">
-                              {item.reason_place_id ? "Yes" : "No"}
-                            </td>
-                            <td className="py-3 px-4 border border-gray-300 text-gray-700">
-                              {item.date_range ? "Yes" : "No"}
-                            </td>
-                            <td className="py-3 px-4 border border-gray-300 text-gray-700">
-                              {item.for_new ? "Yes" : "No"}
-                            </td>
-                            <td className="py-3 px-4 border border-gray-300 text-gray-700">
-                              {item.for_existing_with_condition ? "Yes" : "No"}
-                            </td>
-                            <td className="py-3 px-4 border border-gray-300 text-gray-700">
-                              {item.for_existing_non_condition ? "Yes" : "No"}
-                            </td>
-                            <td className="py-3 px-4 border border-gray-300 text-gray-700">
-                              {item.need_map_existing_user ? "Yes" : "No"}
-                            </td>
-                            <td className="py-3 px-4 border border-gray-300 text-gray-700">
-                              {item.need_map_upcoming_user ? "Yes" : "No"}
-                            </td>
-                            <td className="py-3 px-4 border border-gray-300">
-                              <span className={`px-2 py-1 rounded text-xs font-semibold ${item.is_active
-                                ? 'bg-green-100 text-green-700'
-                                : 'bg-red-100 text-red-700'
-                                }`}>
-                                {item.is_active ? 'Active' : 'Inactive'}
-                              </span>
-                            </td>
-                            <td className="py-3 px-4 border border-gray-300 text-center">
-                              <div className="flex justify-center gap-2">
-                                {deletingId === item.id ? (
-                                  <Loader2 className="animate-spin text-red-600" size={18} />
-                                ) : (
-                                  <>
+            <div className="flex flex-row items-start gap-6 min-h-[500px] overflow-hidden">
+              <div className={`transition-all duration-300 min-w-0 overflow-hidden ${showRules ? 'w-[60%]' : 'w-full'}`}>
+
+                {/* Criteria Table */}
+                <div className="bg-white shadow-sm border border-gray-200 rounded-lg overflow-hidden">
+                  <div className="overflow-x-auto">
+                    {loadingCriteria ? (
+                      <div className="flex justify-center items-center py-8">
+                        <Loader2 className="animate-spin text-[#B02E0C]" size={32} />
+                      </div>
+                    ) : (
+                      <table className="w-full text-left">
+                        <thead className="bg-[#B02E0C]/5">
+                          <tr>
+                            <th className="py-2.5 px-3 border border-gray-200 text-[10px] font-bold text-gray-600 uppercase tracking-tighter text-center">ID</th>
+                            <th className="py-2.5 px-3 border border-gray-200 text-[10px] font-bold text-gray-600 uppercase tracking-tighter text-center">Phone</th>
+                            <th className="py-2.5 px-3 border border-gray-200 text-[10px] font-bold text-gray-600 uppercase tracking-tighter text-center">Email</th>
+                            <th className="py-2.5 px-3 border border-gray-200 text-[10px] font-bold text-gray-600 uppercase tracking-tighter text-center">Range</th>
+                            <th className="py-2.5 px-3 border border-gray-200 text-[10px] font-bold text-gray-600 uppercase tracking-tighter text-center">New</th>
+                            <th className="py-2.5 px-3 border border-gray-200 text-[10px] font-bold text-gray-600 uppercase tracking-tighter text-center">Cond</th>
+                            <th className="py-2.5 px-3 border border-gray-200 text-[10px] font-bold text-gray-600 uppercase tracking-tighter text-center">Non</th>
+                            <th className="py-2.5 px-3 border border-gray-200 text-[10px] font-bold text-gray-600 uppercase tracking-tighter text-center">Exist</th>
+                            <th className="py-2.5 px-3 border border-gray-200 text-[10px] font-bold text-gray-600 uppercase tracking-tighter text-center">Upcom</th>
+                            <th className="py-2.5 px-3 border border-gray-200 text-[10px] font-bold text-gray-600 uppercase tracking-tighter text-center">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                          {criteria.length === 0 ? (
+                            <tr>
+                              <td colSpan="11" className="py-8 text-center text-gray-500 italic text-sm">No criteria found.</td>
+                            </tr>
+                          ) : (
+                            criteria.map((item) => (
+                              <tr key={item.id} className="hover:bg-gray-50/80 transition-colors border-b border-gray-100 last:border-0">
+                                <td className="py-2 px-3 text-xs font-bold text-gray-700 border-x border-gray-100 text-center">{item.id}</td>
+                                <td className="py-2 px-3 text-sm text-center border-r border-gray-100">{item.attach_phone ? "✅" : "❌"}</td>
+                                <td className="py-2 px-3 text-sm text-center border-r border-gray-100">{item.attach_email ? "✅" : "❌"}</td>
+                                <td className="py-2 px-3 text-sm text-center border-r border-gray-100">{item.date_range ? "✅" : "❌"}</td>
+                                <td className="py-2 px-3 text-sm text-center border-r border-gray-100">{item.for_new ? "✅" : "❌"}</td>
+                                <td className="py-2 px-3 text-sm text-center border-r border-gray-100">{item.for_existing_with_condition ? "✅" : "❌"}</td>
+                                <td className="py-2 px-3 text-sm text-center border-r border-gray-100">{item.for_existing_non_condition ? "✅" : "❌"}</td>
+                                <td className="py-2 px-3 text-sm text-center border-r border-gray-100">{item.need_map_existing_user ? "✅" : "❌"}</td>
+                                <td className="py-2 px-3 text-sm text-center border-r border-gray-100">{item.need_map_upcoming_user ? "✅" : "❌"}</td>
+                                <td className="py-2 px-3 text-sm text-center border-r border-gray-100">
+                                  <div className="flex justify-center gap-1.5">
                                     <button
                                       onClick={() => handleEditClick(item)}
-                                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                                      className="p-1 text-blue-600 hover:bg-blue-100 rounded-md transition-all shadow-sm bg-white border border-blue-100"
                                       title="Edit"
                                     >
-                                      <Pencil size={18} />
+                                      <Pencil size={14} />
                                     </button>
                                     <button
                                       onClick={() => handleDeleteCriteria(item.id)}
-                                      className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                                      className="p-1 text-[#B02E0C] hover:bg-red-100 rounded-md transition-all shadow-sm bg-white border border-red-100"
+                                      disabled={deletingId === item.id}
                                       title="Delete"
                                     >
-                                      <Trash2 size={18} />
+                                      {deletingId === item.id ? (
+                                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                      ) : (
+                                        <Trash2 size={14} />
+                                      )}
                                     </button>
-                                  </>
-                                )}
-                              </div>
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                )}
+                                  </div>
+                                </td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
+                </div>
               </div>
+
+              {showRules && (
+                <div className="w-[40%] flex-shrink-0 bg-white rounded-2xl border border-gray-200 shadow-sm overflow-y-auto max-h-[75vh] animate-in slide-in-from-right duration-300">
+                  <div className="p-6">
+                    <div className="flex items-center gap-2 mb-6 pb-4 border-b border-gray-200">
+                      <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
+                        <Info size={20} />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-black text-gray-900 leading-tight">Criteria Guide</h3>
+                        <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest italic">Operational Logic Handbook</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-8">
+                      <section>
+                        <h4 className="text-sm font-black text-gray-900 uppercase tracking-wider mb-4 border-l-4 border-blue-500 pl-3">૧. મુખ્ય સેટિંગ્સ (Criteria Settings)</h4>
+                        <ul className="space-y-4">
+                          <li className="flex gap-3">
+                            <CheckCircle2 size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+                            <div className="text-sm">
+                              <span className="font-bold text-gray-900 block mb-0.5">Attach Phone (ફોન જોડવો)</span>
+                              <span className="text-gray-600 leading-relaxed italic">આ કૂપન ફક્ત એવા જ યુઝર્સ વાપરી શકશે જેમના ફોન નંબર તમે લિસ્ટમાં નાખશો.</span>
+                            </div>
+                          </li>
+                          <li className="flex gap-3">
+                            <CheckCircle2 size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+                            <div className="text-sm">
+                              <span className="font-bold text-gray-900 block mb-0.5">Attach Email (ઈમેલ જોડવો)</span>
+                              <span className="text-gray-600 leading-relaxed italic">આ કૂપન ફક્ત ચોક્કસ ઈમેલ આઈડી વાળા યુઝર્સ માટે જ રહેશે.</span>
+                            </div>
+                          </li>
+                          <li className="flex gap-3">
+                            <CheckCircle2 size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+                            <div className="text-sm">
+                              <span className="font-bold text-gray-900 block mb-0.5">Reason Place ID (વિસ્તાર મુજબ)</span>
+                              <span className="text-gray-600 leading-relaxed italic">ચોક્કસ વિસ્તાર અથવા લોકેશન (સીટી કે એરિયા) માટે કૂપન રાખવી હોય ત્યારે વપરાય છે.</span>
+                            </div>
+                          </li>
+                          <li className="flex gap-3">
+                            <CheckCircle2 size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+                            <div className="text-sm">
+                              <span className="font-bold text-gray-900 block mb-0.5">Date Range (તારીખનો સમયગાળો)</span>
+                              <span className="text-gray-600 leading-relaxed italic">કૂપન કઈ તારીખ થી કઈ તારીખ સુધી ચાલશે તે નક્કી કરવા માટે.</span>
+                            </div>
+                          </li>
+                          <li className="flex gap-3">
+                            <CheckCircle2 size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+                            <div className="text-sm">
+                              <span className="font-bold text-gray-900 block mb-0.5">For New - First Purchase</span>
+                              <span className="text-gray-600 leading-relaxed italic">ફક્ત એવા જ લોકો વાપરી શકશે જેઓ પહેલીવાર પેમેન્ટ કરી રહ્યા હોય.</span>
+                            </div>
+                          </li>
+                          <li className="flex gap-3">
+                            <CheckCircle2 size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+                            <div className="text-sm">
+                              <span className="font-bold text-gray-900 block mb-0.5">Existing - Condition (જૂના યુઝર્સ)</span>
+                              <span className="text-gray-600 leading-relaxed italic">જૂના યુઝર્સ જે અમુક લિમિટ પૂરી કરી હોય તેવી શરત પાળતા હોય તેમના માટે.</span>
+                            </div>
+                          </li>
+                          <li className="flex gap-3">
+                            <CheckCircle2 size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+                            <div className="text-sm">
+                              <span className="font-bold text-gray-900 block mb-0.5">Existing - Non-Condition</span>
+                              <span className="text-gray-600 leading-relaxed italic">બધા જ જૂના યુઝર્સ કોઈપણ શરત વગર આ કૂપન વાપરી શકશે.</span>
+                            </div>
+                          </li>
+                          <li className="flex gap-3">
+                            <CheckCircle2 size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+                            <div className="text-sm">
+                              <span className="font-bold text-gray-900 block mb-0.5">Enable User Selection</span>
+                              <span className="text-gray-600 leading-relaxed italic">જાતે લિસ્ટમાંથી યુઝર્સને સિલેક્ટ કરી શકો છો કે કોને ડિસ્કાઉન્ટ આપવું છે.</span>
+                            </div>
+                          </li>
+                          <li className="flex gap-3">
+                            <CheckCircle2 size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+                            <div className="text-sm">
+                              <span className="font-bold text-gray-900 block mb-0.5">Target Upcoming Users</span>
+                              <span className="text-gray-600 leading-relaxed italic">જે યુઝર્સ ભવિષ્યમાં રજિસ્ટર થશે તેમને પણ કૂપન આપોઆપ લાગુ પડશે.</span>
+                            </div>
+                          </li>
+                        </ul>
+                      </section>
+
+                      <section className="bg-blue-600 rounded-2xl p-6 text-white shadow-xl shadow-blue-200">
+                        <div className="flex items-center gap-2 mb-4">
+                          <AlertCircle size={18} />
+                          <h4 className="text-xs font-black uppercase tracking-widest">૨. લોજિક ગાઈડ (Combinations)</h4>
+                        </div>
+                        <div className="space-y-4">
+                          <div className="bg-white/10 rounded-xl p-3 border border-white/20">
+                            <span className="font-bold block text-sm mb-1 underline">Target All (બધા માટે)</span>
+                            <p className="text-xs italic leading-relaxed">અત્યારના અને હવે પછી આવનારા બધા માટે: Select Specific Users + Target Future Users બંને ચાલુ રાખવા.</p>
+                          </div>
+                          <div className="bg-white/10 rounded-xl p-3 border border-white/20">
+                            <span className="font-bold block text-sm mb-1 underline">Pure New (તદ્દન નવા માટે)</span>
+                            <p className="text-xs italic leading-relaxed">ફક્ત નવા રજિસ્ટર થનારા: For New + Target Upcoming ચાલુ કરવા.</p>
+                          </div>
+                          <div className="bg-white/10 rounded-xl p-3 border border-white/20">
+                            <span className="font-bold block text-sm mb-1 underline">Specific (ચોક્કસ માટે)</span>
+                            <p className="text-xs italic leading-relaxed">ફક્ત ખાસ યુઝર્સ: Selection ચાલુ કરી તેમના આઈડી પસંદ કરવા.</p>
+                          </div>
+                        </div>
+                      </section>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -1241,814 +1346,823 @@ const CouponManagement = () => {
           </div>
         </div>
       )}
+      {/* Add Coupon Modal */}
 
       {/* Create New Coupon Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm bg-black/60 p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl w-full max-w-2xl p-8 relative shadow-2xl overflow-hidden flex flex-col max-h-[95vh]">
-            <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100 flex-shrink-0">
-              <h2 className="text-2xl font-bold text-gray-800">Create New Coupon</h2>
-              <button
-                onClick={() => {
-                  setShowAddModal(false);
-                  resetCouponForm();
-                  setError(null);
-                }}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <X size={24} />
-              </button>
-            </div>
-
-            {error && (
-              <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
-                {error}
+      {
+        showAddModal && (
+          <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm bg-black/60 p-4 overflow-y-auto">
+            <div className="bg-white rounded-2xl w-full max-w-2xl p-8 relative shadow-2xl overflow-hidden flex flex-col max-h-[95vh]">
+              <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100 flex-shrink-0">
+                <h2 className="text-2xl font-bold text-gray-800">Create New Coupon</h2>
+                <button
+                  onClick={() => {
+                    setShowAddModal(false);
+                    resetCouponForm();
+                    setError(null);
+                  }}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <X size={24} />
+                </button>
               </div>
-            )}
 
-            <div className="overflow-y-auto pr-2 custom-scrollbar flex-grow space-y-6">
-              <form onSubmit={handleCreateCoupon} className="space-y-6">
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                      Coupon Code
-                    </label>
-                    <input
-                      type="text"
-                      name="code"
-                      value={couponFormData.code}
-                      onChange={handleCouponInputChange}
-                      placeholder="e.g. DIWALI50"
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                      Title
-                    </label>
-                    <input
-                      type="text"
-                      name="title"
-                      value={couponFormData.title}
-                      onChange={handleCouponInputChange}
-                      placeholder="e.g. Festival Season Offer"
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50"
-                      required
-                    />
-                  </div>
+              {error && (
+                <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
+                  {error}
                 </div>
+              )}
 
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                    Description
-                  </label>
-                  <textarea
-                    name="description"
-                    value={couponFormData.description}
-                    onChange={handleCouponInputChange}
-                    rows="2"
-                    placeholder="Provide details about this coupon..."
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50 resize-none"
-                  ></textarea>
-                </div>
-
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                      Start Date
-                    </label>
-                    <input
-                      type="date"
-                      name="start_date"
-                      value={couponFormData.start_date}
-                      onChange={handleCouponInputChange}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                      End Date
-                    </label>
-                    <input
-                      type="date"
-                      name="end_date"
-                      value={couponFormData.end_date}
-                      onChange={handleCouponInputChange}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-6 pt-4 border-t border-gray-50">
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                      Coupon Type
-                    </label>
-                    <select
-                      name="coupon_type_id"
-                      value={couponFormData.coupon_type_id}
-                      onChange={(e) => {
-                        const { name, value } = e.target;
-                        setCouponFormData(prev => ({
-                          ...prev,
-                          [name]: Number(value)
-                        }));
-                      }}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50 appearance-none cursor-pointer"
-                      required
-                    >
-                      <option value="">Select Type</option>
-                      {couponTypes.map((type) => (
-                        <option key={type.id} value={type.id}>
-                          {type.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                      {couponTypes.find(t => Number(t.id) === Number(couponFormData.coupon_type_id))?.name || "Financial Value"}
-                    </label>
-                    <div className="relative">
+              <div className="overflow-y-auto pr-2 custom-scrollbar flex-grow space-y-6">
+                <form onSubmit={handleCreateCoupon} className="space-y-6">
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                        Coupon Code
+                      </label>
                       <input
-                        type="number"
-                        name="financial_value"
-                        value={couponFormData.financial_value}
+                        type="text"
+                        name="code"
+                        value={couponFormData.code}
                         onChange={handleCouponInputChange}
-                        placeholder={Number(couponFormData.coupon_type_id) === 2 ? "e.g. 10" : "e.g. 120"}
-                        className={`w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50 ${Number(couponFormData.coupon_type_id) === 2 ? "pr-10" : ""}`}
+                        placeholder="e.g. DIWALI50"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50"
                         required
                       />
-                      {Number(couponFormData.coupon_type_id) === 2 && (
-                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-lg">
-                          %
-                        </span>
-                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                        Title
+                      </label>
+                      <input
+                        type="text"
+                        name="title"
+                        value={couponFormData.title}
+                        onChange={handleCouponInputChange}
+                        placeholder="e.g. Festival Season Offer"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50"
+                        required
+                      />
                     </div>
                   </div>
-                </div>
 
-                <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                      Global Usage Limit
+                      Description
                     </label>
-                    <input
-                      type="number"
-                      name="global_usage_limit"
-                      value={couponFormData.global_usage_limit}
+                    <textarea
+                      name="description"
+                      value={couponFormData.description}
                       onChange={handleCouponInputChange}
-                      placeholder="e.g. 100"
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50"
-                      required
-                    />
+                      rows="2"
+                      placeholder="Provide details about this coupon..."
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50 resize-none"
+                    ></textarea>
                   </div>
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                      Criteria Configuration
-                    </label>
-                    <select
-                      name="CouponTypeCriteriaId"
-                      value={couponFormData.CouponTypeCriteriaId}
-                      onChange={handleCouponInputChange}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50 appearance-none cursor-pointer"
-                      required
-                    >
-                      <option value="">Select Criteria</option>
-                      {criteria.map((c) => {
-                        const critId = c.id || c.coupon_type_criteria_id;
-                        return (
-                          <option key={critId} value={String(critId)}>
-                            Criteria #{critId}
+
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                        Start Date
+                      </label>
+                      <input
+                        type="date"
+                        name="start_date"
+                        value={couponFormData.start_date}
+                        onChange={handleCouponInputChange}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                        End Date
+                      </label>
+                      <input
+                        type="date"
+                        name="end_date"
+                        value={couponFormData.end_date}
+                        onChange={handleCouponInputChange}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-6 pt-4 border-t border-gray-50">
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                        Coupon Type
+                      </label>
+                      <select
+                        name="coupon_type_id"
+                        value={couponFormData.coupon_type_id}
+                        onChange={(e) => {
+                          const { name, value } = e.target;
+                          setCouponFormData(prev => ({
+                            ...prev,
+                            [name]: Number(value)
+                          }));
+                        }}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50 appearance-none cursor-pointer"
+                        required
+                      >
+                        <option value="">Select Type</option>
+                        {couponTypes.map((type) => (
+                          <option key={type.id} value={type.id}>
+                            {type.name}
                           </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                        {couponTypes.find(t => Number(t.id) === Number(couponFormData.coupon_type_id))?.name || "Financial Value"}
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          name="financial_value"
+                          value={couponFormData.financial_value}
+                          onChange={handleCouponInputChange}
+                          placeholder={Number(couponFormData.coupon_type_id) === 2 ? "e.g. 10" : "e.g. 120"}
+                          className={`w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50 ${Number(couponFormData.coupon_type_id) === 2 ? "pr-10" : ""}`}
+                          required
+                        />
+                        {Number(couponFormData.coupon_type_id) === 2 && (
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-lg">
+                            %
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                        Global Usage Limit
+                      </label>
+                      <input
+                        type="number"
+                        name="global_usage_limit"
+                        value={couponFormData.global_usage_limit}
+                        onChange={handleCouponInputChange}
+                        placeholder="e.g. 100"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                        Criteria Configuration
+                      </label>
+                      <select
+                        name="CouponTypeCriteriaId"
+                        value={couponFormData.CouponTypeCriteriaId}
+                        onChange={handleCouponInputChange}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50 appearance-none cursor-pointer"
+                        required
+                      >
+                        <option value="">Select Criteria</option>
+                        {criteria.map((c) => {
+                          const critId = c.id || c.coupon_type_criteria_id;
+                          return (
+                            <option key={critId} value={String(critId)}>
+                              Criteria #{critId}
+                            </option>
+                          );
+                        })}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Conditional User Selection List for Create Modal */}
+                  {(() => {
+                    const selectedCrit = criteria.find(c => String(c.id || c.coupon_type_criteria_id) === String(couponFormData.CouponTypeCriteriaId));
+                    if (selectedCrit?.need_map_existing_user) {
+                      return (
+                        <div className="space-y-3 bg-[#B02E0C]/5 p-5 rounded-2xl border border-[#B02E0C]/10 transition-all animate-in fade-in slide-in-from-top-4">
+                          <div className="flex justify-between items-center">
+                            <label className="block text-sm font-bold text-[#B02E0C] uppercase tracking-wider">
+                              Map To Specific Users
+                            </label>
+                            <span className="text-[10px] bg-[#B02E0C] text-white px-2 py-0.5 rounded-full font-bold">Optional</span>
+                          </div>
+                          <div className="border border-[#B02E0C]/20 rounded-xl overflow-hidden bg-white shadow-sm">
+                            <div className="max-h-48 overflow-y-auto p-2 custom-scrollbar">
+                              {loadingUsers ? (
+                                <div className="flex items-center justify-center py-8">
+                                  <Loader2 className="animate-spin text-[#B02E0C]" size={28} />
+                                </div>
+                              ) : allUsers.length > 0 ? (
+                                <div className="grid grid-cols-1 gap-1">
+                                  {allUsers.map((user) => {
+                                    const userId = String(user.id);
+                                    const isSelected = couponFormData.existing_user_ids
+                                      ? String(couponFormData.existing_user_ids).split(',').map(id => id.trim()).includes(userId)
+                                      : false;
+
+                                    return (
+                                      <label key={userId} className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all ${isSelected ? 'bg-[#B02E0C]/10 border border-[#B02E0C]/20' : 'hover:bg-gray-50 border border-transparent'}`}>
+                                        <input
+                                          type="checkbox"
+                                          checked={isSelected}
+                                          onChange={(e) => {
+                                            let currentIds = couponFormData.existing_user_ids
+                                              ? String(couponFormData.existing_user_ids).split(',').map(id => id.trim()).filter(id => id !== "")
+                                              : [];
+
+                                            if (e.target.checked) {
+                                              if (!currentIds.includes(userId)) currentIds.push(userId);
+                                            } else {
+                                              currentIds = currentIds.filter(id => id !== userId);
+                                            }
+                                            setCouponFormData(prev => ({ ...prev, existing_user_ids: currentIds.join(', ') }));
+                                          }}
+                                          className="w-5 h-5 accent-[#B02E0C]"
+                                        />
+                                        <div className="flex flex-col min-w-0">
+                                          <span className={`text-sm font-bold truncate ${isSelected ? 'text-[#B02E0C]' : 'text-gray-800'}`}>
+                                            {user.name}
+                                          </span>
+                                          <span className="text-[11px] text-gray-500 font-medium">
+                                            ID: {user.id} • {user.number} • {user.role}
+                                          </span>
+                                        </div>
+                                      </label>
+                                    );
+                                  })}
+                                </div>
+                              ) : (
+                                <p className="text-sm text-gray-500 text-center py-4">No users found.</p>
+                              )}
+                            </div>
+                          </div>
+                          <p className="text-[11px] text-[#B02E0C] font-semibold italic flex items-center gap-1.5 px-1">
+                            <span className="w-1.5 h-1.5 bg-[#B02E0C] rounded-full animate-pulse"></span>
+                            Note: Leaving this empty will target ALL existing users.
+                          </p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
+
+                  <div className="space-y-3 bg-gray-50 p-5 rounded-2xl border border-gray-100">
+                    <label className="block text-sm font-bold text-gray-700 uppercase tracking-wider">
+                      Applicable Subscription Plans
+                    </label>
+                    <div className="grid grid-cols-2 gap-3 max-h-40 overflow-y-auto p-1 custom-scrollbar">
+                      {plans.map((plan) => {
+                        const isSelected = (couponFormData.subscription_id || []).some(id => String(id) === String(plan.id));
+                        return (
+                          <label key={plan.id} className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${isSelected ? 'bg-white border-[#B02E0C] shadow-sm' : 'bg-white border-gray-200 hover:border-gray-300'}`}>
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => handleSubscriptionChange(plan.id)}
+                              className="w-5 h-5 accent-[#B02E0C]"
+                            />
+                            <span className={`text-sm font-bold ${isSelected ? 'text-[#B02E0C]' : 'text-gray-700'}`}>
+                              {plan.name || `Plan #${plan.id}`}
+                            </span>
+                          </label>
                         );
                       })}
-                    </select>
+                    </div>
                   </div>
-                </div>
 
-                {/* Conditional User Selection List for Create Modal */}
-                {(() => {
-                  const selectedCrit = criteria.find(c => String(c.id || c.coupon_type_criteria_id) === String(couponFormData.CouponTypeCriteriaId));
-                  if (selectedCrit?.need_map_existing_user) {
-                    return (
-                      <div className="space-y-3 bg-[#B02E0C]/5 p-5 rounded-2xl border border-[#B02E0C]/10 transition-all animate-in fade-in slide-in-from-top-4">
-                        <div className="flex justify-between items-center">
-                          <label className="block text-sm font-bold text-[#B02E0C] uppercase tracking-wider">
-                            Map To Specific Users
-                          </label>
-                          <span className="text-[10px] bg-[#B02E0C] text-white px-2 py-0.5 rounded-full font-bold">Optional</span>
-                        </div>
-                        <div className="border border-[#B02E0C]/20 rounded-xl overflow-hidden bg-white shadow-sm">
-                          <div className="max-h-48 overflow-y-auto p-2 custom-scrollbar">
-                            {loadingUsers ? (
-                              <div className="flex items-center justify-center py-8">
-                                <Loader2 className="animate-spin text-[#B02E0C]" size={28} />
-                              </div>
-                            ) : allUsers.length > 0 ? (
-                              <div className="grid grid-cols-1 gap-1">
-                                {allUsers.map((user) => {
-                                  const userId = String(user.id);
-                                  const isSelected = couponFormData.existing_user_ids
-                                    ? String(couponFormData.existing_user_ids).split(',').map(id => id.trim()).includes(userId)
-                                    : false;
-
-                                  return (
-                                    <label key={userId} className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all ${isSelected ? 'bg-[#B02E0C]/10 border border-[#B02E0C]/20' : 'hover:bg-gray-50 border border-transparent'}`}>
-                                      <input
-                                        type="checkbox"
-                                        checked={isSelected}
-                                        onChange={(e) => {
-                                          let currentIds = couponFormData.existing_user_ids
-                                            ? String(couponFormData.existing_user_ids).split(',').map(id => id.trim()).filter(id => id !== "")
-                                            : [];
-
-                                          if (e.target.checked) {
-                                            if (!currentIds.includes(userId)) currentIds.push(userId);
-                                          } else {
-                                            currentIds = currentIds.filter(id => id !== userId);
-                                          }
-                                          setCouponFormData(prev => ({ ...prev, existing_user_ids: currentIds.join(', ') }));
-                                        }}
-                                        className="w-5 h-5 accent-[#B02E0C]"
-                                      />
-                                      <div className="flex flex-col min-w-0">
-                                        <span className={`text-sm font-bold truncate ${isSelected ? 'text-[#B02E0C]' : 'text-gray-800'}`}>
-                                          {user.name}
-                                        </span>
-                                        <span className="text-[11px] text-gray-500 font-medium">
-                                          ID: {user.id} • {user.number} • {user.role}
-                                        </span>
-                                      </div>
-                                    </label>
-                                  );
-                                })}
-                              </div>
-                            ) : (
-                              <p className="text-sm text-gray-500 text-center py-4">No users found.</p>
-                            )}
-                          </div>
-                        </div>
-                        <p className="text-[11px] text-[#B02E0C] font-semibold italic flex items-center gap-1.5 px-1">
-                          <span className="w-1.5 h-1.5 bg-[#B02E0C] rounded-full animate-pulse"></span>
-                          Note: Leaving this empty will target ALL existing users.
-                        </p>
+                  <div className="grid grid-cols-2 gap-6 p-4 rounded-2xl bg-gray-50/50 border border-gray-100">
+                    <label className="flex items-center gap-3 cursor-pointer group">
+                      <div className="relative">
+                        <input
+                          type="checkbox"
+                          name="status"
+                          checked={couponFormData.status}
+                          onChange={handleCouponInputChange}
+                          className="w-6 h-6 accent-[#B02E0C] cursor-pointer"
+                        />
                       </div>
-                    );
-                  }
-                  return null;
-                })()}
-
-                <div className="space-y-3 bg-gray-50 p-5 rounded-2xl border border-gray-100">
-                  <label className="block text-sm font-bold text-gray-700 uppercase tracking-wider">
-                    Applicable Subscription Plans
-                  </label>
-                  <div className="grid grid-cols-2 gap-3 max-h-40 overflow-y-auto p-1 custom-scrollbar">
-                    {plans.map((plan) => {
-                      const isSelected = (couponFormData.subscription_id || []).some(id => String(id) === String(plan.id));
-                      return (
-                        <label key={plan.id} className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${isSelected ? 'bg-white border-[#B02E0C] shadow-sm' : 'bg-white border-gray-200 hover:border-gray-300'}`}>
-                          <input
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={() => handleSubscriptionChange(plan.id)}
-                            className="w-5 h-5 accent-[#B02E0C]"
-                          />
-                          <span className={`text-sm font-bold ${isSelected ? 'text-[#B02E0C]' : 'text-gray-700'}`}>
-                            {plan.name || `Plan #${plan.id}`}
-                          </span>
-                        </label>
-                      );
-                    })}
+                      <div className="flex flex-col">
+                        <span className="text-sm font-bold text-gray-800">Internal Status</span>
+                        <span className="text-[10px] text-gray-500 font-medium">Toggle active/inactive</span>
+                      </div>
+                    </label>
+                    <label className="flex items-center gap-3 cursor-pointer group">
+                      <div className="relative">
+                        <input
+                          type="checkbox"
+                          name="can_combine_with_referral_credit"
+                          checked={couponFormData.can_combine_with_referral_credit}
+                          onChange={handleCouponInputChange}
+                          className="w-6 h-6 accent-[#B02E0C] cursor-pointer"
+                        />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-bold text-gray-800">Combine Referral</span>
+                        <span className="text-[10px] text-gray-500 font-medium">Stack with referral credit</span>
+                      </div>
+                    </label>
                   </div>
-                </div>
+                </form>
+              </div>
 
-                <div className="grid grid-cols-2 gap-6 p-4 rounded-2xl bg-gray-50/50 border border-gray-100">
-                  <label className="flex items-center gap-3 cursor-pointer group">
-                    <div className="relative">
-                      <input
-                        type="checkbox"
-                        name="status"
-                        checked={couponFormData.status}
-                        onChange={handleCouponInputChange}
-                        className="w-6 h-6 accent-[#B02E0C] cursor-pointer"
-                      />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-sm font-bold text-gray-800">Internal Status</span>
-                      <span className="text-[10px] text-gray-500 font-medium">Toggle active/inactive</span>
-                    </div>
-                  </label>
-                  <label className="flex items-center gap-3 cursor-pointer group">
-                    <div className="relative">
-                      <input
-                        type="checkbox"
-                        name="can_combine_with_referral_credit"
-                        checked={couponFormData.can_combine_with_referral_credit}
-                        onChange={handleCouponInputChange}
-                        className="w-6 h-6 accent-[#B02E0C] cursor-pointer"
-                      />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-sm font-bold text-gray-800">Combine Referral</span>
-                      <span className="text-[10px] text-gray-500 font-medium">Stack with referral credit</span>
-                    </div>
-                  </label>
-                </div>
-              </form>
-            </div>
-
-            <div className="flex justify-end gap-3 pt-6 mt-4 border-t border-gray-100 flex-shrink-0">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowAddModal(false);
-                  resetCouponForm();
-                  setError(null);
-                }}
-                className="px-8 py-3 rounded-xl border-2 border-gray-100 text-gray-600 hover:bg-gray-50 hover:border-gray-200 transition-all text-sm font-bold cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleCreateCoupon(e);
-                }}
-                disabled={loading}
-                className="px-10 py-3 rounded-xl bg-[#B02E0C] text-white hover:bg-[#8d270b] hover:shadow-lg hover:shadow-[#B02E0C]/30 transition-all text-sm font-bold cursor-pointer flex items-center gap-3 disabled:opacity-70"
-              >
-                {loading && <Loader2 size={18} className="animate-spin" />}
-                {loading ? "Processing..." : "Create Coupon"}
-              </button>
+              <div className="flex justify-end gap-3 pt-6 mt-4 border-t border-gray-100 flex-shrink-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddModal(false);
+                    resetCouponForm();
+                    setError(null);
+                  }}
+                  className="px-8 py-3 rounded-xl border-2 border-gray-100 text-gray-600 hover:bg-gray-50 hover:border-gray-200 transition-all text-sm font-bold cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleCreateCoupon(e);
+                  }}
+                  disabled={loading}
+                  className="px-10 py-3 rounded-xl bg-[#B02E0C] text-white hover:bg-[#8d270b] hover:shadow-lg hover:shadow-[#B02E0C]/30 transition-all text-sm font-bold cursor-pointer flex items-center gap-3 disabled:opacity-70"
+                >
+                  {loading && <Loader2 size={18} className="animate-spin" />}
+                  {loading ? "Processing..." : "Create Coupon"}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       {/* Update Coupon Modal */}
-      {showEditModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm bg-black/60 p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl w-full max-w-2xl p-8 relative shadow-2xl overflow-hidden flex flex-col max-h-[95vh]">
-            <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100 flex-shrink-0">
-              <h2 className="text-2xl font-bold text-gray-800">Update Coupon</h2>
-              <button
-                onClick={() => {
-                  setShowEditModal(false);
-                  setSelectedCoupon(null);
-                  resetCouponForm();
-                  setError(null);
-                }}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <X size={24} />
-              </button>
-            </div>
-
-            {error && (
-              <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
-                {error}
+      {
+        showEditModal && (
+          <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm bg-black/60 p-4 overflow-y-auto">
+            <div className="bg-white rounded-2xl w-full max-w-2xl p-8 relative shadow-2xl overflow-hidden flex flex-col max-h-[95vh]">
+              <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100 flex-shrink-0">
+                <h2 className="text-2xl font-bold text-gray-800">Update Coupon</h2>
+                <button
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setSelectedCoupon(null);
+                    resetCouponForm();
+                    setError(null);
+                  }}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <X size={24} />
+                </button>
               </div>
-            )}
 
-            <div className="overflow-y-auto pr-2 custom-scrollbar flex-grow space-y-6">
-              <form onSubmit={handleUpdateCoupon} className="space-y-6">
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                      Coupon Code
-                    </label>
-                    <input
-                      type="text"
-                      name="code"
-                      value={couponFormData.code}
-                      onChange={handleCouponInputChange}
-                      placeholder="e.g. DIWALI50"
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                      Title
-                    </label>
-                    <input
-                      type="text"
-                      name="title"
-                      value={couponFormData.title}
-                      onChange={handleCouponInputChange}
-                      placeholder="e.g. Festival Season Offer"
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50"
-                      required
-                    />
-                  </div>
+              {error && (
+                <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
+                  {error}
                 </div>
+              )}
 
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                    Description
-                  </label>
-                  <textarea
-                    name="description"
-                    value={couponFormData.description}
-                    onChange={handleCouponInputChange}
-                    rows="2"
-                    placeholder="Provide details about this coupon..."
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50 resize-none"
-                  ></textarea>
-                </div>
-
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                      Start Date
-                    </label>
-                    <input
-                      type="date"
-                      name="start_date"
-                      value={couponFormData.start_date}
-                      onChange={handleCouponInputChange}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                      End Date
-                    </label>
-                    <input
-                      type="date"
-                      name="end_date"
-                      value={couponFormData.end_date}
-                      onChange={handleCouponInputChange}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-6 pt-4 border-t border-gray-50">
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                      Coupon Type
-                    </label>
-                    <select
-                      name="coupon_type_id"
-                      value={couponFormData.coupon_type_id}
-                      onChange={(e) => {
-                        const { name, value } = e.target;
-                        setCouponFormData(prev => ({
-                          ...prev,
-                          [name]: Number(value)
-                        }));
-                      }}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50 appearance-none cursor-pointer"
-                      required
-                    >
-                      <option value="">Select Type</option>
-                      {couponTypes.map((type) => (
-                        <option key={type.id} value={type.id}>
-                          {type.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                      {couponTypes.find(t => Number(t.id) === Number(couponFormData.coupon_type_id))?.name || "Financial Value"}
-                    </label>
-                    <div className="relative">
+              <div className="overflow-y-auto pr-2 custom-scrollbar flex-grow space-y-6">
+                <form onSubmit={handleUpdateCoupon} className="space-y-6">
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                        Coupon Code
+                      </label>
                       <input
-                        type="number"
-                        name="financial_value"
-                        value={couponFormData.financial_value}
+                        type="text"
+                        name="code"
+                        value={couponFormData.code}
                         onChange={handleCouponInputChange}
-                        placeholder={Number(couponFormData.coupon_type_id) === 2 ? "e.g. 10" : "e.g. 120"}
-                        className={`w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50 ${Number(couponFormData.coupon_type_id) === 2 ? "pr-10" : ""}`}
+                        placeholder="e.g. DIWALI50"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50"
                         required
                       />
-                      {Number(couponFormData.coupon_type_id) === 2 && (
-                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-lg">
-                          %
-                        </span>
-                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                        Title
+                      </label>
+                      <input
+                        type="text"
+                        name="title"
+                        value={couponFormData.title}
+                        onChange={handleCouponInputChange}
+                        placeholder="e.g. Festival Season Offer"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50"
+                        required
+                      />
                     </div>
                   </div>
-                </div>
 
-                <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                      Global Usage Limit
+                      Description
                     </label>
-                    <input
-                      type="number"
-                      name="global_usage_limit"
-                      value={couponFormData.global_usage_limit}
+                    <textarea
+                      name="description"
+                      value={couponFormData.description}
                       onChange={handleCouponInputChange}
-                      placeholder="e.g. 100"
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50"
-                      required
-                    />
+                      rows="2"
+                      placeholder="Provide details about this coupon..."
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50 resize-none"
+                    ></textarea>
                   </div>
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                      Criteria Configuration
-                    </label>
-                    <select
-                      name="CouponTypeCriteriaId"
-                      value={String(couponFormData.CouponTypeCriteriaId || "")}
-                      onChange={handleCouponInputChange}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50 appearance-none cursor-pointer"
-                      required
-                    >
-                      <option value="">Select Criteria</option>
-                      {criteria.map((c) => {
-                        const critId = c.id || c.coupon_type_criteria_id;
-                        return (
-                          <option key={critId} value={String(critId)}>
-                            Criteria #{critId}
+
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                        Start Date
+                      </label>
+                      <input
+                        type="date"
+                        name="start_date"
+                        value={couponFormData.start_date}
+                        onChange={handleCouponInputChange}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                        End Date
+                      </label>
+                      <input
+                        type="date"
+                        name="end_date"
+                        value={couponFormData.end_date}
+                        onChange={handleCouponInputChange}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-6 pt-4 border-t border-gray-50">
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                        Coupon Type
+                      </label>
+                      <select
+                        name="coupon_type_id"
+                        value={couponFormData.coupon_type_id}
+                        onChange={(e) => {
+                          const { name, value } = e.target;
+                          setCouponFormData(prev => ({
+                            ...prev,
+                            [name]: Number(value)
+                          }));
+                        }}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50 appearance-none cursor-pointer"
+                        required
+                      >
+                        <option value="">Select Type</option>
+                        {couponTypes.map((type) => (
+                          <option key={type.id} value={type.id}>
+                            {type.name}
                           </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                        {couponTypes.find(t => Number(t.id) === Number(couponFormData.coupon_type_id))?.name || "Financial Value"}
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          name="financial_value"
+                          value={couponFormData.financial_value}
+                          onChange={handleCouponInputChange}
+                          placeholder={Number(couponFormData.coupon_type_id) === 2 ? "e.g. 10" : "e.g. 120"}
+                          className={`w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50 ${Number(couponFormData.coupon_type_id) === 2 ? "pr-10" : ""}`}
+                          required
+                        />
+                        {Number(couponFormData.coupon_type_id) === 2 && (
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-lg">
+                            %
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                        Global Usage Limit
+                      </label>
+                      <input
+                        type="number"
+                        name="global_usage_limit"
+                        value={couponFormData.global_usage_limit}
+                        onChange={handleCouponInputChange}
+                        placeholder="e.g. 100"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                        Criteria Configuration
+                      </label>
+                      <select
+                        name="CouponTypeCriteriaId"
+                        value={String(couponFormData.CouponTypeCriteriaId || "")}
+                        onChange={handleCouponInputChange}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50 appearance-none cursor-pointer"
+                        required
+                      >
+                        <option value="">Select Criteria</option>
+                        {criteria.map((c) => {
+                          const critId = c.id || c.coupon_type_criteria_id;
+                          return (
+                            <option key={critId} value={String(critId)}>
+                              Criteria #{critId}
+                            </option>
+                          );
+                        })}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Conditional User Selection List for Update Modal */}
+                  {(() => {
+                    const selectedCrit = criteria.find(c => String(c.id || c.coupon_type_criteria_id) === String(couponFormData.CouponTypeCriteriaId));
+                    if (selectedCrit?.need_map_existing_user) {
+                      return (
+                        <div className="space-y-3 bg-[#B02E0C]/5 p-5 rounded-2xl border border-[#B02E0C]/10 transition-all animate-in fade-in slide-in-from-top-4">
+                          <div className="flex justify-between items-center">
+                            <label className="block text-sm font-bold text-[#B02E0C] uppercase tracking-wider">
+                              Map To Specific Users
+                            </label>
+                            <span className="text-[10px] bg-[#B02E0C] text-white px-2 py-0.5 rounded-full font-bold">Optional</span>
+                          </div>
+                          <div className="border border-[#B02E0C]/20 rounded-xl overflow-hidden bg-white shadow-sm">
+                            <div className="max-h-48 overflow-y-auto p-2 custom-scrollbar">
+                              {loadingUsers ? (
+                                <div className="flex items-center justify-center py-8">
+                                  <Loader2 className="animate-spin text-[#B02E0C]" size={28} />
+                                </div>
+                              ) : allUsers.length > 0 ? (
+                                <div className="grid grid-cols-1 gap-1">
+                                  {allUsers.map((user) => {
+                                    const userId = String(user.id);
+                                    const isSelected = couponFormData.existing_user_ids
+                                      ? String(couponFormData.existing_user_ids).split(',').map(id => id.trim()).includes(userId)
+                                      : false;
+
+                                    return (
+                                      <label key={userId} className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all ${isSelected ? 'bg-[#B02E0C]/10 border border-[#B02E0C]/20' : 'hover:bg-gray-50 border border-transparent'}`}>
+                                        <input
+                                          type="checkbox"
+                                          checked={isSelected}
+                                          onChange={(e) => {
+                                            let currentIds = couponFormData.existing_user_ids
+                                              ? String(couponFormData.existing_user_ids).split(',').map(id => id.trim()).filter(id => id !== "")
+                                              : [];
+
+                                            if (e.target.checked) {
+                                              if (!currentIds.includes(userId)) currentIds.push(userId);
+                                            } else {
+                                              currentIds = currentIds.filter(id => id !== userId);
+                                            }
+                                            setCouponFormData(prev => ({ ...prev, existing_user_ids: currentIds.join(', ') }));
+                                          }}
+                                          className="w-5 h-5 accent-[#B02E0C]"
+                                        />
+                                        <div className="flex flex-col min-w-0">
+                                          <span className={`text-sm font-bold truncate ${isSelected ? 'text-[#B02E0C]' : 'text-gray-800'}`}>
+                                            {user.name}
+                                          </span>
+                                          <span className="text-[11px] text-gray-500 font-medium">
+                                            ID: {user.id} • {user.number} • {user.role}
+                                          </span>
+                                        </div>
+                                      </label>
+                                    );
+                                  })}
+                                </div>
+                              ) : (
+                                <p className="text-sm text-gray-500 text-center py-4">No users found.</p>
+                              )}
+                            </div>
+                          </div>
+                          <p className="text-[11px] text-[#B02E0C] font-semibold italic flex items-center gap-1.5 px-1">
+                            <span className="w-1.5 h-1.5 bg-[#B02E0C] rounded-full animate-pulse"></span>
+                            Note: Leaving this empty will target ALL existing users.
+                          </p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
+
+                  <div className="space-y-3 bg-gray-50 p-5 rounded-2xl border border-gray-100">
+                    <label className="block text-sm font-bold text-gray-700 uppercase tracking-wider">
+                      Applicable Subscription Plans
+                    </label>
+                    <div className="grid grid-cols-2 gap-3 max-h-40 overflow-y-auto p-1 custom-scrollbar">
+                      {plans.map((plan) => {
+                        const isSelected = (couponFormData.subscription_id || []).some(id => String(id) === String(plan.id));
+                        return (
+                          <label key={plan.id} className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${isSelected ? 'bg-white border-[#B02E0C] shadow-sm' : 'bg-white border-gray-200 hover:border-gray-300'}`}>
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => handleSubscriptionChange(plan.id)}
+                              className="w-5 h-5 accent-[#B02E0C]"
+                            />
+                            <span className={`text-sm font-bold ${isSelected ? 'text-[#B02E0C]' : 'text-gray-700'}`}>
+                              {plan.name || `Plan #${plan.id}`}
+                            </span>
+                          </label>
                         );
                       })}
-                    </select>
+                    </div>
                   </div>
-                </div>
 
-                {/* Conditional User Selection List for Update Modal */}
-                {(() => {
-                  const selectedCrit = criteria.find(c => String(c.id || c.coupon_type_criteria_id) === String(couponFormData.CouponTypeCriteriaId));
-                  if (selectedCrit?.need_map_existing_user) {
-                    return (
-                      <div className="space-y-3 bg-[#B02E0C]/5 p-5 rounded-2xl border border-[#B02E0C]/10 transition-all animate-in fade-in slide-in-from-top-4">
-                        <div className="flex justify-between items-center">
-                          <label className="block text-sm font-bold text-[#B02E0C] uppercase tracking-wider">
-                            Map To Specific Users
-                          </label>
-                          <span className="text-[10px] bg-[#B02E0C] text-white px-2 py-0.5 rounded-full font-bold">Optional</span>
-                        </div>
-                        <div className="border border-[#B02E0C]/20 rounded-xl overflow-hidden bg-white shadow-sm">
-                          <div className="max-h-48 overflow-y-auto p-2 custom-scrollbar">
-                            {loadingUsers ? (
-                              <div className="flex items-center justify-center py-8">
-                                <Loader2 className="animate-spin text-[#B02E0C]" size={28} />
-                              </div>
-                            ) : allUsers.length > 0 ? (
-                              <div className="grid grid-cols-1 gap-1">
-                                {allUsers.map((user) => {
-                                  const userId = String(user.id);
-                                  const isSelected = couponFormData.existing_user_ids
-                                    ? String(couponFormData.existing_user_ids).split(',').map(id => id.trim()).includes(userId)
-                                    : false;
-
-                                  return (
-                                    <label key={userId} className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all ${isSelected ? 'bg-[#B02E0C]/10 border border-[#B02E0C]/20' : 'hover:bg-gray-50 border border-transparent'}`}>
-                                      <input
-                                        type="checkbox"
-                                        checked={isSelected}
-                                        onChange={(e) => {
-                                          let currentIds = couponFormData.existing_user_ids
-                                            ? String(couponFormData.existing_user_ids).split(',').map(id => id.trim()).filter(id => id !== "")
-                                            : [];
-
-                                          if (e.target.checked) {
-                                            if (!currentIds.includes(userId)) currentIds.push(userId);
-                                          } else {
-                                            currentIds = currentIds.filter(id => id !== userId);
-                                          }
-                                          setCouponFormData(prev => ({ ...prev, existing_user_ids: currentIds.join(', ') }));
-                                        }}
-                                        className="w-5 h-5 accent-[#B02E0C]"
-                                      />
-                                      <div className="flex flex-col min-w-0">
-                                        <span className={`text-sm font-bold truncate ${isSelected ? 'text-[#B02E0C]' : 'text-gray-800'}`}>
-                                          {user.name}
-                                        </span>
-                                        <span className="text-[11px] text-gray-500 font-medium">
-                                          ID: {user.id} • {user.number} • {user.role}
-                                        </span>
-                                      </div>
-                                    </label>
-                                  );
-                                })}
-                              </div>
-                            ) : (
-                              <p className="text-sm text-gray-500 text-center py-4">No users found.</p>
-                            )}
-                          </div>
-                        </div>
-                        <p className="text-[11px] text-[#B02E0C] font-semibold italic flex items-center gap-1.5 px-1">
-                          <span className="w-1.5 h-1.5 bg-[#B02E0C] rounded-full animate-pulse"></span>
-                          Note: Leaving this empty will target ALL existing users.
-                        </p>
+                  <div className="grid grid-cols-2 gap-6 p-4 rounded-2xl bg-gray-50/50 border border-gray-100">
+                    <label className="flex items-center gap-3 cursor-pointer group">
+                      <div className="relative">
+                        <input
+                          type="checkbox"
+                          name="status"
+                          checked={couponFormData.status}
+                          onChange={handleCouponInputChange}
+                          className="w-6 h-6 accent-[#B02E0C] cursor-pointer"
+                        />
                       </div>
-                    );
-                  }
-                  return null;
-                })()}
+                      <div className="flex flex-col">
+                        <span className="text-sm font-bold text-gray-800">Internal Status</span>
+                        <span className="text-[10px] text-gray-500 font-medium">Toggle active/inactive</span>
+                      </div>
+                    </label>
+                    <label className="flex items-center gap-3 cursor-pointer group">
+                      <div className="relative">
+                        <input
+                          type="checkbox"
+                          name="can_combine_with_referral_credit"
+                          checked={couponFormData.can_combine_with_referral_credit}
+                          onChange={handleCouponInputChange}
+                          className="w-6 h-6 accent-[#B02E0C] cursor-pointer"
+                        />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-bold text-gray-800">Combine Referral</span>
+                        <span className="text-[10px] text-gray-500 font-medium">Stack with referral credit</span>
+                      </div>
+                    </label>
+                  </div>
+                </form>
+              </div>
 
-                <div className="space-y-3 bg-gray-50 p-5 rounded-2xl border border-gray-100">
-                  <label className="block text-sm font-bold text-gray-700 uppercase tracking-wider">
-                    Applicable Subscription Plans
-                  </label>
-                  <div className="grid grid-cols-2 gap-3 max-h-40 overflow-y-auto p-1 custom-scrollbar">
-                    {plans.map((plan) => {
-                      const isSelected = (couponFormData.subscription_id || []).some(id => String(id) === String(plan.id));
-                      return (
-                        <label key={plan.id} className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${isSelected ? 'bg-white border-[#B02E0C] shadow-sm' : 'bg-white border-gray-200 hover:border-gray-300'}`}>
-                          <input
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={() => handleSubscriptionChange(plan.id)}
-                            className="w-5 h-5 accent-[#B02E0C]"
-                          />
-                          <span className={`text-sm font-bold ${isSelected ? 'text-[#B02E0C]' : 'text-gray-700'}`}>
-                            {plan.name || `Plan #${plan.id}`}
+              <div className="flex justify-end gap-3 pt-6 mt-4 border-t border-gray-100 flex-shrink-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setSelectedCoupon(null);
+                    resetCouponForm();
+                    setError(null);
+                  }}
+                  className="px-8 py-3 rounded-xl border-2 border-gray-100 text-gray-600 hover:bg-gray-50 hover:border-gray-200 transition-all text-sm font-bold cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleUpdateCoupon(e);
+                  }}
+                  disabled={loading}
+                  className="px-10 py-3 rounded-xl bg-[#B02E0C] text-white hover:bg-[#8d270b] hover:shadow-lg hover:shadow-[#B02E0C]/30 transition-all text-sm font-bold cursor-pointer flex items-center gap-3 disabled:opacity-70"
+                >
+                  {loading && <Loader2 size={18} className="animate-spin" />}
+                  {loading ? "Processing..." : "Update Coupon"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+      }
+
+      {
+        showOpenModal && selectedCoupon && (
+          <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-xs bg-black/50 overflow-y-auto">
+            <div className="bg-white rounded-xl w-[90%] max-w-2xl p-6 relative my-8">
+              <div className="flex justify-between items-center mb-6 border-b pb-4">
+                <h2 className="text-2xl font-bold text-gray-900">Coupon Details</h2>
+                <button
+                  onClick={() => {
+                    setShowOpenModal(false);
+                    setSelectedCoupon(null);
+                  }}
+                  className="text-gray-500 hover:text-gray-700 p-1 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Coupon Code</p>
+                  <p className="text-lg font-bold text-[#B02E0C]">{selectedCoupon.code}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Title</p>
+                  <p className="text-base text-gray-900 font-medium">{selectedCoupon.title || "N/A"}</p>
+                </div>
+
+                <div className="col-span-2 space-y-1">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Description</p>
+                  <p className="text-base text-gray-700 leading-relaxed bg-gray-50 p-3 rounded-lg border border-gray-100">
+                    {selectedCoupon.description || "No description provided."}
+                  </p>
+                </div>
+
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Financial Value</p>
+                  <p className="text-base font-bold text-gray-900">{selectedCoupon.financial_value}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</p>
+                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${selectedCoupon.status
+                    ? 'bg-green-100 text-green-700 border-green-200'
+                    : 'bg-red-100 text-red-700 border-red-200'
+                    }`}>
+                    {selectedCoupon.status ? 'Active' : 'Inactive'}
+                  </span>
+                </div>
+
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Start Date</p>
+                  <p className="text-base text-gray-900">{selectedCoupon.start_date ? new Date(selectedCoupon.start_date).toLocaleDateString(undefined, { dateStyle: 'long' }) : "N/A"}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">End Date</p>
+                  <p className="text-base text-gray-900">{selectedCoupon.end_date ? new Date(selectedCoupon.end_date).toLocaleDateString(undefined, { dateStyle: 'long' }) : "N/A"}</p>
+                </div>
+
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Usage Limit</p>
+                  <p className="text-base text-gray-900 font-medium">
+                    {selectedCoupon.tiering?.[0]?.tier_details?.[0]?.current_tiering_limit || "Unlimited"}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Used Count</p>
+                  <p className="text-base text-gray-900 font-medium">{selectedCoupon.tiering?.[0]?.used_total || 0}</p>
+                </div>
+
+                <div className="col-span-2 space-y-3">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Assigned Subscriptions</p>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedCoupon.subscription_mappings && selectedCoupon.subscription_mappings.length > 0 ? (
+                      selectedCoupon.subscription_mappings.map((mapping, idx) => {
+                        const mappingPlanId = mapping.subscription_plan_id || mapping.SubscriptionPlanId || mapping.subscriptionPlanId;
+                        const plan = plans.find(p => String(p.id) === String(mappingPlanId));
+                        return (
+                          <span key={idx} className="bg-gray-100 text-[#B02E0C] px-3 py-1.5 rounded-md text-sm font-semibold border border-gray-200">
+                            {plan ? plan.name : `Plan ID: ${mappingPlanId}`}
                           </span>
-                        </label>
-                      );
-                    })}
+                        );
+                      })
+                    ) : (
+                      <span className="text-sm text-gray-500 italic">No specific plans assigned (Global Coupon).</span>
+                    )}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-6 p-4 rounded-2xl bg-gray-50/50 border border-gray-100">
-                  <label className="flex items-center gap-3 cursor-pointer group">
-                    <div className="relative">
-                      <input
-                        type="checkbox"
-                        name="status"
-                        checked={couponFormData.status}
-                        onChange={handleCouponInputChange}
-                        className="w-6 h-6 accent-[#B02E0C] cursor-pointer"
-                      />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-sm font-bold text-gray-800">Internal Status</span>
-                      <span className="text-[10px] text-gray-500 font-medium">Toggle active/inactive</span>
-                    </div>
-                  </label>
-                  <label className="flex items-center gap-3 cursor-pointer group">
-                    <div className="relative">
-                      <input
-                        type="checkbox"
-                        name="can_combine_with_referral_credit"
-                        checked={couponFormData.can_combine_with_referral_credit}
-                        onChange={handleCouponInputChange}
-                        className="w-6 h-6 accent-[#B02E0C] cursor-pointer"
-                      />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-sm font-bold text-gray-800">Combine Referral</span>
-                      <span className="text-[10px] text-gray-500 font-medium">Stack with referral credit</span>
-                    </div>
-                  </label>
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Can Combine with Referral</p>
+                  <p className="text-base text-gray-900 font-medium">{selectedCoupon.can_combine_with_referral_credit ? "Yes" : "No"}</p>
                 </div>
-              </form>
-            </div>
-
-            <div className="flex justify-end gap-3 pt-6 mt-4 border-t border-gray-100 flex-shrink-0">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowEditModal(false);
-                  setSelectedCoupon(null);
-                  resetCouponForm();
-                  setError(null);
-                }}
-                className="px-8 py-3 rounded-xl border-2 border-gray-100 text-gray-600 hover:bg-gray-50 hover:border-gray-200 transition-all text-sm font-bold cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleUpdateCoupon(e);
-                }}
-                disabled={loading}
-                className="px-10 py-3 rounded-xl bg-[#B02E0C] text-white hover:bg-[#8d270b] hover:shadow-lg hover:shadow-[#B02E0C]/30 transition-all text-sm font-bold cursor-pointer flex items-center gap-3 disabled:opacity-70"
-              >
-                {loading && <Loader2 size={18} className="animate-spin" />}
-                {loading ? "Processing..." : "Update Coupon"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showOpenModal && selectedCoupon && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-xs bg-black/50 overflow-y-auto">
-          <div className="bg-white rounded-xl w-[90%] max-w-2xl p-6 relative my-8">
-            <div className="flex justify-between items-center mb-6 border-b pb-4">
-              <h2 className="text-2xl font-bold text-gray-900">Coupon Details</h2>
-              <button
-                onClick={() => {
-                  setShowOpenModal(false);
-                  setSelectedCoupon(null);
-                }}
-                className="text-gray-500 hover:text-gray-700 p-1 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <X size={24} />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-x-8 gap-y-6">
-              <div className="space-y-1">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Coupon Code</p>
-                <p className="text-lg font-bold text-[#B02E0C]">{selectedCoupon.code}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Title</p>
-                <p className="text-base text-gray-900 font-medium">{selectedCoupon.title || "N/A"}</p>
-              </div>
-
-              <div className="col-span-2 space-y-1">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Description</p>
-                <p className="text-base text-gray-700 leading-relaxed bg-gray-50 p-3 rounded-lg border border-gray-100">
-                  {selectedCoupon.description || "No description provided."}
-                </p>
-              </div>
-
-              <div className="space-y-1">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Financial Value</p>
-                <p className="text-base font-bold text-gray-900">{selectedCoupon.financial_value}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</p>
-                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${selectedCoupon.status ? 'bg-green-100 text-green-700 border-green-200' : 'bg-red-100 text-red-700 border-red-200'
-                  }`}>
-                  {selectedCoupon.status ? 'Active' : 'Inactive'}
-                </span>
-              </div>
-
-              <div className="space-y-1">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Start Date</p>
-                <p className="text-base text-gray-900">{selectedCoupon.start_date ? new Date(selectedCoupon.start_date).toLocaleDateString(undefined, { dateStyle: 'long' }) : "N/A"}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">End Date</p>
-                <p className="text-base text-gray-900">{selectedCoupon.end_date ? new Date(selectedCoupon.end_date).toLocaleDateString(undefined, { dateStyle: 'long' }) : "N/A"}</p>
-              </div>
-
-              <div className="space-y-1">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Usage Limit</p>
-                <p className="text-base text-gray-900 font-medium">
-                  {selectedCoupon.tiering?.[0]?.tier_details?.[0]?.current_tiering_limit || "Unlimited"}
-                </p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Used Count</p>
-                <p className="text-base text-gray-900 font-medium">{selectedCoupon.tiering?.[0]?.used_total || 0}</p>
-              </div>
-
-              <div className="col-span-2 space-y-3">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Assigned Subscriptions</p>
-                <div className="flex flex-wrap gap-2">
-                  {selectedCoupon.subscription_mappings && selectedCoupon.subscription_mappings.length > 0 ? (
-                    selectedCoupon.subscription_mappings.map((mapping, idx) => {
-                      const mappingPlanId = mapping.subscription_plan_id || mapping.SubscriptionPlanId || mapping.subscriptionPlanId;
-                      const plan = plans.find(p => String(p.id) === String(mappingPlanId));
-                      return (
-                        <span key={idx} className="bg-gray-100 text-[#B02E0C] px-3 py-1.5 rounded-md text-sm font-semibold border border-gray-200">
-                          {plan ? plan.name : `Plan ID: ${mappingPlanId}`}
-                        </span>
-                      );
-                    })
-                  ) : (
-                    <span className="text-sm text-gray-500 italic">No specific plans assigned (Global Coupon).</span>
-                  )}
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Created At</p>
+                  <p className="text-sm text-gray-900">{new Date(selectedCoupon.createdAt).toLocaleString()}</p>
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Can Combine with Referral</p>
-                <p className="text-base text-gray-900 font-medium">{selectedCoupon.can_combine_with_referral_credit ? "Yes" : "No"}</p>
+              <div className="mt-8 pt-6 border-t flex justify-end">
+                <button
+                  onClick={() => {
+                    setShowOpenModal(false);
+                    setSelectedCoupon(null);
+                  }}
+                  className="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-black transition-colors font-medium cursor-pointer"
+                >
+                  Close
+                </button>
               </div>
-              <div className="space-y-1">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Created At</p>
-                <p className="text-sm text-gray-900">{new Date(selectedCoupon.createdAt).toLocaleString()}</p>
-              </div>
-            </div>
-
-            <div className="mt-8 pt-6 border-t flex justify-end">
-              <button
-                onClick={() => {
-                  setShowOpenModal(false);
-                  setSelectedCoupon(null);
-                }}
-                className="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-black transition-colors font-medium cursor-pointer"
-              >
-                Close
-              </button>
             </div>
           </div>
-        </div>
-      )}
-    </div >
+        )
+      }
+    </div>
   );
 };
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
-import { EllipsisVertical, Edit, Trash2, Loader2, Plus, X } from "lucide-react";
+import { EllipsisVertical, Edit, Trash2, Loader2, Plus, X, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import {
   fetchAllPromptReferences,
   createPromptReference,
@@ -9,6 +9,7 @@ import {
   deletePromptReference,
   clearError,
 } from "../../../redux/slice/PromptReferenceSlice";
+import DataTable from "../../common/DataTable";
 
 const PromptReferenceManagement = () => {
   const dispatch = useDispatch();
@@ -16,11 +17,13 @@ const PromptReferenceManagement = () => {
   const location = useLocation();
 
   // Redux state
-  const { promptReferences, loading, error } = useSelector(
+  const { promptReferences, loading, error, total, totalPages, currentPage: reduxCurrentPage } = useSelector(
     (state) => state.promptReference
   );
 
   // Local state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [limit, setLimit] = useState(10);
   const [openMenuId, setOpenMenuId] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState("add"); // "add" or "edit"
@@ -31,10 +34,10 @@ const PromptReferenceManagement = () => {
     details: "",
   });
 
-  // Fetch data on mount
+  // Fetch data on mount and page change
   useEffect(() => {
-    dispatch(fetchAllPromptReferences());
-  }, [dispatch]);
+    dispatch(fetchAllPromptReferences({ page: currentPage, limit }));
+  }, [dispatch, currentPage, limit]);
 
   // Open add modal
   const openAddModal = () => {
@@ -73,7 +76,7 @@ const PromptReferenceManagement = () => {
       }
       setShowModal(false);
       setFormState({ name: "", details: "" });
-      dispatch(fetchAllPromptReferences());
+      dispatch(fetchAllPromptReferences({ page: currentPage, limit }));
     } catch (error) {
       console.error("Failed to save reference:", error);
     }
@@ -87,63 +90,52 @@ const PromptReferenceManagement = () => {
       await dispatch(deletePromptReference(selectedReference.id)).unwrap();
       setShowDeleteModal(false);
       setSelectedReference(null);
-      dispatch(fetchAllPromptReferences());
+      dispatch(fetchAllPromptReferences({ page: currentPage, limit }));
     } catch (error) {
       console.error("Failed to delete reference:", error);
     }
   };
 
   return (
-    <div className="space-y-6 p-4 bg-gray-100 w-full min-h-screen">
+    <div className="space-y-8 p-8 bg-[#F8FAFC] w-full min-h-screen" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
       {/* Navigation Tabs */}
-      <div className="bg-white shadow-sm border border-gray-200 rounded-lg">
-        <div className="flex border-b border-gray-200">
-          <button
-            onClick={() => navigate("/prompts")}
-            className={`px-6 py-3 font-medium text-sm ${
-              location.pathname === "/prompts"
-                ? "text-[#B02E0C] border-b-2 border-[#B02E0C]"
-                : "text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            Prompts
-          </button>
-          <button
-            onClick={() => navigate("/prompts/features")}
-            className={`px-6 py-3 font-medium text-sm ${
-              location.pathname === "/prompts/features"
-                ? "text-[#B02E0C] border-b-2 border-[#B02E0C]"
-                : "text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            PM Features
-          </button>
-          <button
-            onClick={() => navigate("/prompts/references")}
-            className={`px-6 py-3 font-medium text-sm ${
-              location.pathname === "/prompts/references"
-                ? "text-[#B02E0C] border-b-2 border-[#B02E0C]"
-                : "text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            Prompt References
-          </button>
+      <div className="bg-white p-2 rounded-[2rem] shadow-sm border border-[#E2E8F0]">
+        <div className="flex gap-2">
+          {[
+            { name: "Prompts", path: "/prompts" },
+            { name: "PM Features", path: "/prompts/features" },
+            { name: "Prompt References", path: "/prompts/references" },
+          ].map((tab) => (
+            <button
+              key={tab.path}
+              onClick={() => navigate(tab.path)}
+              className={`px-8 py-3 rounded-2xl font-bold text-sm transition-all duration-300 ${location.pathname === tab.path
+                ? "bg-accent text-white shadow-lg shadow-accent/20"
+                : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                }`}
+            >
+              {tab.name}
+            </button>
+          ))}
         </div>
       </div>
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            Prompt References Management
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-black text-[#0F172A] tracking-tight">
+            Prompt References
           </h1>
-          <p className="text-gray-600">Manage all prompt references here.</p>
+          <p className="text-sm font-medium text-[#64748B]">
+            Configure and manage global variables for your AI prompt generation logic.
+          </p>
         </div>
         <button
           onClick={openAddModal}
-          className="mt-4 sm:mt-0 px-4 py-2 bg-[#B02E0C] text-white rounded-md hover:bg-[#8d270b] flex items-center gap-2"
+          className="px-8 py-4 bg-accent text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#8D270B] shadow-xl shadow-accent/20 transition-all active:scale-95 flex items-center gap-2 cursor-pointer"
         >
-          <Plus size={20} /> Add Reference
+          <Plus size={18} strokeWidth={3} />
+          Add Reference
         </button>
       </div>
 
@@ -160,203 +152,200 @@ const PromptReferenceManagement = () => {
         </div>
       )}
 
-      {/* References Table */}
-      <div className="bg-white shadow-sm border border-gray-200 rounded-lg overflow-hidden">
-        {loading ? (
-          <div className="flex justify-center items-center py-12">
-            <Loader2 className="animate-spin text-[#B02E0C]" size={32} />
-            <span className="ml-3 text-gray-600">Loading references...</span>
-          </div>
-        ) : promptReferences.length === 0 ? (
-          <div className="flex flex-col justify-center items-center py-12">
-            <p className="text-gray-500 mb-4">No references found</p>
+      <DataTable
+        columns={[
+          {
+            header: "Reference ID",
+            accessor: "id",
+            cell: (r) => (
+              <span className="px-3 py-1 bg-[#F1F5F9] rounded-lg text-xs font-black text-[#64748B] group-hover:bg-white group-hover:shadow-sm transition-all duration-300">
+                #{r.id}
+              </span>
+            )
+          },
+          {
+            header: "Technical Name",
+            accessor: "name",
+            cell: (r) => (
+              <span className="text-sm font-bold text-[#0F172A] font-mono bg-orange-50/50 px-2 py-0.5 rounded border border-orange-100/50 w-fit">
+                {r.name || "--"}
+              </span>
+            )
+          },
+          {
+            header: "Context Details",
+            accessor: "details",
+            cell: (r) => (
+              <p className="text-sm text-[#475569] font-medium leading-relaxed max-w-md line-clamp-1 italic opacity-80">
+                {r.details || "No description provided"}
+              </p>
+            )
+          },
+        ]}
+        data={promptReferences}
+        loading={loading}
+        pagination={{ page: currentPage, limit, totalPages, totalRecords: total }}
+        onPageChange={(p) => setCurrentPage(p)}
+        onLimitChange={(l) => { setLimit(l); setCurrentPage(1); }}
+        renderActions={(reference) => (
+          <div className="relative">
             <button
-              onClick={openAddModal}
-              className="px-4 py-2 bg-[#B02E0C] text-white rounded-md hover:bg-[#8d270b] flex items-center gap-2"
+              onClick={() => setOpenMenuId(openMenuId === reference.id ? null : reference.id)}
+              className={`p-3 rounded-xl transition-all duration-200 cursor-pointer ${openMenuId === reference.id ? 'bg-accent text-white shadow-lg shadow-accent/20' : 'hover:bg-accent/5 text-[#94A3B8] hover:text-accent'}`}
             >
-              <Plus size={20} /> Create First Reference
+              <EllipsisVertical size={20} />
             </button>
+            {openMenuId === reference.id && (
+              <div className="absolute right-12 top-0 bg-white border border-[#E2E8F0] shadow-2xl rounded-2xl w-48 z-[100] py-2 animate-in zoom-in-95 duration-200 origin-top-right">
+                <ul className="text-[#475569] text-sm font-bold">
+                  <li
+                    onClick={() => {
+                      openEditModal(reference);
+                      setOpenMenuId(null);
+                    }}
+                    className="px-4 py-3 flex items-center gap-3 hover:bg-[#F8FAFC] hover:text-accent cursor-pointer transition-all mx-2 rounded-xl"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100/50">
+                      <Edit size={16} />
+                    </div>
+                    Configure
+                  </li>
+                  <li
+                    onClick={() => {
+                      setSelectedReference(reference);
+                      setShowDeleteModal(true);
+                      setOpenMenuId(null);
+                    }}
+                    className="px-4 py-3 flex items-center gap-3 hover:bg-accent/5 hover:text-accent cursor-pointer transition-all mx-2 rounded-xl text-accent"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-accent/5 flex items-center justify-center text-accent border border-accent/10">
+                      <Trash2 size={16} />
+                    </div>
+                    Purge
+                  </li>
+                </ul>
+              </div>
+            )}
           </div>
-        ) : (
-          <table className="w-full text-left border-t border-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="py-3 px-4 border border-gray-300 text-sm font-semibold">
-                  ID
-                </th>
-                <th className="py-3 px-4 border border-gray-300 text-sm font-semibold">
-                  Name
-                </th>
-                <th className="py-3 px-4 border border-gray-300 text-sm font-semibold">
-                  Details
-                </th>
-                <th className="py-3 px-4 border border-gray-300 text-sm font-semibold text-center">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {promptReferences.map((reference) => (
-                <tr key={reference.id} className="hover:bg-gray-50">
-                  <td className="py-3 px-4 border border-gray-300 text-gray-700">
-                    {reference.id}
-                  </td>
-                  <td className="py-3 px-4 border border-gray-300">
-                    <p className="font-medium text-gray-800">
-                      {reference.name || "--"}
-                    </p>
-                  </td>
-                  <td className="py-3 px-4 border border-gray-300">
-                    <p className="text-sm text-gray-600 line-clamp-2">
-                      {reference.details || "--"}
-                    </p>
-                  </td>
-                  <td className="py-3 px-4 border border-gray-300 text-center relative">
-                    <button
-                      onClick={() =>
-                        setOpenMenuId(
-                          openMenuId === reference.id ? null : reference.id
-                        )
-                      }
-                      className="p-2 rounded hover:bg-gray-100"
-                    >
-                      <EllipsisVertical className="text-gray-600" />
-                    </button>
-
-                    {/* Dropdown Menu */}
-                    {openMenuId === reference.id && (
-                      <div className="absolute right-4 top-10 bg-white border border-gray-200 shadow-lg rounded-md w-44 z-30">
-                        <ul className="text-gray-700 text-sm">
-                          <li
-                            onClick={() => {
-                              openEditModal(reference);
-                              setOpenMenuId(null);
-                            }}
-                            className="px-4 py-2 flex items-center gap-2 hover:bg-gray-50 cursor-pointer"
-                          >
-                            <Edit size={16} /> Edit
-                          </li>
-                          <li
-                            onClick={() => {
-                              setSelectedReference(reference);
-                              setShowDeleteModal(true);
-                              setOpenMenuId(null);
-                            }}
-                            className="px-4 py-2 flex items-center gap-2 text-red-600 hover:bg-gray-50 cursor-pointer"
-                          >
-                            <Trash2 size={16} /> Delete
-                          </li>
-                        </ul>
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         )}
-      </div>
+      />
 
       {/* Add/Edit Modal */}
       {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-xs bg-black/50">
-          <div className="bg-white rounded-lg w-[500px] p-6 relative">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">
-                {modalType === "add"
-                  ? "Add Prompt Reference"
-                  : "Edit Prompt Reference"}
-              </h2>
-              <button onClick={() => setShowModal(false)}>
-                <X className="text-gray-500 hover:text-gray-700 cursor-pointer" />
-              </button>
+        <div className="fixed inset-0 flex items-center justify-center z-[150] p-4 backdrop-blur-md bg-white/30 animate-in fade-in duration-300">
+          <div className="relative bg-white rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-2xl border border-[#E2E8F0] animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
+            <div className="p-8 pb-0 flex-shrink-0">
+              <div className="flex justify-between items-center mb-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-accent/10 rounded-2xl flex items-center justify-center text-accent">
+                    {modalType === "add" ? <Plus size={24} strokeWidth={3} /> : <Edit size={24} strokeWidth={2} />}
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-black text-[#0F172A] tracking-tight">
+                      {modalType === "add" ? "Create Reference" : "Modify Reference"}
+                    </h2>
+                    <p className="text-[10px] font-black text-[#94A3B8] uppercase tracking-widest mt-1">Data Configuration</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="p-3 bg-[#F8FAFC] text-[#94A3B8] hover:text-[#0F172A] rounded-2xl transition-all active:scale-95"
+                >
+                  <X size={20} strokeWidth={3} />
+                </button>
+              </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={formState.name}
-                  onChange={(e) =>
-                    setFormState({ ...formState, name: e.target.value })
-                  }
-                  placeholder="e.g., estimated_completion_date"
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B02E0C]"
-                  required
-                />
-              </div>
+            <div className="p-8 overflow-y-auto custom-scrollbar">
+              <form id="ref-form" onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center px-1">
+                    <label className="text-[10px] font-black text-[#64748B] uppercase tracking-widest">Technical Handle</label>
+                    <span className="text-[10px] font-black text-accent uppercase italic">* Required</span>
+                  </div>
+                  <input
+                    type="text"
+                    value={formState.name}
+                    onChange={(e) =>
+                      setFormState({ ...formState, name: e.target.value })
+                    }
+                    placeholder="e.g. steel_price_index_2024"
+                    className="w-full bg-[#F8FAFC] border-2 border-transparent focus:border-accent/20 focus:bg-white rounded-2xl px-5 py-4 text-sm font-bold text-[#0F172A] transition-all outline-none placeholder:text-[#94A3B8] placeholder:font-medium"
+                    required
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Details
-                </label>
-                <textarea
-                  value={formState.details}
-                  onChange={(e) =>
-                    setFormState({ ...formState, details: e.target.value })
-                  }
-                  placeholder="Description of this reference"
-                  rows="3"
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B02E0C]"
-                />
-              </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-[#64748B] uppercase tracking-widest px-1">Logic Definition & Context</label>
+                  <textarea
+                    value={formState.details}
+                    onChange={(e) =>
+                      setFormState({ ...formState, details: e.target.value })
+                    }
+                    placeholder="Define how this variable interacts with the prompt logic..."
+                    rows="4"
+                    className="w-full bg-[#F8FAFC] border-2 border-transparent focus:border-accent/20 focus:bg-white rounded-2xl px-5 py-4 text-sm font-bold text-[#0F172A] transition-all outline-none placeholder:text-[#94A3B8] placeholder:font-medium"
+                  />
+                </div>
+              </form>
+            </div>
 
-              <div className="flex justify-end gap-3 mt-6">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-2 rounded-md border border-gray-300 hover:bg-gray-100 cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 rounded-md bg-[#B02E0C] text-white hover:bg-[#8d270b] cursor-pointer"
-                >
-                  {modalType === "add" ? "Create" : "Update"}
-                </button>
-              </div>
-            </form>
+            <div className="p-8 border-t border-[#F1F5F9] bg-[#F8FAFC]/50 flex gap-4">
+              <button
+                type="button"
+                onClick={() => setShowModal(false)}
+                className="flex-1 py-4 px-6 rounded-2xl border-2 border-[#E2E8F0] bg-white text-sm font-black text-[#64748B] uppercase tracking-widest hover:bg-[#F1F5F9] transition-all active:scale-95"
+              >
+                Back
+              </button>
+              <button
+                type="submit"
+                form="ref-form"
+                className="flex-[2] py-4 px-8 bg-accent text-white rounded-2xl text-sm font-black uppercase tracking-widest hover:bg-[#8D270B] shadow-lg shadow-accent/30 transition-all active:scale-95 cursor-pointer"
+              >
+                {modalType === "add" ? "Initialize Variable" : "Sync Changes"}
+              </button>
+            </div>
           </div>
         </div>
       )}
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && selectedReference && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-xs bg-black/50">
-          <div className="bg-white rounded-lg w-[400px] p-6 relative">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Delete Reference</h2>
-              <button onClick={() => setShowDeleteModal(false)}>
-                <X className="text-gray-500 hover:text-gray-700 cursor-pointer" />
-              </button>
-            </div>
+        <div className="fixed inset-0 flex items-center justify-center z-[150] p-4 backdrop-blur-md bg-white/30 animate-in fade-in duration-300">
+          <div className="relative bg-white rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl border border-[#E2E8F0] animate-in zoom-in-95 duration-300">
+            <div className="p-8">
+              <div className="w-16 h-16 bg-accent/5 rounded-[2rem] flex items-center justify-center text-accent mb-6 mx-auto shadow-sm">
+                <Trash2 size={32} strokeWidth={2} />
+              </div>
 
-            <p className="text-gray-600 mb-4">
-              Are you sure you want to delete the reference{" "}
-              <strong>{selectedReference.name}</strong>? This action cannot be
-              undone.
-            </p>
+              <div className="text-center space-y-2 mb-8">
+                <h2 className="text-xl font-black text-[#0F172A] tracking-tight">Purge Reference?</h2>
+                <div className="p-4 bg-accent/5 rounded-2xl border border-accent/10 mt-4">
+                  <p className="text-xs font-black text-accent uppercase tracking-widest mb-1 italic">Technical Impact Warning</p>
+                  <p className="text-sm font-medium text-[#64748B]">
+                    Removing <span className="text-accent font-black">"{selectedReference.name}"</span> may cause failures in prompt generation logic using this key.
+                  </p>
+                </div>
+              </div>
 
-            <div className="flex justify-end gap-3 mt-6">
-              <button
-                onClick={() => {
-                  setShowDeleteModal(false);
-                  setSelectedReference(null);
-                }}
-                className="px-4 py-2 rounded-md border border-gray-300 hover:bg-gray-100 cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDelete}
-                className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 cursor-pointer"
-              >
-                Delete
-              </button>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setSelectedReference(null);
+                  }}
+                  className="flex-1 py-4 px-6 rounded-2xl border-2 border-[#E2E8F0] bg-white text-sm font-black text-[#64748B] uppercase tracking-widest hover:bg-[#F1F5F9] transition-all active:scale-95"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="flex-1 py-4 px-6 bg-accent text-white rounded-2xl text-sm font-black uppercase tracking-widest hover:bg-[#8D270B] shadow-lg shadow-accent/10 transition-all active:scale-95 cursor-pointer"
+                >
+                  Purge Data
+                </button>
+              </div>
             </div>
           </div>
         </div>

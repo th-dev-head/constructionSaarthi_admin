@@ -1,272 +1,7 @@
-// import { useState } from "react";
-// import { EllipsisVertical, Eye, Lock, Ban, X } from "lucide-react";
-// import { createCoupon } from "../../../redux/slice/Types/couponSlice";
-// import { useDispatch, useSelector } from "react-redux";
-
-// const Coupon = () => {
-//   const [openMenuId, setOpenMenuId] = useState(null);
-//   const [showAddModal, setShowAddModal] = useState(false);
-//   const [showOpenModal, setShowOpenModal] = useState(false);
-//   const [showEditModal, setShowEditModal] = useState(false);
-//   const [showDeleteModal, setShowDeleteModal] = useState(false);
-//   const [selectedUser, setSelectedUser] = useState(null);
-//   const [couponName, setCouponName] = useState("");
-//   const [formState, setFormState] = useState({ name: "" });
-
-//   const dispatch = useDispatch();
-//   const { couponList, loading } = useSelector((state) => state.coupon);
-
-//   // Handle Save Coupon
-//   const handleSaveCoupon = (e) => {
-//     e.preventDefault();
-//     if (!formState.name) return alert("Please enter coupon name");
-
-//     dispatch(createCoupon({ name: formState.name }));
-//     setShowAddModal(false);
-//     setFormState({ name: "" });
-//   };
-
-//   const Modal = ({ title, children, onClose }) => (
-//     <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-xs bg-black/50">
-//       <div className="bg-white rounded-xl w-[400px] p-6 relative">
-//         <button
-//           onClick={onClose}
-//           className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
-//         >
-//           <X size={20} />
-//         </button>
-//         <div className="p-6">
-//           <h2 className="text-xl font-semibold mb-4">{title}</h2>
-//           {children}
-//         </div>
-//       </div>
-//     </div>
-//   );
-
-//   return (
-//     <div className="space-y-6 p-4 bg-gray-100 w-full min-h-screen">
-//       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-//         <div>
-//           <h1 className="text-2xl font-bold text-gray-900">Coupon</h1>
-//           {/* <p className="text-gray-600">Manage all user feature here.</p> */}
-//         </div>
-//         <button
-//           onClick={() => setShowAddModal(true)}
-//           className="mt-4 sm:mt-0 px-4 py-2 bg-[#B02E0C] text-white rounded-md hover:bg-[#8d270b]"
-//         >
-//           + Add Coupon Type
-//         </button>
-//       </div>
-
-//       <div className="bg-white shadow-sm border border-gray-200 mt-4 rounded-lg">
-//         <div className="flex justify-between items-center border-b border-gray-200 bg-gray-50 relative">
-//           <div className="flex items-center gap-3 p-4 relative">
-//             <input
-//               type="text"
-//               placeholder="Search Coupon..."
-//               className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#B02E0C]"
-//             />
-//           </div>
-//         </div>
-
-//         <table className="w-full text-left border-t border-gray-200">
-//           <thead className="bg-gray-50">
-//             <tr>
-//               <th className="py-3 px-4 border border-gray-300 text-sm font-semibold"></th>
-//               <th className="py-3 px-4 border border-gray-300 text-sm font-semibold">
-//                 Name
-//               </th>
-//               <th className="py-3 px-4 border border-gray-300 text-sm font-semibold">
-//                 Date
-//               </th>
-//               <th className="py-3 px-4 border border-gray-300 text-sm font-semibold text-center">
-//                 Action
-//               </th>
-//             </tr>
-//           </thead>
-
-//           <tbody>
-//             {loading ? (
-//               <tr>
-//                 <td colSpan="4" className="py-4 px-4 text-center text-gray-700">
-//                   Loading...
-//                 </td>
-//               </tr>
-//             ) : couponList && couponList.length > 0 ? (
-//               couponList.map((user) => (
-//                 <tr key={user.id}>
-//                   <td className="py-3 px-4 border border-gray-300">
-//                     <input
-//                       type="checkbox"
-//                       className="form-checkbox text-[#B02E0C] rounded focus:ring-[#B02E0C]"
-//                     />
-//                   </td>
-//                   <td className="py-2 px-4 border border-gray-300 text-gray-700">
-//                     {user.name}
-//                   </td>
-//                   <td className="py-2 px-4 border border-gray-300 text-gray-700">
-//                     {user.createdAt}
-//                   </td>
-//                   <td className="py-2 px-4 border border-gray-300 text-center relative">
-//                     <button
-//                       onClick={() =>
-//                         setOpenMenuId(openMenuId === user.id ? null : user.id)
-//                       }
-//                       className="p-2 rounded hover:bg-gray-100"
-//                     >
-//                       <EllipsisVertical className="text-gray-600" />
-//                     </button>
-
-//                     {openMenuId === user.id && (
-//                       <div className="absolute right-2 top-14 bg-white border-2 border-gray-300 shadow-lg rounded-md w-40 z-50">
-//                         <ul className="text-gray-700 text-sm">
-//                           <li
-//                             onClick={() => {
-//                               setSelectedUser(user);
-//                               setShowOpenModal(true);
-//                               setOpenMenuId(null);
-//                             }}
-//                             className="px-4 py-2 flex items-center gap-2 hover:bg-gray-300 cursor-pointer"
-//                           >
-//                             <Eye size={16} /> Open
-//                           </li>
-//                           <li
-//                             onClick={() => {
-//                               setSelectedUser(user);
-//                               setShowEditModal(true);
-//                               setOpenMenuId(null);
-//                             }}
-//                             className="px-4 py-2 flex items-center gap-2 hover:bg-gray-300 cursor-pointer"
-//                           >
-//                             <Lock size={16} /> Edit
-//                           </li>
-//                           <li
-//                             onClick={() => {
-//                               setSelectedUser(user);
-//                               setShowDeleteModal(true);
-//                               setOpenMenuId(null);
-//                             }}
-//                             className="px-4 py-2 flex items-center gap-2 text-red-600 hover:bg-gray-300 cursor-pointer"
-//                           >
-//                             <Ban size={16} /> Delete
-//                           </li>
-//                         </ul>
-//                       </div>
-//                     )}
-//                   </td>
-//                 </tr>
-//               ))
-//             ) : (
-//               <tr>
-//                 <td colSpan="4" className="py-4 px-4 text-center text-gray-500">
-//                   No coupon available
-//                 </td>
-//               </tr>
-//             )}
-//           </tbody>
-//         </table>
-//       </div>
-
-//       {/* Add Feature Modal */}
-//       {showAddModal && (
-//         <Modal title="Add New Coupon" onClose={() => setShowAddModal(false)}>
-//           <form className="space-y-4">
-//             <label className="block text-sm font-medium text-gray-700">
-//               Name
-//             </label>
-//             <input
-//               type="text"
-//               placeholder="Name"
-//               value={formState.name}
-//               onChange={(e) =>
-//                 setFormState((prev) => ({ ...prev, name: e.target.value }))
-//               }
-//               className="w-full border border-gray-300 px-3 py-2 rounded-md"
-//               autoFocus
-//             />
-//             <button
-//               onClick={handleSaveCoupon}
-//               disabled={loading}
-//               className="bg-[#B02E0C] text-white px-4 py-2 rounded-md hover:bg-[#8d270b]"
-//             >
-//               {loading ? "Saving..." : "Save"}
-//             </button>
-//           </form>
-//         </Modal>
-//       )}
-
-//       {/* Open Modal */}
-//       {showOpenModal && selectedUser && (
-//         <Modal
-//           title="View Coupon Details"
-//           onClose={() => setShowOpenModal(false)}
-//         >
-//           <div className="space-y-2">
-//             <p>
-//               <strong>Coupon Name:</strong> {selectedUser.name}
-//             </p>
-//             <p>
-//               <strong>Date:</strong> {selectedUser.createdAt}
-//             </p>
-//           </div>
-//         </Modal>
-//       )}
-
-//       {/* Edit Modal */}
-//       {showEditModal && selectedUser && (
-//         <Modal title="Edit Coupon" onClose={() => setShowEditModal(false)}>
-//           <form className="space-y-4">
-//             <label className="block text-sm font-medium text-gray-700">
-//               Name
-//             </label>
-//             <input
-//               type="text"
-//               defaultValue={selectedUser.name}
-//               className="w-full border border-gray-300 px-3 py-2 rounded-md"
-//             />
-//             <button className="bg-[#B02E0C] text-white px-4 py-2 rounded-md hover:bg-[#8d270b]">
-//               Update
-//             </button>
-//           </form>
-//         </Modal>
-//       )}
-
-//       {/* Delete Modal */}
-//       {showDeleteModal && selectedUser && (
-//         <Modal title="Confirm Delete" onClose={() => setShowDeleteModal(false)}>
-//           <p>
-//             Are you sure you want to delete <strong>{selectedUser.name}</strong>
-//             ?
-//           </p>
-//           <div className="flex justify-end gap-3 mt-6">
-//             <button
-//               onClick={() => setShowDeleteModal(false)}
-//               className="px-4 py-2 bg-gray-200 rounded-md"
-//             >
-//               Cancel
-//             </button>
-//             <button
-//               onClick={() => {
-//                 setShowDeleteModal(false);
-//                 alert(`${selectedUser.name} deleted`);
-//               }}
-//               className="px-4 py-2 bg-red-600 text-white rounded-md"
-//             >
-//               Delete
-//             </button>
-//           </div>
-//         </Modal>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default Coupon;
-
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
-import { EllipsisVertical, X } from "lucide-react";
+import { EllipsisVertical, X, Plus, Calendar, Ticket, Trash2, Edit, Eye, Info } from "lucide-react";
 import {
   createCoupon,
   fetchCoupons,
@@ -274,7 +9,6 @@ import {
   deleteCouponType
 } from "../../../redux/slice/Types/couponSlice";
 import DataTable from "../../common/DataTable";
-import Modal from "../../common/Modal";
 
 const Coupon = () => {
   const dispatch = useDispatch();
@@ -284,30 +18,42 @@ const Coupon = () => {
 
   const [openMenuId, setOpenMenuId] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState("add");
+  const [modalType, setModalType] = useState("add"); // "add" | "edit" | "view" | "delete"
   const [selectedCoupon, setSelectedCoupon] = useState(null);
   const [formState, setFormState] = useState({ name: "" });
-
-  // Initialize pagination state from Redux or defaults
   const [page, setPage] = useState(pagination?.currentPage || 1);
   const [limit, setLimit] = useState(pagination?.limit || 10);
   const [search, setSearch] = useState("");
+  const nameRef = useRef(null);
+  const menuRef = useRef(null);
 
-  // Fetch coupons when page, limit, or search changes
   useEffect(() => {
-    console.log("Fetching coupons with:", { page, limit, search });
     dispatch(fetchCoupons({ page, limit, search }));
   }, [dispatch, page, limit, search]);
 
-  // Update local state when Redux pagination changes
   useEffect(() => {
-    if (pagination?.currentPage) {
-      setPage(pagination.currentPage);
-    }
-    if (pagination?.limit) {
-      setLimit(pagination.limit);
-    }
+    if (pagination?.currentPage) setPage(pagination.currentPage);
+    if (pagination?.limit) setLimit(pagination.limit);
   }, [pagination]);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        if (!event.target.closest('button[class*="rounded-xl"]')) {
+          setOpenMenuId(null);
+        }
+      }
+    };
+    if (openMenuId) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [openMenuId]);
+
+  useEffect(() => {
+    if (showModal && (modalType === "add" || modalType === "edit")) {
+      setTimeout(() => nameRef.current?.focus(), 100);
+    }
+  }, [showModal, modalType]);
 
   const handleFormChange = (e) => {
     setFormState({ ...formState, [e.target.name]: e.target.value });
@@ -315,281 +61,276 @@ const Coupon = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
-    if (!formState.name.trim()) {
-      return toast.error("Coupon name is required");
-    }
+    if (!formState.name.trim()) return toast.error("Coupon Label is required");
 
     try {
       const resultAction = await dispatch(createCoupon({ name: formState.name }));
-
       if (createCoupon.fulfilled.match(resultAction)) {
-        toast.success("Coupon added successfully!");
+        toast.success("Coupon Protocol Initialized!");
         setShowModal(false);
         setFormState({ name: "" });
-        // Refresh the list with current pagination
         dispatch(fetchCoupons({ page, limit, search }));
-      } else if (createCoupon.rejected.match(resultAction)) {
-        const errorMessage = resultAction.payload || "Failed to add coupon";
-        toast.error(errorMessage);
+      } else {
+        toast.error(resultAction.payload || "Initialization Failed");
       }
     } catch (error) {
-      console.error("Error in handleSave:", error);
-      toast.error("An unexpected error occurred");
+      toast.error("Protocol Error: Connection Interrupted");
     }
   };
 
   const handleUpdate = async (e) => {
     e.preventDefault();
-    if (!formState.name.trim()) {
-      return toast.error("Coupon name is required");
-    }
-
-    if (!selectedCoupon) return;
+    if (!formState.name.trim()) return toast.error("Coupon Label is required");
 
     try {
-      const resultAction = await dispatch(
-        updateCouponType({
-          id: selectedCoupon.id,
-          name: formState.name,
-        })
-      );
-
+      const resultAction = await dispatch(updateCouponType({ id: selectedCoupon.id, name: formState.name }));
       if (updateCouponType.fulfilled.match(resultAction)) {
-        toast.success("Coupon updated successfully!");
+        toast.success("Coupon Protocol Modified!");
         setShowModal(false);
         setFormState({ name: "" });
-        // Refresh the list with current pagination
         dispatch(fetchCoupons({ page, limit, search }));
-      } else if (updateCouponType.rejected.match(resultAction)) {
-        const errorMessage = resultAction.payload || "Failed to update coupon";
-        toast.error(errorMessage);
+      } else {
+        toast.error(resultAction.payload || "Modification Failed");
       }
     } catch (error) {
-      console.error("Error in handleUpdate:", error);
-      toast.error("An unexpected error occurred");
+      toast.error("Protocol Error: Connection Interrupted");
     }
   };
 
   const handleDelete = async () => {
-    if (!selectedCoupon) return;
-
     try {
       const resultAction = await dispatch(deleteCouponType(selectedCoupon.id));
-
       if (deleteCouponType.fulfilled.match(resultAction)) {
-        toast.success("Coupon deleted successfully!");
+        toast.success("Coupon Protocol Dismantled!");
         setShowModal(false);
-        // Refresh the list with current pagination
         dispatch(fetchCoupons({ page, limit, search }));
-      } else if (deleteCouponType.rejected.match(resultAction)) {
-        const errorMessage = resultAction.payload || "Failed to delete coupon";
-        toast.error(errorMessage);
+      } else {
+        toast.error(resultAction.payload || "Elimination Failed");
       }
     } catch (error) {
-      console.error("Error in handleDelete:", error);
-      toast.error("An unexpected error occurred");
+      toast.error("Protocol Error: Connection Interrupted");
     }
-  };
-
-  const handlePageChange = (newPage) => {
-    console.log("Page changing to:", newPage);
-    setPage(newPage);
-  };
-
-  const handleLimitChange = (newLimit) => {
-    console.log("Limit changing to:", newLimit);
-    setLimit(newLimit);
-    setPage(1); // Reset to first page when limit changes
-  };
-
-  const handleSearch = (searchTerm) => {
-    console.log("Search term:", searchTerm);
-    setSearch(searchTerm);
-    setPage(1); // Reset to first page when searching
   };
 
   const columns = [
     {
-      header: "Name",
+      header: "Reward Metadata",
       accessor: "name",
-      cell: (row) => row.name || 'N/A'
+      cell: (r) => (
+        <div className="flex items-center gap-4">
+          <div className="w-10 h-10 rounded-xl bg-accent/5 flex items-center justify-center text-accent border border-accent/10">
+            <Ticket size={18} />
+          </div>
+          <div>
+            <p className="font-black text-[#0F172A]">{r.name}</p>
+            <p className="text-[10px] text-[#94A3B8] font-bold uppercase tracking-widest mt-0.5">Voucher Type Node</p>
+          </div>
+        </div>
+      )
     },
     {
-      header: "Date",
+      header: "Registry Date",
       accessor: "createdAt",
-      cell: (row) => {
-        try {
-          return row.createdAt ? new Date(row.createdAt).toLocaleDateString() : 'N/A';
-        } catch (e) {
-          console.error("Error formatting date:", e, "Row data:", row);
-          return 'Invalid Date';
-        }
-      }
-    }
+      cell: (r) => (
+        <div className="flex items-center gap-2 text-[#64748B] font-bold text-xs">
+          <Calendar size={14} className="text-[#94A3B8]" />
+          {r.createdAt ? new Date(r.createdAt).toLocaleDateString() : "PENDING"}
+        </div>
+      )
+    },
   ];
 
   const renderActions = (coupon) => (
-    <div className="relative">
+    <div className="relative" ref={openMenuId === coupon.id ? menuRef : null}>
       <button
-        onClick={() =>
-          setOpenMenuId(openMenuId === coupon.id ? null : coupon.id)
-        }
-        className="p-2 rounded hover:bg-gray-100"
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpenMenuId(openMenuId === coupon.id ? null : coupon.id);
+        }}
+        className={`p-3 rounded-xl transition-all duration-200 cursor-pointer ${openMenuId === coupon.id ? 'bg-accent text-white shadow-lg shadow-accent/20' : 'hover:bg-accent/5 text-[#94A3B8] hover:text-accent'}`}
       >
-        <EllipsisVertical />
+        <EllipsisVertical size={20} />
       </button>
+
       {openMenuId === coupon.id && (
-        <div className="absolute right-0 top-8 bg-white border border-gray-200 shadow-md rounded-md w-32 z-50">
-          <button
-            className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-            onClick={() => {
-              setSelectedCoupon(coupon);
-              setModalType("view");
-              setShowModal(true);
-              setOpenMenuId(null);
-            }}
-          >
-            View
-          </button>
-          <button
-            className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-            onClick={() => {
-              setSelectedCoupon(coupon);
-              setFormState({ name: coupon.name });
-              setModalType("edit");
-              setShowModal(true);
-              setOpenMenuId(null);
-            }}
-          >
-            Edit
-          </button>
-          <button
-            className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600"
-            onClick={() => {
-              setSelectedCoupon(coupon);
-              setModalType("delete");
-              setShowModal(true);
-              setOpenMenuId(null);
-            }}
-          >
-            Delete
-          </button>
+        <div className="absolute right-12 top-0 bg-white border border-[#E2E8F0] shadow-2xl rounded-2xl w-48 z-[100] py-2 animate-in zoom-in-95 duration-200 origin-top-right">
+          <ul className="text-[#475569] text-sm font-bold">
+            <li
+              onClick={() => {
+                setSelectedCoupon(coupon);
+                setModalType("view");
+                setShowModal(true);
+                setOpenMenuId(null);
+              }}
+              className="px-4 py-3 flex items-center gap-3 hover:bg-[#F8FAFC] hover:text-accent cursor-pointer transition-all mx-2 rounded-xl"
+            >
+              <div className="w-8 h-8 rounded-lg bg-accent/5 flex items-center justify-center text-accent border border-accent/10">
+                <Eye size={16} />
+              </div>
+              Inspect
+            </li>
+            <li
+              onClick={() => {
+                setSelectedCoupon(coupon);
+                setFormState({ name: coupon.name });
+                setModalType("edit");
+                setShowModal(true);
+                setOpenMenuId(null);
+              }}
+              className="px-4 py-3 flex items-center gap-3 hover:bg-[#F8FAFC] hover:text-accent cursor-pointer transition-all mx-2 rounded-xl"
+            >
+              <div className="w-8 h-8 rounded-lg bg-accent/5 flex items-center justify-center text-accent border border-accent/10">
+                <Edit size={16} />
+              </div>
+              Modify
+            </li>
+            <li
+              onClick={() => {
+                setSelectedCoupon(coupon);
+                setModalType("delete");
+                setShowModal(true);
+                setOpenMenuId(null);
+              }}
+              className="px-4 py-3 flex items-center gap-3 hover:bg-accent/5 hover:text-accent cursor-pointer transition-all mx-2 rounded-xl text-accent"
+            >
+              <div className="w-8 h-8 rounded-lg bg-accent/5 flex items-center justify-center text-accent border border-accent/10">
+                <Trash2 size={16} />
+              </div>
+              Purge
+            </li>
+          </ul>
         </div>
       )}
     </div>
   );
 
-  // Ensure couponList is always an array
-  const tableData = Array.isArray(couponList) ? couponList : [];
-
   return (
-    <div className="space-y-6 p-4 bg-gray-100 w-full min-h-screen">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Coupons</h1>
-          {pagination && (
-            <p className="text-sm text-gray-600 mt-1">
-              Showing {tableData.length} of {pagination.totalRecords || 0} coupons
-              {pagination.totalPages > 1 && ` (Page ${page} of ${pagination.totalPages})`}
-            </p>
-          )}
+    <div className="space-y-8 p-8 bg-[#F8FAFC] w-full min-h-screen" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-black text-[#0F172A] tracking-tight">Coupon-Metrix</h1>
+          <p className="text-sm font-medium text-[#64748B]">Management of reward frameworks and voucher classification nodes.</p>
         </div>
+
         <button
           onClick={() => {
-            setModalType("add");
+            setSelectedCoupon(null);
             setFormState({ name: "" });
+            setModalType("add");
             setShowModal(true);
           }}
-          className="mt-4 sm:mt-0 px-4 py-2 bg-[#B02E0C] text-white rounded-md hover:bg-[#8d270b]"
+          className="px-8 py-4 bg-accent text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#8D270B] shadow-xl shadow-accent/20 transition-all active:scale-95 flex items-center gap-2 cursor-pointer"
         >
-          + Add Coupon
+          <Plus size={18} strokeWidth={3} />
+          Initialize Coupon
         </button>
       </div>
 
       <DataTable
         columns={columns}
-        data={tableData}
+        data={Array.isArray(couponList) ? couponList : []}
         loading={loading}
         renderActions={renderActions}
         rowKey={(row) => row.id || row._id || Math.random().toString()}
         showSearch
-        onSearch={handleSearch}
+        onSearch={(q) => { setSearch(q); setPage(1); }}
         pagination={pagination}
-        onPageChange={handlePageChange}
-        onLimitChange={handleLimitChange}
+        onPageChange={setPage}
+        onLimitChange={(l) => { setLimit(l); setPage(1); }}
       />
 
       {showModal && (
-        <Modal
-          title={
-            modalType === "add"
-              ? "Add Coupon"
-              : modalType === "edit"
-                ? "Edit Coupon"
-                : modalType === "view"
-                  ? "View Coupon"
-                  : "Delete Coupon"
-          }
-          onClose={() => setShowModal(false)}
-        >
-          {(modalType === "add" || modalType === "edit") && (
-            <form
-              className="space-y-4"
-              onSubmit={modalType === "add" ? handleSave : handleUpdate}
-            >
-              <label className="block text-sm font-medium">Name</label>
-              <input
-                type="text"
-                name="name"
-                value={formState.name}
-                onChange={handleFormChange}
-                className="w-full border px-3 py-2 rounded-md"
-                autoFocus
-              />
-              <button
-                type="submit"
-                className="w-full px-4 py-2 bg-[#B02E0C] text-white rounded-md hover:bg-[#8d270b]"
-              >
-                {modalType === "add" ? "Save" : "Update"}
-              </button>
-            </form>
-          )}
-
-          {modalType === "view" && selectedCoupon && (
-            <div className="space-y-2">
-              <p>
-                <strong>Name:</strong> {selectedCoupon.name}
-              </p>
-              <p>
-                <strong>Date:</strong>{" "}
-                {selectedCoupon.createdAt ? new Date(selectedCoupon.createdAt).toLocaleDateString() : 'N/A'}
-              </p>
-            </div>
-          )}
-
-          {modalType === "delete" && selectedCoupon && (
-            <div>
-              <p>
-                Are you sure you want to delete{" "}
-                <strong>{selectedCoupon.name}</strong>?
-              </p>
-              <div className="flex justify-end gap-3 mt-4">
+        <div className="fixed inset-0 flex items-center justify-center z-[200] p-4 backdrop-blur-md bg-white/30 animate-in fade-in duration-300">
+          <div className="relative bg-white rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-2xl border border-[#E2E8F0] animate-in zoom-in-95 duration-300">
+            <div className="p-8">
+              <div className="flex justify-between items-center mb-10">
+                <div className="space-y-1">
+                  <h2 className="text-2xl font-black text-[#0F172A] tracking-tight text-center sm:text-left">
+                    {modalType === "add" ? "Initialize Coupon" : modalType === "edit" ? "Modify Coupon" : modalType === "view" ? "Coupon Intelligence" : "Eliminate Coupon"}
+                  </h2>
+                  <p className="text-[10px] font-black text-accent uppercase tracking-widest opacity-70 italic">Voucher Framework Node</p>
+                </div>
                 <button
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300"
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-[#64748B] hover:bg-[#F1F5F9] transition-all"
                 >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleDelete}
-                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
-                >
-                  Delete
+                  <X size={20} strokeWidth={3} />
                 </button>
               </div>
+
+              {(modalType === "add" || modalType === "edit") && (
+                <form className="space-y-6" onSubmit={modalType === "add" ? handleSave : handleUpdate}>
+                  <div>
+                    <label className="block text-[10px] font-black text-[#64748B] uppercase tracking-widest mb-2 pl-1 italic">Coupon Descriptor Label</label>
+                    <input
+                      type="text"
+                      name="name"
+                      ref={nameRef}
+                      value={formState.name}
+                      onChange={handleFormChange}
+                      className="w-full px-5 py-4 bg-[#F8FAFC] border-2 border-[#E2E8F0] rounded-2xl text-sm font-bold text-[#0F172A] focus:ring-accent/20 focus:border-accent transition-all outline-none shadow-sm placeholder-[#94A3B8]"
+                      placeholder="Enter coupon type..."
+                      required
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-full py-5 bg-accent text-white rounded-2xl text-sm font-black uppercase tracking-widest shadow-lg shadow-accent/20 hover:bg-[#8D270B] transition-all active:scale-95 cursor-pointer mt-4"
+                  >
+                    {modalType === "add" ? "Commit Initialization" : "Commit Modifications"}
+                  </button>
+                </form>
+              )}
+
+              {modalType === "view" && selectedCoupon && (
+                <div className="p-6 bg-[#F8FAFC] rounded-3xl border border-[#E2E8F0] space-y-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-accent/5 flex items-center justify-center text-accent border border-accent/10 shrink-0">
+                      <Ticket size={24} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black text-[#94A3B8] uppercase tracking-widest mb-1">Coupon Identity</p>
+                      <p className="text-xl font-black text-[#0F172A]">{selectedCoupon.name}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-accent/5 flex items-center justify-center text-accent border border-accent/10 shrink-0">
+                      <Info size={24} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black text-[#94A3B8] uppercase tracking-widest mb-1">Incentive MetaData</p>
+                      <p className="text-sm font-medium text-[#475569] leading-relaxed">This reward protocol defines the voucher parameters and redemption logic for promotional cycles.</p>
+                    </div>
+                  </div>
+                  <div className="pt-4 border-t border-[#E2E8F0] flex items-center justify-between text-[#64748B] text-xs font-bold font-mono">
+                    <span>PROTOCOL ID: {String(selectedCoupon.id).slice(-8).toUpperCase()}</span>
+                    <span>LOGGED: {selectedCoupon.createdAt ? new Date(selectedCoupon.createdAt).toLocaleDateString() : "PENDING"}</span>
+                  </div>
+                </div>
+              )}
+
+              {modalType === "delete" && selectedCoupon && (
+                <div className="flex flex-col text-center">
+                  <div className="w-20 h-20 bg-accent/5 rounded-[2.5rem] flex items-center justify-center text-accent mb-6 mx-auto shadow-sm">
+                    <Trash2 size={40} strokeWidth={2} />
+                  </div>
+                  <h3 className="text-2xl font-black text-[#0F172A] tracking-tight mb-2">Eliminate Reward Protocol?</h3>
+                  <div className="p-5 bg-accent/5 rounded-3xl border border-accent/10 mt-6 text-left">
+                    <p className="text-[10px] font-black text-accent uppercase tracking-widest mb-2 italic">Security Assessment</p>
+                    <p className="text-sm font-medium text-[#64748B] leading-relaxed">
+                      Removing <span className="text-accent font-black">"{selectedCoupon.name}"</span> will permanently dismantle its presence across the voucher management matrix.
+                    </p>
+                  </div>
+
+                  <div className="flex gap-4 mt-8">
+                    <button onClick={() => setShowModal(false)} className="flex-1 py-4 px-6 rounded-2xl border-2 border-[#E2E8F0] bg-white text-sm font-black text-[#64748B] uppercase tracking-widest hover:bg-[#F1F5F9] transition-all cursor-pointer">Abort</button>
+                    <button onClick={handleDelete} className="flex-[2] py-4 px-8 bg-accent text-white rounded-2xl text-sm font-black uppercase tracking-widest shadow-lg shadow-accent/20 hover:bg-[#8D270B] transition-all cursor-pointer">Confirm Purge</button>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-        </Modal>
+          </div>
+        </div>
       )}
     </div>
   );

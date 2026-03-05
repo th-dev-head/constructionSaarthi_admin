@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
-import { EllipsisVertical, Eye, Edit, Trash2, Loader2, Plus, X } from "lucide-react";
+import { EllipsisVertical, Eye, Edit, Trash2, Loader2, Plus, X, Search, Filter, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import {
   fetchAllPrompts,
   deletePrompt,
@@ -10,6 +10,7 @@ import {
 import {
   fetchAllPMFeatures,
 } from "../../../redux/slice/PMFeatureSlice";
+import DataTable from "../../common/DataTable";
 
 const PromptsList = () => {
   const dispatch = useDispatch();
@@ -18,12 +19,14 @@ const PromptsList = () => {
   const menuRef = useRef(null);
 
   // Redux state
-  const { prompts, loading, error } = useSelector((state) => state.prompt);
+  const { prompts, loading, error, total, totalPages, currentPage: reduxCurrentPage } = useSelector((state) => state.prompt);
   const { pmFeatures, loading: featuresLoading } = useSelector(
     (state) => state.pmFeature
   );
 
   // Local state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [limit, setLimit] = useState(10);
   const [openMenuId, setOpenMenuId] = useState(null);
   const [selectedFeature, setSelectedFeature] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -41,16 +44,17 @@ const PromptsList = () => {
         includeDeleted: false,
         onlyActive: true,
         feature_id: selectedFeature || null,
+        page: currentPage,
+        limit,
       })
     );
-  }, [dispatch, selectedFeature]);
+  }, [dispatch, selectedFeature, currentPage, limit]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
-        // Check if click is not on the ellipsis button
-        const isEllipsisButton = event.target.closest('button[class*="p-2"]');
+        const isEllipsisButton = event.target.closest('button[class*="rounded-xl"]');
         if (!isEllipsisButton) {
           setOpenMenuId(null);
         }
@@ -74,7 +78,6 @@ const PromptsList = () => {
       await dispatch(deletePrompt(selectedPrompt.prompt_id)).unwrap();
       setShowDeleteModal(false);
       setSelectedPrompt(null);
-      // Refresh prompts
       dispatch(
         fetchAllPrompts({
           includeDeleted: false,
@@ -87,300 +90,264 @@ const PromptsList = () => {
     }
   };
 
-  // Format date
-  const formatDate = (dateString) => {
-    if (!dateString) return "--";
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString("en-GB", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      });
-    } catch (error) {
-      return dateString;
-    }
-  };
-
   return (
-    <div className="space-y-6 p-4 bg-gray-100 w-full min-h-screen">
-
+    <div className="space-y-8 p-8 bg-[#F8FAFC] w-full min-h-screen" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
 
       {/* Navigation Tabs */}
-      <div className="bg-white shadow-sm border border-gray-200 rounded-lg">
-        <div className="flex border-b border-gray-200">
-          <button
-            onClick={() => navigate("/prompts")}
-            className={`px-6 py-3 font-medium text-sm ${
-              location.pathname === "/prompts"
-                ? "text-[#B02E0C] border-b-2 border-[#B02E0C]"
-                : "text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            Prompts
-          </button>
-          <button
-            onClick={() => navigate("/prompts/features")}
-            className={`px-6 py-3 font-medium text-sm ${
-              location.pathname === "/prompts/features"
-                ? "text-[#B02E0C] border-b-2 border-[#B02E0C]"
-                : "text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            PM Features
-          </button>
-          <button
-            onClick={() => navigate("/prompts/references")}
-            className={`px-6 py-3 font-medium text-sm ${
-              location.pathname === "/prompts/references"
-                ? "text-[#B02E0C] border-b-2 border-[#B02E0C]"
-                : "text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            Prompt References
-          </button>
+      <div className="bg-white p-2 rounded-[2rem] shadow-sm border border-[#E2E8F0]">
+        <div className="flex gap-2">
+          {[
+            { name: "Prompts", path: "/prompts" },
+            { name: "PM Features", path: "/prompts/features" },
+            { name: "Prompt References", path: "/prompts/references" },
+          ].map((tab) => (
+            <button
+              key={tab.path}
+              onClick={() => navigate(tab.path)}
+              className={`px-8 py-3 rounded-2xl font-bold text-sm transition-all duration-300 ${location.pathname === tab.path
+                ? "bg-accent text-white shadow-lg shadow-accent/20"
+                : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                }`}
+            >
+              {tab.name}
+            </button>
+          ))}
         </div>
       </div>
+
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Prompts Management</h1>
-          <p className="text-gray-600">Manage all prompts, features, and references here.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-black text-[#0F172A] tracking-tight">
+            Intelligence Hub
+          </h1>
+          <p className="text-sm font-medium text-[#64748B]">
+            Orchestrate and optimize your AI generation prompts and templates.
+          </p>
         </div>
         <button
           onClick={() => navigate("/prompts/create")}
-          className="mt-4 sm:mt-0 px-4 py-2 bg-[#B02E0C] text-white rounded-md hover:bg-[#8d270b] flex items-center gap-2"
+          className="px-8 py-4 bg-accent text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#8D270B] shadow-xl shadow-accent/20 transition-all active:scale-95 flex items-center gap-2 cursor-pointer"
         >
-          <Plus size={20} /> Add Prompt
+          <Plus size={18} strokeWidth={3} />
+          Forge New Prompt
         </button>
       </div>
-      {/* Filters */}
-      <div className="bg-white shadow-sm border border-gray-200 rounded-lg p-4">
-        <div className="flex gap-4 items-center">
-          <div className="flex-1">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Filter by Feature
-            </label>
+
+      {/* Filters & Search */}
+      <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-[#E2E8F0] flex flex-wrap items-center gap-4">
+        <div className="flex-1 min-w-[300px] relative">
+          <label className="text-[10px] font-black text-[#64748B] uppercase tracking-widest px-1 mb-2 block">Module Filter</label>
+          <div className="relative">
             <select
               value={selectedFeature}
               onChange={(e) => setSelectedFeature(e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#B02E0C]"
+              className="w-full appearance-none bg-[#F8FAFC] border-2 border-transparent focus:border-accent/20 focus:bg-white rounded-2xl px-5 py-3.5 text-sm font-bold text-[#0F172A] transition-all outline-none cursor-pointer"
             >
-              <option value="">All Features</option>
+              <option value="">All Active Modules</option>
               {featuresLoading ? (
-                <option>Loading features...</option>
+                <option disabled>Loading system modules...</option>
               ) : (
-                pmFeatures.map((feature) => (
-                  <option key={feature.id} value={feature.id}>
-                    {feature.feature || feature.name}
+                pmFeatures.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.feature || f.name}
                   </option>
                 ))
               )}
             </select>
+            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8] pointer-events-none" />
           </div>
         </div>
+
+        {/* <div className="flex-1 min-w-[300px]">
+          <label className="text-[10px] font-black text-[#64748B] uppercase tracking-widest px-1 mb-2 block">Quick Search</label>
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search templates, variables, or features..."
+              className="w-full bg-[#F8FAFC] border-2 border-transparent focus:border-accent/20 focus:bg-white rounded-2xl px-12 py-3.5 text-sm font-bold text-[#0F172A] transition-all outline-none placeholder:text-[#94A3B8] placeholder:font-medium"
+            />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#94A3B8]" />
+          </div>
+        </div> */}
       </div>
 
       {/* Error Message */}
       {error && (
-        <div className="p-4 bg-red-50 border-l-4 border-red-400 text-red-700">
-          <p className="font-medium">Error: {error}</p>
+        <div className="p-4 bg-accent/5 border-l-4 border-accent text-accent rounded-xl animate-in fade-in duration-300">
+          <p className="text-sm font-bold">Error: {error}</p>
           <button
             onClick={() => dispatch(clearError())}
-            className="text-sm underline mt-1"
+            className="text-xs underline mt-1 font-black uppercase tracking-widest opacity-70 hover:opacity-100"
           >
             Dismiss
           </button>
         </div>
       )}
 
-      {/* Prompts Table */}
-      <div className="bg-white shadow-sm border border-gray-200 rounded-lg overflow-visible">
-        {loading ? (
-          <div className="flex justify-center items-center py-12">
-            <Loader2 className="animate-spin text-[#B02E0C]" size={32} />
-            <span className="ml-3 text-gray-600">Loading prompts...</span>
-          </div>
-        ) : prompts.length === 0 ? (
-          <div className="flex flex-col justify-center items-center py-12">
-            <p className="text-gray-500 mb-4">No prompts found</p>
-            <button
-              onClick={() => navigate("/prompts/create")}
-              className="px-4 py-2 bg-[#B02E0C] text-white rounded-md hover:bg-[#8d270b] flex items-center gap-2"
-            >
-              <Plus size={20} /> Create First Prompt
-            </button>
-          </div>
-        ) : (
-          <table className="w-full text-left border-t border-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="py-3 px-4 border border-gray-300 text-sm font-semibold">
-                  Title
-                </th>
-                <th className="py-3 px-4 border border-gray-300 text-sm font-semibold">
-                  Type
-                </th>
-                <th className="py-3 px-4 border border-gray-300 text-sm font-semibold">
-                  Feature
-                </th>
-                <th className="py-3 px-4 border border-gray-300 text-sm font-semibold">
-                  Variables
-                </th>
-                <th className="py-3 px-4 border border-gray-300 text-sm font-semibold text-center">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {prompts.map((prompt) => {
-                const feature = pmFeatures.find(
-                  (f) => String(f.id) === String(prompt.feature_id)
-                );
-                return (
-                  <tr key={prompt.prompt_id} className="hover:bg-gray-50">
-                    <td className="py-3 px-4 border border-gray-300">
-                      <div>
-                        <p className="font-medium text-gray-800">{prompt.title}</p>
-                        <p className="text-xs text-gray-500 mt-1 line-clamp-2">
-                          {typeof prompt.prompt === 'string' ? (prompt.prompt.length > 100 ? prompt.prompt.substring(0, 100) + '...' : prompt.prompt) : ''}
-                        </p>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 border border-gray-300">
-                      <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">
-                        {prompt.type || "documnets"}
+      <DataTable
+        columns={[
+          {
+            header: "Template Intelligence",
+            accessor: "title",
+            cell: (r) => (
+              <div className="space-y-1">
+                <p className="font-bold text-[#0F172A] group-hover:text-accent transition-colors">{r.title}</p>
+                <p className="text-xs text-[#64748B] font-medium line-clamp-2 max-w-md leading-relaxed italic opacity-80">
+                  {typeof r.prompt === 'string' ? r.prompt : ''}
+                </p>
+              </div>
+            )
+          },
+          {
+            header: "Blueprint Type",
+            accessor: "type",
+            cell: (r) => (
+              <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-black uppercase tracking-wider border border-blue-100/50 shadow-sm shadow-blue-500/5">
+                {r.type || "DOCUMENTS"}
+              </span>
+            )
+          },
+          {
+            header: "Module",
+            accessor: "feature_id",
+            cell: (r) => {
+              const feature = pmFeatures.find(f => String(f.id) === String(r.feature_id));
+              return (
+                <div className="flex items-center gap-2 text-sm font-bold text-[#475569]">
+                  <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+                  {feature ? feature.feature || feature.name : "Core System"}
+                </div>
+              );
+            }
+          },
+          {
+            header: "Dynamic Keys",
+            accessor: "variables",
+            cell: (r) => (
+              <div className="flex flex-wrap gap-2 max-w-xs">
+                {r.variables && r.variables.length > 0 ? (
+                  <>
+                    {r.variables.slice(0, 2).map((v, idx) => (
+                      <span key={idx} className="px-2 py-0.5 bg-[#F1F5F9] text-[#64748B] rounded font-mono text-[10px] font-bold border border-[#E2E8F0] shadow-sm">
+                        ${v.name}
                       </span>
-                    </td>
-                    
-                    <td className="py-3 px-4 border border-gray-300 text-gray-700">
-                      {feature ? feature.feature || feature.name : prompt.feature_id || "--"}
-                    </td>
-                    <td className="py-3 px-4 border border-gray-300">
-                      <div className="flex flex-wrap gap-1">
-                        {prompt.variables && prompt.variables.length > 0 ? (
-                          prompt.variables.slice(0, 3).map((variable, idx) => (
-                            <span
-                              key={idx}
-                              className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs"
-                            >
-                              {variable.name}
-                            </span>
-                          ))
-                        ) : (
-                          <span className="text-gray-400 text-xs">No variables</span>
-                        )}
-                        {prompt.variables && prompt.variables.length > 3 && (
-                          <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
-                            +{prompt.variables.length - 3} more
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 border border-gray-300 text-center relative" ref={openMenuId === prompt.prompt_id ? menuRef : null}>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setOpenMenuId(
-                            openMenuId === prompt.prompt_id ? null : prompt.prompt_id
-                          );
-                        }}
-                        className="p-2 rounded hover:bg-gray-100 relative z-10"
-                      >
-                        <EllipsisVertical className="text-gray-600" />
-                      </button>
-
-                      {/* Dropdown Menu */}
-                      {openMenuId === prompt.prompt_id && (
-                        <div 
-                          className="absolute right-0 top-full mt-1 bg-white border border-gray-200 shadow-lg rounded-md w-44 z-50"
-                          onClick={(e) => e.stopPropagation()}
-                          style={{ 
-                            // For last row, position upward if needed
-                            ...(prompts.indexOf(prompt) === prompts.length - 1 ? {
-                              bottom: '100%',
-                              top: 'auto',
-                              marginTop: 0,
-                              marginBottom: '4px'
-                            } : {})
-                          }}
-                        >
-                          <ul className="text-gray-700 text-sm">
-                            <li
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                navigate(`/prompts/view/${prompt.prompt_id}`);
-                                setOpenMenuId(null);
-                              }}
-                              className="px-4 py-2 flex items-center gap-2 hover:bg-gray-50 cursor-pointer"
-                            >
-                              <Eye size={16} /> View
-                            </li>
-                            <li
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                navigate(`/prompts/edit/${prompt.prompt_id}`);
-                                setOpenMenuId(null);
-                              }}
-                              className="px-4 py-2 flex items-center gap-2 hover:bg-gray-50 cursor-pointer"
-                            >
-                              <Edit size={16} /> Edit
-                            </li>
-                            <li
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedPrompt(prompt);
-                                setShowDeleteModal(true);
-                                setOpenMenuId(null);
-                              }}
-                              className="px-4 py-2 flex items-center gap-2 text-red-600 hover:bg-gray-50 cursor-pointer"
-                            >
-                              <Trash2 size={16} /> Delete
-                            </li>
-                          </ul>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                    ))}
+                    {r.variables.length > 2 && (
+                      <span className="px-2 py-0.5 bg-accent/10 text-accent rounded font-black text-[10px] border border-accent/10">
+                        +{r.variables.length - 2} KEYS
+                      </span>
+                    )}
+                  </>
+                ) : (
+                  <span className="text-[10px] font-black text-[#94A3B8] uppercase italic">Static Logic</span>
+                )}
+              </div>
+            )
+          }
+        ]}
+        data={prompts}
+        loading={loading}
+        pagination={{ page: currentPage, limit, totalPages, totalRecords: total }}
+        onPageChange={(p) => setCurrentPage(p)}
+        onLimitChange={(l) => { setLimit(l); setCurrentPage(1); }}
+        renderActions={(prompt) => (
+          <div className="relative" ref={openMenuId === prompt.prompt_id ? menuRef : null}>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpenMenuId(openMenuId === prompt.prompt_id ? null : prompt.prompt_id);
+              }}
+              className={`p-3 rounded-xl transition-all duration-200 cursor-pointer relative z-10 ${openMenuId === prompt.prompt_id ? 'bg-accent text-white shadow-lg shadow-accent/20' : 'hover:bg-accent/5 text-[#94A3B8] hover:text-accent'}`}
+            >
+              <EllipsisVertical size={20} />
+            </button>
+            {openMenuId === prompt.prompt_id && (
+              <div className="absolute right-12 top-0 bg-white border border-[#E2E8F0] shadow-2xl rounded-2xl w-48 z-[100] py-2 animate-in zoom-in-95 duration-200 origin-top-right">
+                <ul className="text-[#475569] text-sm font-bold">
+                  <li
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/prompts/view/${prompt.prompt_id}`);
+                      setOpenMenuId(null);
+                    }}
+                    className="px-4 py-3 flex items-center gap-3 hover:bg-[#F8FAFC] hover:text-accent cursor-pointer transition-all mx-2 rounded-xl"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center text-green-600 border border-green-100/50">
+                      <Eye size={16} />
+                    </div>
+                    Preview
+                  </li>
+                  <li
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/prompts/edit/${prompt.prompt_id}`);
+                      setOpenMenuId(null);
+                    }}
+                    className="px-4 py-3 flex items-center gap-3 hover:bg-[#F8FAFC] hover:text-accent cursor-pointer transition-all mx-2 rounded-xl"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100/50">
+                      <Edit size={16} />
+                    </div>
+                    Configure
+                  </li>
+                  <li
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedPrompt(prompt);
+                      setShowDeleteModal(true);
+                      setOpenMenuId(null);
+                    }}
+                    className="px-4 py-3 flex items-center gap-3 hover:bg-accent/5 hover:text-accent cursor-pointer transition-all mx-2 rounded-xl text-accent"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-accent/5 flex items-center justify-center text-accent border border-accent/10">
+                      <Trash2 size={16} />
+                    </div>
+                    Destroy
+                  </li>
+                </ul>
+              </div>
+            )}
+          </div>
         )}
-      </div>
+      />
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && selectedPrompt && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-xs bg-black/50">
-          <div className="bg-white rounded-lg w-[400px] p-6 relative">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Delete Prompt</h2>
-              <button onClick={() => setShowDeleteModal(false)}>
-                <X className="text-gray-500 hover:text-gray-700 cursor-pointer" />
-              </button>
-            </div>
+        <div className="fixed inset-0 flex items-center justify-center z-[150] p-4 backdrop-blur-md bg-white/30 animate-in fade-in duration-300">
+          <div className="relative bg-white rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl border border-[#E2E8F0] animate-in zoom-in-95 duration-300">
+            <div className="p-8">
+              <div className="w-16 h-16 bg-accent/5 rounded-[2rem] flex items-center justify-center text-accent mb-6 mx-auto shadow-sm">
+                <Trash2 size={32} strokeWidth={2} />
+              </div>
 
-            <p className="text-gray-600 mb-4">
-              Are you sure you want to delete the prompt{" "}
-              <strong>{selectedPrompt.title}</strong>? This action cannot be undone.
-            </p>
+              <div className="text-center space-y-2 mb-8">
+                <h2 className="text-xl font-black text-[#0F172A] tracking-tight">Destroy Logic Template?</h2>
+                <div className="p-4 bg-accent/5 rounded-2xl border border-accent/10 mt-4">
+                  <p className="text-xs font-black text-accent uppercase tracking-widest mb-1 italic">Mission Critical Warning</p>
+                  <p className="text-sm font-medium text-[#64748B]">
+                    Are you sure you want to permanently erase <span className="text-accent font-black">"{selectedPrompt.title}"</span>? This will dismantle this intelligence blueprint.
+                  </p>
+                </div>
+              </div>
 
-            <div className="flex justify-end gap-3 mt-6">
-              <button
-                onClick={() => {
-                  setShowDeleteModal(false);
-                  setSelectedPrompt(null);
-                }}
-                className="px-4 py-2 rounded-md border border-gray-300 hover:bg-gray-100 cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDelete}
-                className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 cursor-pointer"
-              >
-                Delete
-              </button>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setSelectedPrompt(null);
+                  }}
+                  className="flex-1 py-4 px-6 rounded-2xl border-2 border-[#E2E8F0] bg-white text-sm font-black text-[#64748B] uppercase tracking-widest hover:bg-[#F1F5F9] transition-all active:scale-95"
+                >
+                  Abort
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="flex-1 py-4 px-6 bg-accent text-white rounded-2xl text-sm font-black uppercase tracking-widest hover:bg-[#8D270B] shadow-lg shadow-accent/20 transition-all active:scale-95 cursor-pointer"
+                >
+                  Confirm Destroy
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -390,4 +357,3 @@ const PromptsList = () => {
 };
 
 export default PromptsList;
-

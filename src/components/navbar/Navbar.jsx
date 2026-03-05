@@ -8,7 +8,7 @@ export const Navbar = ({
   onToggleCollapse,
 }) => {
   return (
-    <header className="w-full bg-white shadow-sm h-16 flex items-center px-6 justify-between sticky top-0">
+    <header className="w-full bg-white/95 backdrop-blur-sm shadow-sm h-16 flex items-center px-6 justify-between sticky top-0 z-40 transition-all duration-300">
       <div className="flex items-center gap-4">
         {/* Mobile Menu Button */}
         <button

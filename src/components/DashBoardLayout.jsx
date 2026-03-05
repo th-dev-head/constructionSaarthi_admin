@@ -38,9 +38,8 @@ export const DashBoardLayout = () => {
       />
 
       <div
-        className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${
-          isSidebarCollapsed ? "lg:ml-20" : "lg:ml-64"
-        }`}
+        className={`flex-1 flex flex-col min-h-screen transition-all duration-300 relative ${isSidebarCollapsed ? "lg:pl-20" : "lg:pl-64"
+          } w-full`}
       >
         <Navbar
           toggleSidebar={toggleSidebar}
@@ -48,7 +47,7 @@ export const DashBoardLayout = () => {
           isSidebarCollapsed={isSidebarCollapsed}
           onToggleCollapse={toggleSidebarCollapse}
         />
-        <main className="p-5 bg-gray-100">
+        <main className="p-8 bg-[#F8FAFC] flex-1 overflow-x-hidden">
           <Outlet />
         </main>
       </div>

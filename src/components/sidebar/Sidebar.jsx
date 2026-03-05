@@ -8,7 +8,7 @@ import { logout } from "../../redux/slice/AuthSlice";
 
 export const Sidebar = ({
   isOpen = false,
-  onClose = () => {},
+  onClose = () => { },
   isCollapsed = false,
 }) => {
   const location = useLocation();
@@ -27,7 +27,7 @@ export const Sidebar = ({
   };
 
   const baseClasses =
-    "bg-white text-black h-screen fixed top-0 left-0 flex flex-col transition-all duration-300 border-r border-gray-200";
+    "bg-white text-black h-screen fixed top-0 left-0 flex flex-col transition-all duration-300 border-r border-gray-200 z-50 shadow-xl shadow-gray-200/50";
   const mobileStateClass = isOpen ? "translate-x-0" : "-translate-x-full";
   const desktopClass = "lg:translate-x-0";
   const collapsedClass = isCollapsed ? "w-20" : "w-64";
@@ -45,7 +45,7 @@ export const Sidebar = ({
             onClick={() => toggleDropdown(item.name)}
             className={`flex items-center gap-3 py-2 hover:bg-gray-100 rounded-lg 
             ${isCollapsed ? "justify-center" : "px-3"}
-            ${isOpen ? "text-[#FB4211]" : "text-gray-700"}`}
+            ${isOpen ? "text-[#B02E0C]" : "text-gray-700"}`}
             title={isCollapsed ? item.name : ""}
           >
             {item.icon}
@@ -69,12 +69,11 @@ export const Sidebar = ({
                   key={sub.name}
                   to={sub.link}
                   onClick={() => window.innerWidth < 1024 && onClose()}
-                  className={`flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-gray-100 transition-all
-                  ${
-                    location.pathname === sub.link
-                      ? "bg-blue-50 text-[#FB4211] border-l-4 border-[#FB4211]"
-                      : "text-gray-700"
-                  }`}
+                  className={`flex items-center gap-2 px-2 py-2 rounded-lg transition-all
+                  ${location.pathname === sub.link
+                      ? "bg-[#B02E0C] text-white hover:bg-[#8d270b]"
+                      : "text-gray-700 hover:bg-gray-100"
+                    }`}
                 >
                   {sub.icon}
                   <span className="text-sm">{sub.name}</span>
@@ -92,13 +91,12 @@ export const Sidebar = ({
           key={item.name}
           to={item.link}
           onClick={() => window.innerWidth < 1024 && onClose()}
-          className={`flex items-center gap-3 py-2 hover:bg-gray-100 rounded-lg 
+          className={`flex items-center gap-3 py-2 rounded-lg transition-all
           ${isCollapsed ? "justify-center" : "px-3"}
-          ${
-            location.pathname === item.link
-              ? "bg-blue-50 text-[#FB4211] border-l-4 border-[#FB4211]"
-              : "text-gray-700"
-          }`}
+          ${location.pathname === item.link
+              ? "bg-[#B02E0C] text-white hover:bg-[#8d270b]"
+              : "text-gray-700 hover:bg-gray-100"
+            }`}
         >
           {item.icon}
           {!isCollapsed && <span className="font-medium">{item.name}</span>}
@@ -115,9 +113,8 @@ export const Sidebar = ({
         className={`${baseClasses} ${mobileStateClass} ${desktopClass} ${collapsedClass}`}
       >
         <div
-          className={`flex items-center justify-between ${
-            isCollapsed ? "flex-col" : ""
-          }`}
+          className={`flex items-center justify-between ${isCollapsed ? "flex-col" : ""
+            }`}
         >
           <div
             className={`w-full flex items-center justify-center font-bold 
@@ -144,9 +141,8 @@ export const Sidebar = ({
         <div className="border-t border-gray-200 p-3">
           <button
             onClick={handleLogout}
-            className={`w-full flex items-center gap-3 py-2 px-3 hover:bg-gray-100 rounded-lg text-red-600 transition-colors ${
-              isCollapsed ? "justify-center" : ""
-            }`}
+            className={`w-full flex items-center gap-3 py-2 px-3 hover:bg-gray-100 rounded-lg text-red-600 transition-colors ${isCollapsed ? "justify-center" : ""
+              }`}
             title={isCollapsed ? "Logout" : ""}
           >
             <LogOut size={22} />
