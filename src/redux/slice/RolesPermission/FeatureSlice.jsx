@@ -4,7 +4,7 @@ import { apiInstance } from "../../../config/axiosInstance";
 
 export const fetchAllFeature = createAsyncThunk(
   "role/fetchAllFeature",
-  async ({ page = 1, limit = 10, search = "" } = {}, thunkAPI) => {
+  async ({ page = 1, limit = 100, search = "" } = {}, thunkAPI) => {
     const token = localStorage.getItem("token");
     if (!token) {
       return thunkAPI.rejectWithValue("No token found, please login first.");

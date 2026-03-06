@@ -5,7 +5,7 @@ import { apiInstance } from "../../config/axiosInstance";
 // Fetch all prompt references
 export const fetchAllPromptReferences = createAsyncThunk(
   "promptReference/fetchAllPromptReferences",
-  async ({ page = 1, limit = 10 } = {}, thunkAPI) => {
+  async ({ page = 1, limit = 100 } = {}, thunkAPI) => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
