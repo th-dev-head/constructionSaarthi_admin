@@ -9,6 +9,7 @@ import {
   deleteGavge,
 } from "../../../redux/slice/Types/GavgeTypeSlice";
 import DataTable from "../../common/DataTable";
+import { toPascalCase } from "../../../utils/stringUtils";
 
 const Gavge = () => {
   const dispatch = useDispatch();
@@ -102,7 +103,7 @@ const Gavge = () => {
             <Shield size={18} />
           </div>
           <div>
-            <p className="font-black text-[#0F172A]">{r.gavgeName}</p>
+            <p className="font-black text-[#0F172A]">{toPascalCase(r.gavgeName)}</p>
             <p className="text-[10px] text-[#94A3B8] font-bold uppercase tracking-widest mt-0.5">Specifications Tag</p>
           </div>
         </div>
@@ -111,7 +112,7 @@ const Gavge = () => {
     {
       header: "Format Protocol",
       accessor: "gavgeFormat",
-      cell: (r) => <span className="font-bold text-[#475569]">{r.gavgeFormat || "Standard"}</span>
+      cell: (r) => <span className="font-bold text-[#475569]">{toPascalCase(r.gavgeFormat) || "Standard"}</span>
     },
     {
       header: "Registry Date",
@@ -293,7 +294,7 @@ const Gavge = () => {
                     </div>
                     <div>
                       <p className="text-[10px] font-black text-[#94A3B8] uppercase tracking-widest mb-1">Gavge Identifier</p>
-                      <p className="text-xl font-black text-[#0F172A]">{selectedGavge.gavgeName}</p>
+                      <p className="text-xl font-black text-[#0F172A]">{toPascalCase(selectedGavge.gavgeName)}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
@@ -302,7 +303,7 @@ const Gavge = () => {
                     </div>
                     <div>
                       <p className="text-[10px] font-black text-[#94A3B8] uppercase tracking-widest mb-1">Defined Format</p>
-                      <p className="text-lg font-bold text-[#475569]">{selectedGavge.gavgeFormat}</p>
+                      <p className="text-lg font-bold text-[#475569]">{toPascalCase(selectedGavge.gavgeFormat)}</p>
                     </div>
                   </div>
                   <div className="pt-4 border-t border-[#E2E8F0] flex items-center justify-between text-[#64748B] text-xs font-bold font-mono">
@@ -321,7 +322,7 @@ const Gavge = () => {
                   <div className="p-5 bg-accent/5 rounded-3xl border border-accent/10 mt-6 text-left">
                     <p className="text-[10px] font-black text-accent uppercase tracking-widest mb-2 italic">Security Assessment</p>
                     <p className="text-sm font-medium text-[#64748B] leading-relaxed">
-                      Removing <span className="text-accent font-black">"{selectedGavge.gavgeName}"</span> will permanently dismantle its presence across the specifications matrix.
+                      Removing <span className="text-accent font-black">"{toPascalCase(selectedGavge.gavgeName)}"</span> will permanently dismantle its presence across the specifications matrix.
                     </p>
                   </div>
 

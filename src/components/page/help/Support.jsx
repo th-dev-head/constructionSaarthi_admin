@@ -14,6 +14,7 @@ import {
 } from "../../../redux/slice/HelpSlice";
 import { apiInstance } from "../../../config/axiosInstance";
 import DataTable from "../../common/DataTable";
+import { toPascalCase } from "../../../utils/stringUtils";
 
 const Support = () => {
   const dispatch = useDispatch();
@@ -30,6 +31,8 @@ const Support = () => {
   const [faqModalType, setFaqModalType] = useState("add");
   const [showFAQDeleteModal, setShowFAQDeleteModal] = useState(false);
   const [selectedFAQ, setSelectedFAQ] = useState(null);
+  const [selectedTicket, setSelectedTicket] = useState(null);
+
 
   const [categoryForm, setCategoryForm] = useState({
     name: "",
@@ -348,7 +351,7 @@ const Support = () => {
               {
                 header: "Name",
                 accessor: "name",
-                cell: (r) => <span className="text-sm font-bold text-[#0F172A]">{r.name || "--"}</span>
+                cell: (r) => <span className="text-sm font-bold text-[#0F172A]">{toPascalCase(r.name) || "--"}</span>
               },
               // {
               //   header: "Icon Tag",
@@ -453,7 +456,7 @@ const Support = () => {
                           <HelpCircle size={24} />
                         </div>
                         <div>
-                          <div className="text-lg font-black text-[#0F172A] tracking-tight group-hover/cat:text-accent transition-colors">{cat.name || "--"}</div>
+                          <div className="text-lg font-black text-[#0F172A] tracking-tight group-hover/cat:text-accent transition-colors">{toPascalCase(cat.name) || "--"}</div>
                           <div className="text-[10px] font-black text-[#64748B] uppercase tracking-widest mt-0.5 opacity-70 italic">Count: {cat.faq_count ?? faqs.length} entries</div>
                         </div>
                       </div>
@@ -623,7 +626,7 @@ const Support = () => {
                 accessor: "user.full_name",
                 cell: (r) => (
                   <div className="flex flex-col">
-                    <span className="text-sm font-bold text-[#0F172A]">{r.user?.full_name || r.user_name || "Unknown Identity"}</span>
+                    <span className="text-sm font-bold text-[#0F172A]">{toPascalCase(r.user?.full_name || r.user_name) || "Unknown Identity"}</span>
                     <span className="text-xs font-medium text-[#64748B] tabular-nums">{r.user?.phone_number || r.user_phone || "--"}</span>
                   </div>
                 )
@@ -631,7 +634,7 @@ const Support = () => {
               {
                 header: "Inquiry Context",
                 accessor: "issue_category",
-                cell: (r) => <span className="text-sm font-black text-[#475569] uppercase tracking-tight">{r.issue_category || "General"}</span>
+                cell: (r) => <span className="text-sm font-black text-[#475569] uppercase tracking-tight">{toPascalCase(r.issue_category) || "General"}</span>
               },
               {
                 header: "State",
@@ -647,7 +650,17 @@ const Support = () => {
                 )
               },
               {
+                header: "Description",
+                accessor: "description",
+                cell: (r) => (
+                  <p className="text-sm font-medium text-[#64748B] leading-relaxed line-clamp-2 max-w-xs italic">
+                    "{r.description || r.message || "No description provided"}"
+                  </p>
+                )
+              },
+              {
                 header: "Time Logs",
+
                 accessor: "createdAt",
                 cell: (r) => (
                   <div className="flex flex-col">
@@ -673,8 +686,13 @@ const Support = () => {
             onLimitChange={(l) => setTicketFilters(prev => ({ ...prev, limit: l, page: 1 }))}
             renderActions={(t) => (
               <button
-                onClick={() => { setStatusForm({ id: String(t.id), status: t.status || "Open", admin_note: "" }); setShowStatusModal(true); }}
+                onClick={() => {
+                  setSelectedTicket(t);
+                  setStatusForm({ id: String(t.id), status: t.status || "Open", admin_note: "" });
+                  setShowStatusModal(true);
+                }}
                 className="px-4 py-2 bg-accent text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-[#8D270B] shadow-lg shadow-accent/10 transition-all active:scale-95 cursor-pointer"
+
               >
                 Intervene
               </button>
@@ -700,7 +718,7 @@ const Support = () => {
                 header: "Client Identity",
                 accessor: "user.full_name",
                 cell: (r) => (
-                  <span className="text-sm font-bold text-[#0F172A]">{r.user?.full_name || r.user?.phone_number || r.user_id}</span>
+                  <span className="text-sm font-bold text-[#0F172A]">{toPascalCase(r.user?.full_name) || r.user?.phone_number || r.user_id}</span>
                 )
               },
               {
@@ -768,7 +786,61 @@ const Support = () => {
                 </button>
               </div>
 
+              {selectedTicket && (
+                <div className="mb-8 p-6 bg-[#F8FAFC] rounded-3xl border border-[#E2E8F0] space-y-4 animate-in slide-in-from-top-4 duration-500">
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-black text-accent uppercase tracking-widest pl-1 italic">Ticket Context</span>
+                      <h3 className="text-lg font-black text-[#0F172A] tracking-tight">{toPascalCase(selectedTicket.issue_category) || "General Inquiry"}</h3>
+                    </div>
+                    <span className="px-3 py-1 bg-[#F1F5F9] rounded-lg text-xs font-black text-[#64748B]">#{selectedTicket.id}</span>
+                  </div>
+
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-black text-[#64748B] uppercase tracking-widest pl-1 italic">Client Narrative</span>
+                    <div className="p-4 bg-white rounded-2xl border border-[#E2E8F0] min-h-[80px]">
+                      <p className="text-sm font-bold text-[#475569] leading-relaxed italic">
+                        "{selectedTicket.description || selectedTicket.message || "No detailed commentary provided by the client."}"
+                      </p>
+                    </div>
+                  </div>
+
+                  {selectedTicket.attachment_url && (
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-black text-[#64748B] uppercase tracking-widest pl-1 italic">Evidence / Attachment</span>
+                      <div className="relative group rounded-2xl overflow-hidden border border-[#E2E8F0] aspect-video bg-white">
+                        <img
+                          src={selectedTicket.attachment_url}
+                          alt="Attachment"
+                          className="w-full h-full object-contain"
+                        />
+                        <a
+                          href={selectedTicket.attachment_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px] font-black uppercase tracking-widest"
+                        >
+                          View Full Scale
+                        </a>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-4 pt-2 border-t border-[#E2E8F0]">
+                    <div>
+                      <span className="text-[10px] font-black text-[#64748B] uppercase tracking-widest pl-1 italic">Submitted On</span>
+                      <p className="text-xs font-bold text-[#0F172A]">{new Date(selectedTicket.createdAt || selectedTicket.created_at).toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-black text-[#64748B] uppercase tracking-widest pl-1 italic">Current Lifecycle</span>
+                      <p className="text-xs font-bold text-accent">{selectedTicket.status || "Open"}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-6">
+
                 <div>
                   <label className="block text-[10px] font-black text-[#64748B] uppercase tracking-widest mb-2 pl-1 italic">Lifecycle State</label>
                   <div className="relative">

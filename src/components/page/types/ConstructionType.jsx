@@ -9,6 +9,7 @@ import {
     deleteConstruction,
 } from "../../../redux/slice/Types/ConstructionSlice";
 import DataTable from "../../common/DataTable";
+import { toPascalCase } from "../../../utils/stringUtils";
 
 const ConstructionType = () => {
     const dispatch = useDispatch();
@@ -95,7 +96,7 @@ const ConstructionType = () => {
                         <HardHat size={18} />
                     </div>
                     <div>
-                        <p className="font-black text-[#0F172A]">{r.name}</p>
+                        <p className="font-black text-[#0F172A]">{toPascalCase(r.name)}</p>
                         <p className="text-[10px] text-[#94A3B8] font-bold uppercase tracking-widest mt-0.5">Structural Node Type</p>
                     </div>
                 </div>
@@ -259,7 +260,7 @@ const ConstructionType = () => {
                                         </div>
                                         <div>
                                             <p className="text-[10px] font-black text-[#94A3B8] uppercase tracking-widest mb-1">Building Identity</p>
-                                            <p className="text-xl font-black text-[#0F172A]">{selectedConstruction.name}</p>
+                                            <p className="text-xl font-black text-[#0F172A]">{toPascalCase(selectedConstruction.name)}</p>
                                         </div>
                                     </div>
                                     <div className="flex items-start gap-4">
@@ -287,7 +288,7 @@ const ConstructionType = () => {
                                     <div className="p-5 bg-accent/5 rounded-3xl border border-accent/10 mt-6 text-left">
                                         <p className="text-[10px] font-black text-accent uppercase tracking-widest mb-2 italic">Security Assessment</p>
                                         <p className="text-sm font-medium text-[#64748B] leading-relaxed">
-                                            Removing <span className="text-accent font-black">"{selectedConstruction.name}"</span> will permanently dismantle its presence across the infrastructure ledger.
+                                            Removing <span className="text-accent font-black">"{toPascalCase(selectedConstruction.name)}"</span> will permanently dismantle its presence across the infrastructure ledger.
                                         </p>
                                     </div>
 

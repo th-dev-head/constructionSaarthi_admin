@@ -10,6 +10,7 @@ import {
   clearUserProfile,
 } from "../../../redux/slice/UserSlice";
 import DataTable from "../../common/DataTable";
+import { toPascalCase } from "../../../utils/stringUtils";
 
 const Users = () => {
   const dispatch = useDispatch();
@@ -169,10 +170,10 @@ const Users = () => {
           </div>
           <div>
             <p className="font-medium text-[#0F172A] group-hover:text-accent transition-colors">
-              {user.name || user.full_name || "--"}
+              {toPascalCase(user.name || user.full_name) || "--"}
             </p>
             <p className="text-[10px] font-black text-[#94A3B8] uppercase tracking-wider">
-              {user.role_id ? getRoleNameById(user.role_id) : user.role || "--"}
+              {toPascalCase(user.role_id ? getRoleNameById(user.role_id) : user.role) || "--"}
             </p>
           </div>
         </div>
@@ -377,9 +378,9 @@ const Users = () => {
                       </div>
                     </div>
                     <div className="text-center md:text-left">
-                      <h3 className="text-3xl font-black text-[#0F172A] mb-1">{userProfile.full_name || userProfile.name}</h3>
+                      <h3 className="text-3xl font-black text-[#0F172A] mb-1">{toPascalCase(userProfile.full_name || userProfile.name)}</h3>
                       <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mt-4">
-                        <span className="px-4 py-1.5 rounded-full bg-accent text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-accent/20">{userProfile.role}</span>
+                        <span className="px-4 py-1.5 rounded-full bg-accent text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-accent/20">{toPascalCase(userProfile.role)}</span>
                         <span className="px-4 py-1.5 rounded-full bg-white text-[#64748B] text-[10px] font-black uppercase tracking-widest ring-1 ring-[#E2E8F0]">ID: {userProfile.id?.slice(-8).toUpperCase()}</span>
                       </div>
                     </div>
@@ -405,7 +406,7 @@ const Users = () => {
                         {userProfile.details.company_Name && (
                           <div>
                             <p className="text-[10px] text-[#94A3B8] font-black uppercase tracking-widest mb-1">Enterprise Brand</p>
-                            <p className="text-xl font-black text-[#0F172A]">{userProfile.details.company_Name}</p>
+                            <p className="text-xl font-black text-[#0F172A]">{toPascalCase(userProfile.details.company_Name)}</p>
                           </div>
                         )}
                         {userProfile.details.gstin && (
