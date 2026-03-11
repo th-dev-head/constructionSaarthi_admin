@@ -114,11 +114,10 @@ const Login = () => {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full py-4 text-white rounded-xl font-bold text-lg transition-all ${
-              loading 
-                ? "bg-gray-400 cursor-not-allowed" 
+            className={`w-full py-4 text-white rounded-xl font-bold text-lg transition-all ${loading
+                ? "bg-gray-400 cursor-not-allowed"
                 : "bg-[#B02E0C] hover:bg-[#8e240a] hover:shadow-lg active:scale-[0.98]"
-            }`}
+              }`}
           >
             {loading ? "Sending OTP..." : "Send OTP"}
           </button>
