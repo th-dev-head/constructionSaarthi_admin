@@ -71,7 +71,7 @@ const Subscriptions = () => {
         setPagination({
           totalRecords: response.data.total || 0,
           totalPages: response.data.totalPages || 1,
-          currentPage: response.data.page || 1,
+          page: response.data.page || currentPage, 
           limit: response.data.limit || rowsPerPage,
         });
       } else {

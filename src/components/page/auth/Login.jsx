@@ -40,6 +40,10 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!/^\d{10}$/.test(phoneNumber)) {
+      toast.error("Please enter a valid 10-digit mobile number");
+      return;
+    }
     dispatch(sendOtp({ countryCode, phoneNumber }))
       .unwrap()
       .then(() => {
@@ -53,8 +57,6 @@ const Login = () => {
       });
   };
 
-  const handleForgotPassword = () => navigate("/forgot-pass");
-
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center relative">
       <ToastContainer position="top-right" autoClose={5000} />
@@ -63,23 +65,23 @@ const Login = () => {
         style={{ backgroundImage: `url(${loginbg})` }}
       ></div>
 
-      <div className="relative z-10 bg-white shadow-lg rounded-lg p-8 w-11/12 max-w-md">
-        <div className="flex justify-center gap-2 mb-8 text-center items-center">
-          <img src={icon} alt="Logo" className="w-10" />
-          <p className="font-bold">ConstructionSaarthi</p>
+      <div className="relative z-10 bg-white shadow-lg rounded-2xl p-10 w-11/12 max-w-lg">
+        <div className="flex justify-center gap-2 mb-10 text-center items-center">
+          <img src={icon} alt="Logo" className="w-12 h-auto" />
+          <p className="font-bold text-xl tracking-tight">ConstructionSaarthi</p>
         </div>
 
-        <h2 className="text-2xl font-semibold text-center mb-4">Sign In</h2>
-        <p className="text-center text-[16px] text-[#060C12] mb-6">
+        <h2 className="text-3xl font-bold text-center mb-2">Sign In</h2>
+        <p className="text-center text-[16px] text-gray-600 mb-8">
           Please fill in your details to access your dashboard.
         </p>
 
         <form onSubmit={handleSubmit}>
-          <div className="mb-4 flex gap-2">
+          <div className="mb-6 flex gap-3">
             <select
               value={countryCode}
               onChange={(e) => dispatch(setCountryCode(e.target.value))}
-              className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B02E0C] bg-white text-gray-700"
             >
               {countryCodes.map((c) => (
                 <option key={c.code} value={c.code}>
@@ -91,35 +93,37 @@ const Login = () => {
             <input
               type="tel"
               value={phoneNumber}
-              onChange={(e) => dispatch(setPhoneNumber(e.target.value))}
+              onChange={(e) => {
+                const val = e.target.value.replace(/\D/g, "").slice(0, 10);
+                dispatch(setPhoneNumber(val));
+              }}
               required
-              placeholder="Mobile Number"
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="Enter Mobile Number"
+              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B02E0C]"
             />
           </div>
 
           <div className="flex items-center justify-between mb-10">
-            <label className="flex items-center text-sm text-gray-600">
-              <input type="checkbox" className="form-checkbox text-indigo-600" />
+            <label className="flex items-center text-[15px] text-gray-500 cursor-pointer">
+              <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-[#B02E0C] focus:ring-[#B02E0C]" />
               <span className="ml-2">Remember me</span>
             </label>
-            <p
-              className="text-md text-[#B02E0C] cursor-pointer hover:underline"
-              onClick={handleForgotPassword}
-            >
-              Forgot Password?
-            </p>
+            {/* Removed Forgot Password? link as requested */}
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2 bg-[#B02E0C] text-white rounded-xl hover:bg-[#872f00] transition-colors"
+            className={`w-full py-4 text-white rounded-xl font-bold text-lg transition-all ${
+              loading 
+                ? "bg-gray-400 cursor-not-allowed" 
+                : "bg-[#B02E0C] hover:bg-[#8e240a] hover:shadow-lg active:scale-[0.98]"
+            }`}
           >
-            {loading ? "Sending..." : "Send OTP"}
+            {loading ? "Sending OTP..." : "Send OTP"}
           </button>
 
-          {error && <p className="text-red-500 mt-2">{error}</p>}
+          {error && <p className="text-red-500 mt-4 text-center font-medium bg-red-50 py-2 rounded-lg border border-red-100">{error}</p>}
         </form>
       </div>
     </div>
