@@ -23,12 +23,17 @@ import CreatePrompt from "./page/prompts/CreatePrompt";
 import PromptsList from "./page/prompts/PromptsList";
 import PMFeatureManagement from "./page/prompts/PMFeatureManagement";
 import PromptReferenceManagement from "./page/prompts/PromptReferenceManagement";
+import Support from "./page/help/Support";
+import BannerManagement from "./page/banner/BannerManagement";
+import CategoryManagement from "./page/category/CategoryManagement";
+import ConstructionType from "./page/types/ConstructionType";
+import ContractType from "./page/types/ContractType";
 
 const Navigation = () => (
   <BrowserRouter>
     <Routes>
       <Route path="/" element={<Login />} />
-        <Route path="/otp-send" element={<OTPSend />} />
+      <Route path="/otp-send" element={<OTPSend />} />
       <Route path="/forgot-pass" element={<ForgotPassword />} />
       <Route path="/reset-pass" element={<ResetPassword />} />
 
@@ -47,6 +52,8 @@ const Navigation = () => (
         <Route path="/inventory" element={<Inventory />} />
         <Route path="/coupon" element={<Coupon />} />
         <Route path="/bank" element={<BankType />} />
+        <Route path="/construction" element={<ConstructionType />} />
+        <Route path="/contract-type" element={<ContractType />} />
         <Route path="/coupon-management" element={<CouponManagement />} />
         <Route path="/prompts" element={<PromptsList />} />
         <Route path="/prompts/create" element={<CreatePrompt />} />
@@ -54,6 +61,12 @@ const Navigation = () => (
         <Route path="/prompts/view/:id" element={<CreatePrompt />} />
         <Route path="/prompts/features" element={<PMFeatureManagement />} />
         <Route path="/prompts/references" element={<PromptReferenceManagement />} />
+        <Route path="/help" element={<Support />} />
+        <Route path="/banner-management" element={<BannerManagement />} />
+        <Route path="/category-management" element={<CategoryManagement />} />
+        <Route path="/help/faqs" element={<Support />} />
+        <Route path="/help/tickets" element={<Support />} />
+        <Route path="/help/feedbacks" element={<Support />} />
       </Route>
     </Routes>
   </BrowserRouter>

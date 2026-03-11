@@ -5,23 +5,24 @@ import { apiInstance } from "../../config/axiosInstance";
 // Fetch all PM features
 export const fetchAllPMFeatures = createAsyncThunk(
   "pmFeature/fetchAllPMFeatures",
-  async (_, thunkAPI) => {
+  async ({ page = 1, limit = 10 } = {}, thunkAPI) => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
         return thunkAPI.rejectWithValue("No token found, please login first.");
       }
 
-      const response = await fetch(
-        `${baseUrl}/api/PMFeature`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const url = new URL(`${baseUrl}/api/PMFeature`);
+      url.searchParams.append("page", page);
+      url.searchParams.append("limit", limit);
+
+      const response = await fetch(url.toString(), {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       const data = await response.json();
 
@@ -137,6 +138,10 @@ const pmFeatureSlice = createSlice({
     pmFeatures: [],
     loading: false,
     error: null,
+    total: 0,
+    currentPage: 1,
+    totalPages: 1,
+    limit: 10,
   },
   reducers: {
     clearError: (state) => {
@@ -153,6 +158,10 @@ const pmFeatureSlice = createSlice({
       .addCase(fetchAllPMFeatures.fulfilled, (state, action) => {
         state.loading = false;
         state.pmFeatures = action.payload.data || action.payload.features || action.payload || [];
+        state.total = action.payload.total || 0;
+        state.currentPage = action.payload.currentPage || 1;
+        state.totalPages = action.payload.totalPages || 1;
+        state.limit = action.payload.limit || 10;
       })
       .addCase(fetchAllPMFeatures.rejected, (state, action) => {
         state.loading = false;

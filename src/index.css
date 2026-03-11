@@ -68,3 +68,29 @@ button:focus-visible {
 } */
 
 @import "tailwindcss";
+
+@theme {
+  --color-accent: #B02E0C;
+  --font-sans: "Helvetica Neue", Helvetica, Arial, "sans-serif";
+}
+
+* {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+}
+
+:root {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+input,
+button,
+textarea,
+select {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}

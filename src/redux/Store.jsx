@@ -12,6 +12,11 @@ import userReducer from "./slice/UserSlice";
 import promptReducer from "./slice/PromptSlice";
 import promptReferenceReducer from "./slice/PromptReferenceSlice";
 import pmFeatureReducer from "./slice/PMFeatureSlice";
+import helpReducer from "./slice/HelpSlice";
+import bannerReducer from "./slice/BannerSlice";
+import categoryReducer from "./slice/CategorySlice";
+import constructionReducer from "./slice/Types/ConstructionSlice";
+import contractTypeReducer from "./slice/Types/ContractTypeSlice";
 
 export const store = configureStore({
   reducer: {
@@ -28,5 +33,10 @@ export const store = configureStore({
     prompt: promptReducer,
     promptReference: promptReferenceReducer,
     pmFeature: pmFeatureReducer,
+    help: helpReducer,
+    banner: bannerReducer,
+    category: categoryReducer,
+    construction: constructionReducer,
+    contractType: contractTypeReducer,
   },
 });
