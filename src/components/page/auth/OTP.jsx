@@ -2,6 +2,10 @@ import React, { useState, useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { verifyOtp, sendOtp } from "../../../redux/slice/AuthSlice";
+import loginbg from "../../../assets/loginbg.png";
+import icon from "../../../assets/icon.png";
+import { toast } from "react-toastify";
+// ...existing code...
 
 const OTPSend = () => {
   const [otpDigits, setOtpDigits] = useState(["", "", "", "", "", ""]);
@@ -15,6 +19,20 @@ const OTPSend = () => {
     (state) => state.auth
   );
 
+  // helper to extract meaningful message from backend/rejected thunk
+  const getErrorMessage = (err) => {
+    if (!err) return "Something went wrong. Please try again.";
+    if (typeof err === "string") return err;
+    const data = err.payload || err;
+    if (data) {
+      if (data.error && typeof data.error === "object" && data.error.message) return data.error.message;
+      if (typeof data.error === "string") return data.error;
+      if (data.message) return data.message;
+    }
+    if (err.message) return err.message;
+    return "Something went wrong. Please try again.";
+  };
+
   // Masked phone number: show last 2 digits only
   const maskedPhone = phoneNumber
     ? `*** *** ***${phoneNumber.slice(-2)}`
@@ -24,6 +42,9 @@ const OTPSend = () => {
   useEffect(() => {
     setTimer(30);
     setCanResend(false);
+    return () => {
+      toast.dismiss();
+    };
   }, []);
 
   useEffect(() => {
@@ -77,15 +98,22 @@ const OTPSend = () => {
 
   const handleVerify = () => {
     const otp = otpDigits.join("");
-    if (otp.length < 6) return;
+    if (otp.length < 6) {
+      toast.error("Please enter the full 6-digit OTP");
+      return;
+    }
     dispatch(verifyOtp({ countryCode, phoneNumber, otp }))
       .unwrap()
       .then((data) => {
         if (data.token) {
+          toast.success("Login successful!");
           navigate("/dashboard");
         }
       })
-      .catch((err) => console.error(err));
+      .catch((err) => {
+        console.error("Verification error:", err);
+        toast.error(getErrorMessage(err));
+      });
   };
 
   const handleResend = () => {
@@ -94,6 +122,7 @@ const OTPSend = () => {
     dispatch(sendOtp({ countryCode, phoneNumber }))
       .unwrap()
       .then(() => {
+        toast.success("OTP resent successfully");
         setOtpDigits(["", "", "", "", "", ""]);
         setTimer(30);
         setCanResend(false);
@@ -101,7 +130,8 @@ const OTPSend = () => {
         inputRefs.current[0]?.focus();
       })
       .catch((err) => {
-        console.error(err);
+        console.error("Resend error:", err);
+        toast.error(getErrorMessage(err));
         setResending(false);
       });
   };
@@ -109,27 +139,21 @@ const OTPSend = () => {
   const isComplete = otpDigits.every((d) => d !== "");
 
   return (
-    <div className="otp-screen-wrapper">
-      <div className="otp-card">
-        {/* Icon */}
-        <div className="otp-icon-circle">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            width="28"
-            height="28"
-          >
-            <path d="M6.57 15.85a1.5 1.5 0 01-1.14-2.47l4.47-5.37a1.5 1.5 0 012.28 0l4.47 5.37a1.5 1.5 0 01-1.14 2.47H6.57z" />
-            <path
-              fillRule="evenodd"
-              d="M1.5 4.5a3 3 0 013-3h15a3 3 0 013 3v15a3 3 0 01-3 3h-15a3 3 0 01-3-3v-15zm4.5 0a.75.75 0 000 1.5h12a.75.75 0 000-1.5H6zm0 3a.75.75 0 000 1.5h12a.75.75 0 000-1.5H6zm0 3a.75.75 0 000 1.5h12a.75.75 0 000-1.5H6z"
-              clipRule="evenodd"
-            />
-          </svg>
+    <div className="otp-screen-wrapper relative">
+      {/* Background matching Login screen */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url(${loginbg})` }}
+      ></div>
+
+      <div className="otp-card relative z-10 p-6 md:p-10 w-full max-w-[420px] mx-4">
+        {/* Logo and branding matching Login screen */}
+        <div className="flex justify-start gap-2 mb-8 md:mb-10 items-center w-full">
+          <img src={icon} alt="Logo" className="w-10 md:w-12 h-auto" />
+          <p className="font-bold text-lg md:text-xl tracking-tight text-[#1a1a1a]">ConstructionSaarthi</p>
         </div>
 
-        <h2 className="otp-title">Verify OTP</h2>
+        <h2 className="otp-title text-2xl md:text-3xl font-bold mb-2">Verify OTP</h2>
         <p className="otp-subtitle">
           Enter One Time Password which we sent on your mobile number{" "}
           <span className="otp-masked-phone">{maskedPhone}</span>
@@ -172,7 +196,7 @@ const OTPSend = () => {
         </div>
 
         {/* Error */}
-        {error && <p className="otp-error">{error}</p>}
+        {error && <p className="otp-error">{getErrorMessage(error)}</p>}
 
         {/* Verify Button */}
         <button
@@ -192,30 +216,20 @@ const OTPSend = () => {
           justify-content: center;
           background: #f5f5f5;
           font-family: 'Inter', 'Segoe UI', sans-serif;
+          position: relative;
         }
 
         .otp-card {
           background: #ffffff;
-          border-radius: 20px;
-          padding: 40px 36px;
-          width: 100%;
+          border-radius: 28px;
+          width: 90%;
           max-width: 420px;
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.10);
+          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
           display: flex;
           flex-direction: column;
           align-items: flex-start;
-        }
-
-        .otp-icon-circle {
-          width: 52px;
-          height: 52px;
-          background: #fef0ec;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin-bottom: 20px;
-          color: #B02E0C;
+          position: relative;
+          z-index: 10;
         }
 
         .otp-title {

@@ -70,7 +70,7 @@ export const Sidebar = ({
                   to={sub.link}
                   onClick={() => window.innerWidth < 1024 && onClose()}
                   className={`flex items-center gap-2 px-2 py-2 rounded-lg transition-all
-                  ${location.pathname === sub.link
+                  ${location.pathname === sub.link || (sub.link !== '/' && location.pathname.startsWith(sub.link + '/'))
                       ? "bg-[#B02E0C] text-white hover:bg-[#8d270b]"
                       : "text-gray-700 hover:bg-gray-100"
                     }`}
@@ -93,7 +93,7 @@ export const Sidebar = ({
           onClick={() => window.innerWidth < 1024 && onClose()}
           className={`flex items-center gap-3 py-2 rounded-lg transition-all
           ${isCollapsed ? "justify-center" : "px-3"}
-          ${location.pathname === item.link
+          ${location.pathname === item.link || (item.link !== '/' && location.pathname.startsWith(item.link + '/'))
               ? "bg-[#B02E0C] text-white hover:bg-[#8d270b]"
               : "text-gray-700 hover:bg-gray-100"
             }`}

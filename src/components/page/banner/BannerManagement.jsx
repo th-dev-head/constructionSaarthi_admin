@@ -32,6 +32,7 @@ const BannerManagement = () => {
         is_active: true,
     });
     const [activeTab, setActiveTab] = useState("all"); // "all" | "header" | "footer"
+    const [searchQuery, setSearchQuery] = useState("");
     const [imageFile, setImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
     const fileInputRef = useRef(null);
@@ -211,7 +212,14 @@ const BannerManagement = () => {
         },
     ];
 
-    const filteredBanners = banners.filter(b => activeTab === "all" || b.type === activeTab);
+    const filteredBanners = banners.filter(b => {
+        const matchesTab = activeTab === "all" || b.type === activeTab;
+        const matchesSearch = 
+            (b.heading || "").toLowerCase().includes(searchQuery.toLowerCase()) || 
+            (b.sub_heading || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (b.button_text || "").toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesTab && matchesSearch;
+    });
 
     const renderActions = (banner, idx) => (
         <div className="relative" ref={openMenuId === banner.id ? menuRef : null}>
@@ -294,7 +302,7 @@ const BannerManagement = () => {
     );
 
     return (
-        <div className="space-y-8 p-8 bg-[#F8FAFC] w-full min-h-screen" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
+        <div className="space-y-4 sm:space-y-8 px-4 sm:px-8 py-4 sm:py-8 bg-[#F8FAFC] w-full min-h-screen" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="space-y-1">
                     <h1 className="text-3xl font-black text-[#0F172A] tracking-tight">Banner-Management</h1>
@@ -333,8 +341,8 @@ const BannerManagement = () => {
                 renderActions={renderActions}
                 rowKey="id"
                 showSearch
-                pagination={{ page: 1, limit: 10, totalPages: 1, totalRecords: banners.length }}
-                onSearch={(q) => { }}
+                pagination={{ page: 1, limit: 10, totalPages: Math.ceil(filteredBanners.length / 10), totalRecords: filteredBanners.length }}
+                onSearch={(q) => setSearchQuery(q)}
             />
 
             {showModal && (

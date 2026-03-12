@@ -200,8 +200,8 @@ const Subscriptions = () => {
   );
 
   return (
-    <div className="pb-10 animate-in fade-in duration-500 bg-[#F8FAFC] min-h-screen p-8">
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8 gap-6">
+    <div className="space-y-4 sm:space-y-8 px-4 sm:px-8 py-4 sm:py-8 bg-[#F8FAFC] w-full min-h-screen" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div>
           <h1 className="text-3xl font-extrabold text-[#0F172A] tracking-tight leading-none">Subscriptions</h1>
           <p className="text-[#64748B] text-sm mt-1 font-medium">Keep track of all user subscriptions effortlessly</p>
@@ -212,8 +212,8 @@ const Subscriptions = () => {
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-3xl shadow-sm border border-[#E2E8F0] mb-6 flex flex-wrap items-center gap-4">
-        <div className="relative flex-1 min-w-[300px]">
+      <div className="bg-white p-4 md:p-6 rounded-3xl shadow-sm border border-[#E2E8F0] mb-6 flex flex-wrap items-center gap-4">
+        <div className="relative flex-1 min-w-[240px]">
           <input type="text" placeholder="Search users/orders..." value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }} className="w-full pl-12 pr-4 py-3 bg-[#F1F5F9] border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-accent/20 focus:bg-white transition-all outline-none" />
           <Search className="absolute left-4 top-3.5 w-5 h-5 text-[#94A3B8]" />
         </div>

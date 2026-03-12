@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { GrFormEdit } from "react-icons/gr";
 import { IoToggle } from "react-icons/io5";
+import { useNavigate } from "react-router-dom";
 import { apiInstance } from "../../../config/axiosInstance";
-import { Loader2, Trash2, Edit3, X, CheckCircle2, AlertCircle } from "lucide-react";
+import { Loader2, Trash2, Edit3, X, CheckCircle2, AlertCircle, ArrowLeft } from "lucide-react";
 import { toPascalCase } from "../../../utils/stringUtils";
 
 // Helper function to decode JWT token
@@ -21,6 +22,7 @@ const decodeToken = (token) => {
 };
 
 const ManagePlan = () => {
+    const navigate = useNavigate();
     const [open, setOpen] = useState(false);
     const [plans, setPlans] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -471,11 +473,22 @@ const ManagePlan = () => {
     ];
 
     return (
-        <div className="p-5">
-            <h2 className="text-2xl font-semibold mb-4">Manage Plans</h2>
-            <p className="text-gray-600 mb-6">
-                Handle all your plans effortlessly at the best rates
-            </p>
+        <div className="space-y-4 sm:space-y-8 px-4 sm:px-8 py-4 sm:py-8 bg-[#F8FAFC] w-full min-h-screen" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="flex items-center gap-4">
+                    <button
+                        onClick={() => navigate("/subscriptions")}
+                        className="p-2.5 bg-white border border-[#E2E8F0] rounded-2xl text-[#64748B] hover:text-accent hover:border-accent/20 transition-all shadow-sm active:scale-95"
+                        title="Back to Subscriptions"
+                    >
+                        <ArrowLeft size={20} strokeWidth={2.5} />
+                    </button>
+                    <div>
+                        <h2 className="text-3xl font-black text-[#0F172A] tracking-tight leading-none">Manage Plans</h2>
+                        <p className="text-[#64748B] text-sm mt-1 font-medium">Handle all your plans effortlessly at the best rates</p>
+                    </div>
+                </div>
+            </div>
 
             <div>
                 <h1 className="text-2xl font-semibold mb-4">Subscription Plans</h1>

@@ -39,15 +39,15 @@ const Pagination = ({
   if (totalPages <= 0) return null;
 
   return (
-    <div className="flex flex-col lg:flex-row justify-between items-center gap-6 p-6 border-t border-[#F1F5F9] bg-[#FFFFFF]">
+    <div className="flex flex-col md:flex-row justify-between items-center gap-4 md:gap-6 px-2 sm:px-6 py-4 md:p-6 border-t border-[#F1F5F9] bg-[#FFFFFF]">
       {/* Left: Rows selector */}
-      <div className="flex items-center gap-3">
-        <span className="text-sm font-medium text-[#6B7280]">Show</span>
+      <div className="flex items-center gap-3 order-2 md:order-1">
+        <span className="text-[12px] md:text-sm font-medium text-[#6B7280]">Show</span>
         <div className="relative">
           <select
             value={limit}
             onChange={(e) => onLimitChange(Number(e.target.value))}
-            className="appearance-none pl-3 pr-8 py-1.5 bg-white border border-[#E5E7EB] rounded-lg text-sm font-bold text-[#111827] focus:ring-0 focus:border-[#D1D5DB] transition-all cursor-pointer outline-none shadow-sm"
+            className="appearance-none pl-3 pr-8 py-1.5 bg-white border border-[#E5E7EB] rounded-lg text-[12px] md:text-sm font-bold text-[#111827] focus:ring-0 focus:border-[#D1D5DB] transition-all cursor-pointer outline-none shadow-sm"
           >
             {pageSizes.map(size => (
               <option key={size} value={size}>{size}</option>
@@ -57,42 +57,42 @@ const Pagination = ({
             <ChevronDown size={14} />
           </div>
         </div>
-        <span className="text-sm font-medium text-[#6B7280]">per page hello</span>
+        <span className="text-[12px] md:text-sm font-medium text-[#6B7280]">per page</span>
       </div>
 
       {/* Right: Info and Pagination Group */}
-      <div className="flex flex-col sm:flex-row items-center gap-6">
+      <div className="flex flex-col sm:flex-row items-center gap-4 md:gap-6 order-1 md:order-2 w-full md:w-auto">
         {/* Range Info */}
-        <div className="text-sm font-medium text-[#6B7280]">
+        <div className="text-[12px] md:text-sm font-medium text-[#6B7280] order-2 sm:order-1">
           <span className="tabular-nums">
-            {((page - 1) * limit) + 1}-{Math.min(page * limit, totalRecords)}
+            {totalRecords === 0 ? "0-0" : `${((page - 1) * limit) + 1}-${Math.min(page * limit, totalRecords)}`}
           </span>
           <span className="mx-1">of</span>
           <span className="text-[#111827] font-bold">{totalRecords}</span>
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 order-1 sm:order-2">
           {/* Prev Arrow */}
           <button
             onClick={handlePrev}
             disabled={Number(page) === 1}
-            className="w-9 h-9 flex items-center justify-center rounded-lg border border-[#F3F4F6] bg-white text-[#9CA3AF] hover:bg-[#F9FAFB] hover:text-[#4B5563] disabled:opacity-30 disabled:hover:bg-white transition-colors cursor-pointer"
+            className="w-8 h-8 md:w-9 md:h-9 flex items-center justify-center rounded-lg border border-[#F3F4F6] bg-white text-[#9CA3AF] hover:bg-[#F9FAFB] hover:text-[#4B5563] disabled:opacity-30 disabled:hover:bg-white transition-colors cursor-pointer"
           >
-            <ChevronLeft size={18} />
+            <ChevronLeft size={16} md:size={18} />
           </button>
 
           {/* Page List */}
           <div className="flex items-center">
             {getPageNumbers().map((pageNum, index) => {
               if (pageNum === "...") {
-                return <span key={`dots-${index}`} className="px-2 text-[#9CA3AF] text-sm">...</span>;
+                return <span key={`dots-${index}`} className="px-1 md:px-2 text-[#9CA3AF] text-sm">...</span>;
               }
               const isActive = Number(page) === Number(pageNum);
               return (
                 <button
                   key={pageNum}
                   onClick={() => onPageChange(pageNum)}
-                  className={`w-9 h-9 rounded-lg flex items-center justify-center text-sm font-bold transition-all sm:mx-0.5 cursor-pointer ${isActive
+                  className={`w-8 h-8 md:w-9 md:h-9 rounded-lg flex items-center justify-center text-[12px] md:text-sm font-bold transition-all mx-0.5 cursor-pointer ${isActive
                     ? "bg-[#B02E0C] text-white shadow-md border-[#B02E0C]"
                     : "text-[#4B5563] hover:text-[#111827] hover:bg-[#F9FAFB] border border-transparent"
                     }`}
@@ -107,9 +107,9 @@ const Pagination = ({
           <button
             onClick={handleNext}
             disabled={Number(page) >= totalPages}
-            className="w-9 h-9 flex items-center justify-center rounded-lg border border-[#F3F4F6] bg-white text-[#9CA3AF] hover:bg-[#F9FAFB] hover:text-[#4B5563] disabled:opacity-30 disabled:hover:bg-white transition-colors cursor-pointer"
+            className="w-8 h-8 md:w-9 md:h-9 flex items-center justify-center rounded-lg border border-[#F3F4F6] bg-white text-[#9CA3AF] hover:bg-[#F9FAFB] hover:text-[#4B5563] disabled:opacity-30 disabled:hover:bg-white transition-colors cursor-pointer"
           >
-            <ChevronRight size={18} />
+            <ChevronRight size={16} md:size={18} />
           </button>
         </div>
       </div>

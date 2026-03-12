@@ -697,35 +697,37 @@ const CouponManagement = () => {
   );
 
   return (
-    <div className="space-y-6 p-4 bg-gray-100 w-full min-h-screen">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+    <div className="space-y-4 sm:space-y-8 px-4 sm:px-8 py-4 sm:py-8 bg-[#F8FAFC] w-full min-h-screen">
+      <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            Coupon Management{" "}
+          <h1 className="text-3xl font-black text-[#0F172A] tracking-tight">
+            Coupon Management
           </h1>
-          <p className="text-gray-600">
+          <p className="text-[#64748B] text-sm mt-1 font-medium">
             Manage discount coupon codes for platform subscriptions or
             purchases.
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
           <button
             onClick={() => {
               setShowAddModal(true);
               fetchPlans();
               fetchCriteria();
             }}
-            className="mt-4 sm:mt-0 px-4 py-2 bg-[#B02E0C] text-white rounded-md hover:bg-[#8d270b]"
+            className="px-5 py-2.5 bg-[#B02E0C] text-white rounded-xl text-sm font-bold shadow-lg shadow-[#B02E0C]/20 hover:bg-[#8d270b] transition-all active:scale-95 flex items-center justify-center gap-2"
           >
-            + Create New Coupon
+            <Plus size={18} strokeWidth={3} />
+            Create New Coupon
           </button>
           <button
             onClick={() => {
               setShowCriteriaModal(true);
               fetchCriteria();
             }}
-            className="mt-4 sm:mt-0 px-4 py-2 bg-[#B02E0C] text-white rounded-md hover:bg-[#8d270b]"
+            className="px-5 py-2.5 bg-white border border-[#E2E8F0] text-[#475569] rounded-xl text-sm font-bold shadow-sm hover:bg-[#F8FAFC] transition-all active:scale-95 flex items-center justify-center gap-2"
           >
+            <AlertCircle size={18} />
             Coupon Criteria
           </button>
         </div>
@@ -763,14 +765,14 @@ const CouponManagement = () => {
 
       {/* Coupon Criteria Modal */}
       {showCriteriaModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-xs bg-black/50 overflow-y-auto">
-          <div className="bg-white rounded-xl w-[90%] max-w-6xl p-6 relative my-8">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-semibold">Coupon Criteria</h2>
-              <div className="flex gap-3">
+        <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-xs bg-black/50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-6xl p-4 md:p-8 relative shadow-2xl overflow-hidden flex flex-col max-h-[95vh] animate-in zoom-in-95 duration-300">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sticky top-0 bg-white z-10 pb-4 border-b border-gray-100">
+              <h2 className="text-2xl font-bold text-gray-900">Coupon Criteria</h2>
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   onClick={() => setShowRules(!showRules)}
-                  className={`px-4 py-2 rounded-md flex items-center gap-2 transition-all ${showRules ? "bg-blue-600 text-white shadow-lg" : "bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100"}`}
+                  className={`px-3 md:px-4 py-2 rounded-xl text-xs md:text-sm font-bold flex items-center gap-2 transition-all ${showRules ? "bg-blue-600 text-white shadow-lg" : "bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100"}`}
                 >
                   <Info size={18} />
                   Rules & Guide
@@ -780,7 +782,7 @@ const CouponManagement = () => {
                     setShowAddCriteriaModal(true);
                     resetCriteriaForm();
                   }}
-                  className="px-4 py-2 bg-[#B02E0C] text-white rounded-md hover:bg-[#8d270b] flex items-center gap-2"
+                  className="px-3 md:px-4 py-2 bg-[#B02E0C] text-white rounded-xl hover:bg-[#8d270b] flex items-center gap-2 text-xs md:text-sm font-bold shadow-lg shadow-[#B02E0C]/20 transition-all active:scale-95"
                 >
                   <Plus size={18} />
                   Add Criteria
@@ -792,7 +794,7 @@ const CouponManagement = () => {
                     setSuccessCriteria(null);
                     setShowRules(false);
                   }}
-                  className="text-gray-500 hover:text-gray-700"
+                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 text-gray-500 hover:text-gray-700 transition-all"
                 >
                   <X size={24} />
                 </button>
@@ -810,8 +812,8 @@ const CouponManagement = () => {
               </div>
             )}
 
-            <div className="flex flex-row items-start gap-6 min-h-[500px] overflow-hidden">
-              <div className={`transition-all duration-300 min-w-0 overflow-hidden ${showRules ? 'w-[60%]' : 'w-full'}`}>
+            <div className="flex flex-col lg:flex-row items-start gap-6 flex-grow overflow-y-auto custom-scrollbar pr-1">
+              <div className={`transition-all duration-300 min-w-0 w-full ${showRules ? 'lg:w-[60%]' : 'w-full'}`}>
 
                 {/* Criteria Table */}
                 <div className="bg-white shadow-sm border border-gray-200 rounded-lg overflow-hidden">
@@ -887,7 +889,7 @@ const CouponManagement = () => {
               </div>
 
               {showRules && (
-                <div className="w-[40%] flex-shrink-0 bg-white rounded-2xl border border-gray-200 shadow-sm overflow-y-auto max-h-[75vh] animate-in slide-in-from-right duration-300">
+                <div className="w-full lg:w-[40%] flex-shrink-0 bg-white rounded-2xl border border-gray-200 shadow-sm overflow-y-auto lg:max-h-[75vh] animate-in slide-in-from-bottom lg:slide-in-from-right duration-300">
                   <div className="p-6">
                     <div className="flex items-center gap-2 mb-6 pb-4 border-b border-gray-200">
                       <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
@@ -1000,10 +1002,10 @@ const CouponManagement = () => {
 
       {/* Add Criteria Modal */}
       {showAddCriteriaModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-xs bg-black/50 overflow-y-auto">
-          <div className="bg-white rounded-xl w-[90%] max-w-3xl p-6 relative my-8">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Add Coupon Criteria</h2>
+        <div className="fixed inset-0 flex items-center justify-center z-[60] backdrop-blur-xs bg-black/50 p-4">
+          <div className="bg-white rounded-[2rem] w-full max-w-3xl p-6 md:p-8 relative shadow-2xl animate-in zoom-in-95 duration-300 overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="flex justify-between items-center mb-6 border-b border-gray-100 pb-4 flex-shrink-0">
+              <h2 className="text-2xl font-black text-gray-900">Add Coupon Criteria</h2>
               <button
                 onClick={() => {
                   setShowAddCriteriaModal(false);
@@ -1026,7 +1028,7 @@ const CouponManagement = () => {
               <form onSubmit={handleCreateCriteria} className="space-y-6">
                 <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
                   <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Basic Requirements</h3>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {[
                       { name: 'attach_phone', label: 'Require Phone Number' },
                       { name: 'attach_email', label: 'Require Email Address' },
@@ -1127,7 +1129,7 @@ const CouponManagement = () => {
                     </div>
                     <h3 className="text-sm font-bold uppercase tracking-wider">Logic Guide</h3>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <p className="text-[11px] font-bold text-blue-900 border-b border-blue-200 pb-1 mb-1 italic">COMMON LOGIC</p>
                       <p className="text-[10px] text-blue-800 leading-tight">• <span className="font-bold">Target All:</span> Enable <span className="italic">Selection</span> + <span className="italic">Future</span> (Keep IDs empty)</p>
@@ -1145,7 +1147,7 @@ const CouponManagement = () => {
               </form>
             </div>
 
-            <div className="flex justify-end gap-3 pt-6 mt-4 border-t border-gray-100 flex-shrink-0">
+            <div className="flex flex-col sm:flex-row justify-end gap-3 pt-6 mt-4 border-t border-gray-100 flex-shrink-0">
               <button
                 type="button"
                 onClick={() => {
@@ -1153,7 +1155,7 @@ const CouponManagement = () => {
                   resetCriteriaForm();
                   setErrorCriteria(null);
                 }}
-                className="px-8 py-3 rounded-xl border-2 border-gray-100 text-gray-600 hover:bg-gray-50 hover:border-gray-200 transition-all text-sm font-bold cursor-pointer"
+                className="px-8 py-3 rounded-xl border-2 border-gray-100 text-gray-600 hover:bg-gray-50 hover:border-gray-200 transition-all text-sm font-bold cursor-pointer w-full sm:w-auto"
               >
                 Cancel
               </button>
@@ -1163,7 +1165,7 @@ const CouponManagement = () => {
                   e.preventDefault();
                   handleCreateCriteria(e);
                 }}
-                className="px-10 py-3 rounded-xl bg-[#B02E0C] text-white hover:bg-[#8d270b] hover:shadow-lg hover:shadow-[#B02E0C]/30 transition-all text-sm font-bold cursor-pointer"
+                className="px-10 py-3 rounded-xl bg-[#B02E0C] text-white hover:bg-[#8d270b] hover:shadow-lg hover:shadow-[#B02E0C]/30 transition-all text-sm font-bold cursor-pointer w-full sm:w-auto"
               >
                 Create Criteria
               </button>
@@ -1201,7 +1203,7 @@ const CouponManagement = () => {
               <form onSubmit={handleUpdateCriteria} className="space-y-6">
                 <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
                   <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Criteria Settings</h3>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {[
                       { name: 'attach_phone', label: 'Attach Phone' },
                       { name: 'attach_email', label: 'Attach Email' },
@@ -1301,7 +1303,7 @@ const CouponManagement = () => {
                     </div>
                     <h3 className="text-sm font-bold uppercase tracking-wider">Logic Guide</h3>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <p className="text-[11px] font-bold text-blue-900 border-b border-blue-200 pb-1 mb-1 italic">COMMON LOGIC</p>
                       <p className="text-[10px] text-blue-800 leading-tight">• <span className="font-bold">Target All:</span> Enable <span className="italic">Selection</span> + <span className="italic">Future</span> (Keep IDs empty)</p>
@@ -1351,8 +1353,8 @@ const CouponManagement = () => {
       {/* Create New Coupon Modal */}
       {
         showAddModal && (
-          <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm bg-black/60 p-4 overflow-y-auto">
-            <div className="bg-white rounded-2xl w-full max-w-2xl p-8 relative shadow-2xl overflow-hidden flex flex-col max-h-[95vh]">
+          <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm bg-black/60 p-4">
+            <div className="bg-white rounded-[2rem] w-full max-w-2xl p-6 md:p-8 relative shadow-2xl overflow-hidden flex flex-col max-h-[95vh] animate-in zoom-in-95 duration-300">
               <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100 flex-shrink-0">
                 <h2 className="text-2xl font-bold text-gray-800">Create New Coupon</h2>
                 <button
@@ -1375,7 +1377,7 @@ const CouponManagement = () => {
 
               <div className="overflow-y-auto pr-2 custom-scrollbar flex-grow space-y-6">
                 <form onSubmit={handleCreateCoupon} className="space-y-6">
-                  <div className="grid grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
                         Coupon Code
@@ -1420,7 +1422,7 @@ const CouponManagement = () => {
                     ></textarea>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
                         Start Date
@@ -1449,7 +1451,7 @@ const CouponManagement = () => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-6 pt-4 border-t border-gray-50">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-gray-50">
                     <div className="space-y-2">
                       <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
                         Coupon Type
@@ -1498,7 +1500,7 @@ const CouponManagement = () => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
                         Global Usage Limit
@@ -1613,7 +1615,7 @@ const CouponManagement = () => {
                     <label className="block text-sm font-bold text-gray-700 uppercase tracking-wider">
                       Applicable Subscription Plans
                     </label>
-                    <div className="grid grid-cols-2 gap-3 max-h-40 overflow-y-auto p-1 custom-scrollbar">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-40 overflow-y-auto p-1 custom-scrollbar">
                       {plans.map((plan) => {
                         const isSelected = (couponFormData.subscription_id || []).some(id => String(id) === String(plan.id));
                         return (
@@ -1633,7 +1635,7 @@ const CouponManagement = () => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-6 p-4 rounded-2xl bg-gray-50/50 border border-gray-100">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 p-4 rounded-2xl bg-gray-50/50 border border-gray-100">
                     <label className="flex items-center gap-3 cursor-pointer group">
                       <div className="relative">
                         <input
@@ -1668,7 +1670,7 @@ const CouponManagement = () => {
                 </form>
               </div>
 
-              <div className="flex justify-end gap-3 pt-6 mt-4 border-t border-gray-100 flex-shrink-0">
+              <div className="flex flex-col sm:flex-row justify-end gap-3 pt-6 mt-4 border-t border-gray-100 flex-shrink-0">
                 <button
                   type="button"
                   onClick={() => {
@@ -1676,7 +1678,7 @@ const CouponManagement = () => {
                     resetCouponForm();
                     setError(null);
                   }}
-                  className="px-8 py-3 rounded-xl border-2 border-gray-100 text-gray-600 hover:bg-gray-50 hover:border-gray-200 transition-all text-sm font-bold cursor-pointer"
+                  className="px-8 py-3 rounded-xl border-2 border-gray-100 text-gray-600 hover:bg-gray-50 hover:border-gray-200 transition-all text-sm font-bold cursor-pointer w-full sm:w-auto"
                 >
                   Cancel
                 </button>
@@ -1687,7 +1689,7 @@ const CouponManagement = () => {
                     handleCreateCoupon(e);
                   }}
                   disabled={loading}
-                  className="px-10 py-3 rounded-xl bg-[#B02E0C] text-white hover:bg-[#8d270b] hover:shadow-lg hover:shadow-[#B02E0C]/30 transition-all text-sm font-bold cursor-pointer flex items-center gap-3 disabled:opacity-70"
+                  className="px-10 py-3 rounded-xl bg-[#B02E0C] text-white hover:bg-[#8d270b] hover:shadow-lg hover:shadow-[#B02E0C]/30 transition-all text-sm font-bold cursor-pointer flex items-center justify-center gap-3 disabled:opacity-70 w-full sm:w-auto"
                 >
                   {loading && <Loader2 size={18} className="animate-spin" />}
                   {loading ? "Processing..." : "Create Coupon"}
@@ -1701,8 +1703,8 @@ const CouponManagement = () => {
       {/* Update Coupon Modal */}
       {
         showEditModal && (
-          <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm bg-black/60 p-4 overflow-y-auto">
-            <div className="bg-white rounded-2xl w-full max-w-2xl p-8 relative shadow-2xl overflow-hidden flex flex-col max-h-[95vh]">
+          <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm bg-black/60 p-4">
+            <div className="bg-white rounded-[2rem] w-full max-w-2xl p-4 md:p-8 relative shadow-2xl overflow-hidden flex flex-col max-h-[95vh] animate-in zoom-in-95 duration-300">
               <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100 flex-shrink-0">
                 <h2 className="text-2xl font-bold text-gray-800">Update Coupon</h2>
                 <button
@@ -1726,7 +1728,7 @@ const CouponManagement = () => {
 
               <div className="overflow-y-auto pr-2 custom-scrollbar flex-grow space-y-6">
                 <form onSubmit={handleUpdateCoupon} className="space-y-6">
-                  <div className="grid grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
                         Coupon Code
@@ -1771,7 +1773,7 @@ const CouponManagement = () => {
                     ></textarea>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
                         Start Date
@@ -1800,7 +1802,7 @@ const CouponManagement = () => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-6 pt-4 border-t border-gray-50">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-gray-100">
                     <div className="space-y-2">
                       <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
                         Coupon Type
@@ -1849,7 +1851,7 @@ const CouponManagement = () => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
                         Global Usage Limit
@@ -1901,7 +1903,7 @@ const CouponManagement = () => {
                             <span className="text-[10px] bg-[#B02E0C] text-white px-2 py-0.5 rounded-full font-bold">Optional</span>
                           </div>
                           <div className="border border-[#B02E0C]/20 rounded-xl overflow-hidden bg-white shadow-sm">
-                            <div className="max-h-48 overflow-y-auto p-2 custom-scrollbar">
+                            <div className="max-h-40 md:max-h-48 overflow-y-auto p-2 custom-scrollbar">
                               {loadingUsers ? (
                                 <div className="flex items-center justify-center py-8">
                                   <Loader2 className="animate-spin text-[#B02E0C]" size={28} />
@@ -1964,7 +1966,7 @@ const CouponManagement = () => {
                     <label className="block text-sm font-bold text-gray-700 uppercase tracking-wider">
                       Applicable Subscription Plans
                     </label>
-                    <div className="grid grid-cols-2 gap-3 max-h-40 overflow-y-auto p-1 custom-scrollbar">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-40 overflow-y-auto p-1 custom-scrollbar">
                       {plans.map((plan) => {
                         const isSelected = (couponFormData.subscription_id || []).some(id => String(id) === String(plan.id));
                         return (
@@ -1984,7 +1986,7 @@ const CouponManagement = () => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-6 p-4 rounded-2xl bg-gray-50/50 border border-gray-100">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 p-4 rounded-2xl bg-gray-50/50 border border-gray-100">
                     <label className="flex items-center gap-3 cursor-pointer group">
                       <div className="relative">
                         <input
@@ -2019,7 +2021,7 @@ const CouponManagement = () => {
                 </form>
               </div>
 
-              <div className="flex justify-end gap-3 pt-6 mt-4 border-t border-gray-100 flex-shrink-0">
+              <div className="flex flex-col sm:flex-row justify-end gap-3 pt-6 mt-4 border-t border-gray-100 flex-shrink-0">
                 <button
                   type="button"
                   onClick={() => {
@@ -2028,7 +2030,7 @@ const CouponManagement = () => {
                     resetCouponForm();
                     setError(null);
                   }}
-                  className="px-8 py-3 rounded-xl border-2 border-gray-100 text-gray-600 hover:bg-gray-50 hover:border-gray-200 transition-all text-sm font-bold cursor-pointer"
+                  className="px-8 py-3 rounded-xl border-2 border-gray-100 text-gray-600 hover:bg-gray-50 hover:border-gray-200 transition-all text-sm font-bold cursor-pointer w-full sm:w-auto"
                 >
                   Cancel
                 </button>
@@ -2039,7 +2041,7 @@ const CouponManagement = () => {
                     handleUpdateCoupon(e);
                   }}
                   disabled={loading}
-                  className="px-10 py-3 rounded-xl bg-[#B02E0C] text-white hover:bg-[#8d270b] hover:shadow-lg hover:shadow-[#B02E0C]/30 transition-all text-sm font-bold cursor-pointer flex items-center gap-3 disabled:opacity-70"
+                  className="px-10 py-3 rounded-xl bg-[#B02E0C] text-white hover:bg-[#8d270b] hover:shadow-lg hover:shadow-[#B02E0C]/30 transition-all text-sm font-bold cursor-pointer flex items-center justify-center gap-3 disabled:opacity-70 w-full sm:w-auto"
                 >
                   {loading && <Loader2 size={18} className="animate-spin" />}
                   {loading ? "Processing..." : "Update Coupon"}
@@ -2052,8 +2054,8 @@ const CouponManagement = () => {
 
       {
         showOpenModal && selectedCoupon && (
-          <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-xs bg-black/50 overflow-y-auto">
-            <div className="bg-white rounded-xl w-[90%] max-w-2xl p-6 relative my-8">
+          <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-xs bg-black/50 p-4">
+            <div className="bg-white rounded-2xl w-full max-w-2xl p-6 md:p-8 relative shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
               <div className="flex justify-between items-center mb-6 border-b pb-4">
                 <h2 className="text-2xl font-bold text-gray-900">Coupon Details</h2>
                 <button
@@ -2067,7 +2069,7 @@ const CouponManagement = () => {
                 </button>
               </div>
 
-              <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
                 <div className="space-y-1">
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Coupon Code</p>
                   <p className="text-lg font-bold text-[#B02E0C]">{selectedCoupon.code}</p>

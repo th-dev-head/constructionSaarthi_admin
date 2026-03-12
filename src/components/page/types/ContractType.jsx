@@ -19,6 +19,7 @@ const ContractType = () => {
     const [modalType, setModalType] = useState("add"); // "add" | "edit" | "view" | "delete"
     const [selectedContractType, setSelectedContractType] = useState(null);
     const [formState, setFormState] = useState({ name: "" });
+    const [searchQuery, setSearchQuery] = useState("");
     const nameRef = useRef(null);
     const menuRef = useRef(null);
 
@@ -113,6 +114,10 @@ const ContractType = () => {
         },
     ];
 
+    const filteredContractTypes = contractTypes.filter(type => 
+        (type.name || "").toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     const renderActions = (type) => (
         <div className="relative" ref={openMenuId === type.id ? menuRef : null}>
             <button
@@ -178,7 +183,7 @@ const ContractType = () => {
     );
 
     return (
-        <div className="space-y-8 p-8 bg-[#F8FAFC] w-full min-h-screen" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
+        <div className="space-y-4 sm:space-y-8 px-4 sm:px-8 py-4 sm:py-8 bg-[#F8FAFC] w-full min-h-screen" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="space-y-1">
                     <h1 className="text-3xl font-black text-[#0F172A] tracking-tight">Contract-Protocols</h1>
@@ -201,11 +206,18 @@ const ContractType = () => {
 
             <DataTable
                 columns={columns}
-                data={contractTypes}
+                data={filteredContractTypes}
                 loading={loading}
                 renderActions={renderActions}
                 rowKey={(row) => row.id}
                 showSearch
+                pagination={{ 
+                    page: 1, 
+                    limit: 10, 
+                    totalPages: Math.ceil(filteredContractTypes.length / 10), 
+                    totalRecords: filteredContractTypes.length 
+                }}
+                onSearch={(q) => setSearchQuery(q)}
             />
 
             {showModal && (
