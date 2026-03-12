@@ -47,7 +47,7 @@ export const DashBoardLayout = () => {
           isSidebarCollapsed={isSidebarCollapsed}
           onToggleCollapse={toggleSidebarCollapse}
         />
-        <main className="p-8 bg-[#F8FAFC] flex-1 overflow-x-hidden">
+        <main className="p-0 sm:p-4 md:p-8 bg-[#F8FAFC] flex-1 overflow-x-hidden">
           <Outlet />
         </main>
       </div>

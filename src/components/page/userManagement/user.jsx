@@ -290,10 +290,12 @@ const Users = () => {
   const tabs = ["All", ...Roles.map((role) => role.name)];
 
   return (
-    <div className="space-y-8 p-6 bg-[#F8FAFC] w-full min-h-screen">
-      <div>
-        <h1 className="text-3xl font-extrabold text-[#0F172A] tracking-tight">Users Management</h1>
-        <p className="text-[#64748B] mt-1 text-lg font-medium">Monitor and manage your platform's growing community of professionals</p>
+    <div className="space-y-4 sm:space-y-8 px-4 sm:px-8 py-4 sm:py-8 bg-[#F8FAFC] w-full min-h-screen" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-extrabold text-[#0F172A] tracking-tight">Users Management</h1>
+          <p className="text-[#64748B] mt-1 text-sm font-medium">Monitor and manage your platform's growing community of professionals</p>
+        </div>
       </div>
 
       <div className="flex gap-2 items-center border-b border-[#E2E8F0] overflow-x-auto no-scrollbar">

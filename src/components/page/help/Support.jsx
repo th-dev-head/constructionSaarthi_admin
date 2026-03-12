@@ -59,6 +59,7 @@ const Support = () => {
   const [ticketTotalPages, setTicketTotalPages] = useState(1);
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [statusForm, setStatusForm] = useState({ id: "", status: "Open", admin_note: "" });
+  const [updatingStatus, setUpdatingStatus] = useState(false);
 
   const [feedbacks, setFeedbacks] = useState([]);
   const [feedbackFilters, setFeedbackFilters] = useState({ page: 1, limit: 10 });
@@ -99,17 +100,28 @@ const Support = () => {
   const updateTicketStatus = async () => {
     const id = statusForm.id;
     if (!id) return;
+    setUpdatingStatus(true);
     try {
       await apiInstance.put(`/api/admin/support/ticket/${id}/status`, {
         status: statusForm.status,
         admin_note: statusForm.admin_note,
       });
+
+      // Update local state immediately for instant feedback
+      setTickets(prev => prev.map(t =>
+        String(t.id) === String(id) ? { ...t, status: statusForm.status } : t
+      ));
+
       setShowStatusModal(false);
       setStatusForm({ id: "", status: "Open", admin_note: "" });
-      fetchTickets();
-      fetchTicketStats();
+
+      // Refetch to sync with server
+      await fetchTickets();
+      await fetchTicketStats();
     } catch (err) {
       setTicketsError(err.response?.data?.message || err.message);
+    } finally {
+      setUpdatingStatus(false);
     }
   };
 
@@ -289,10 +301,10 @@ const Support = () => {
   };
 
   return (
-    <div className="space-y-8 p-8 bg-[#F8FAFC] w-full min-h-screen" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
+    <div className="space-y-4 sm:space-y-8 px-4 sm:px-8 py-4 sm:py-8 bg-[#F8FAFC] w-full min-h-screen" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
       {/* Navigation Tabs */}
-      <div className="bg-white p-2 rounded-[2rem] shadow-sm border border-[#E2E8F0]">
-        <div className="flex gap-2">
+      <div className="bg-white p-1 md:p-2 rounded-2xl md:rounded-[2rem] shadow-sm border border-[#E2E8F0] overflow-x-auto no-scrollbar">
+        <div className="flex gap-1 md:gap-2 min-w-max">
           {[
             { name: "Categories", path: "/help", icon: LayoutGrid },
             { name: "FAQs", path: "/help/faqs", icon: HelpCircle },
@@ -302,12 +314,12 @@ const Support = () => {
             <button
               key={tab.path}
               onClick={() => navigate(tab.path)}
-              className={`px-8 py-3 rounded-2xl font-bold text-sm transition-all duration-300 flex items-center gap-2 ${location.pathname === tab.path
-                ? "bg-accent text-white shadow-lg shadow-accent/20"
+              className={`px-4 md:px-8 py-2 md:py-3 rounded-xl md:rounded-2xl font-bold text-[12px] md:text-sm transition-all duration-300 flex items-center gap-2 whitespace-nowrap ${location.pathname === tab.path
+                ? "bg-accent text-white shadow-md md:shadow-lg shadow-accent/20"
                 : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                 }`}
             >
-              <tab.icon size={18} strokeWidth={location.pathname === tab.path ? 3 : 2} />
+              <tab.icon size={16} md:size={18} strokeWidth={location.pathname === tab.path ? 3 : 2} />
               {tab.name}
             </button>
           ))}
@@ -327,26 +339,27 @@ const Support = () => {
       )}
 
       {location.pathname === "/help" && (
-        <>
+        <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="space-y-1">
-              <h1 className="text-3xl font-black text-[#0F172A] tracking-tight">
+              <h1 className="text-2xl md:text-3xl font-black text-[#0F172A] tracking-tight">
                 Help Support
               </h1>
-              <p className="text-sm font-medium text-[#64748B]">
+              <p className="text-[12px] md:text-sm font-medium text-[#64748B]">
                 Manage help categories shown in app help center.
               </p>
             </div>
             <button
               onClick={openAddCategory}
-              className="px-8 py-4 bg-accent text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#8D270B] shadow-xl shadow-accent/20 transition-all active:scale-95 flex items-center gap-2 cursor-pointer"
+              className="px-6 md:px-8 py-3 md:py-4 bg-accent text-white rounded-xl md:rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-[#8D270B] shadow-lg md:shadow-xl shadow-accent/20 transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto"
             >
-              <Plus size={18} strokeWidth={3} />
+              <Plus size={16} md:size={18} strokeWidth={3} />
               Add Category
             </button>
           </div>
 
-          <DataTable
+          <div className="bg-white shadow-2xl shadow-gray-200/50 border border-[#E2E8F0] rounded-2xl md:rounded-[2rem] overflow-hidden">
+            <DataTable
             columns={[
               {
                 header: "Name",
@@ -421,8 +434,9 @@ const Support = () => {
                 )}
               </div>
             )}
-          />
-        </>
+            />
+          </div>
+        </div>
       )}
 
       {location.pathname === "/help/faqs" && (
@@ -449,14 +463,14 @@ const Support = () => {
                   ? [...cat.faqs].sort((a, b) => Number(a?.order || 0) - Number(b?.order || 0))
                   : [];
                 return (
-                  <div key={cat.id} className="p-8 group/cat hover:bg-[#F8FAFC] transition-colors">
-                    <div className="flex items-center justify-between mb-8">
+                  <div key={cat.id} className="p-4 md:p-8 group/cat hover:bg-[#F8FAFC] transition-colors">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-8">
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-accent/10 rounded-2xl flex items-center justify-center text-accent">
-                          <HelpCircle size={24} />
+                        <div className="w-10 h-10 md:w-12 md:h-12 bg-accent/10 rounded-xl md:rounded-2xl flex items-center justify-center text-accent">
+                          <HelpCircle size={20} md:size={24} />
                         </div>
                         <div>
-                          <div className="text-lg font-black text-[#0F172A] tracking-tight group-hover/cat:text-accent transition-colors">{toPascalCase(cat.name) || "--"}</div>
+                          <div className="text-md md:text-lg font-black text-[#0F172A] tracking-tight group-hover/cat:text-accent transition-colors">{toPascalCase(cat.name) || "--"}</div>
                           <div className="text-[10px] font-black text-[#64748B] uppercase tracking-widest mt-0.5 opacity-70 italic">Count: {cat.faq_count ?? faqs.length} entries</div>
                         </div>
                       </div>
@@ -466,80 +480,69 @@ const Support = () => {
                           setFaqModalType("add");
                           setShowFAQModal(true);
                         }}
-                        className="px-6 py-3 bg-accent text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-[#8D270B] shadow-lg shadow-accent/10 transition-all active:scale-95 flex items-center gap-2 cursor-pointer"
+                        className="px-6 py-3 bg-accent text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-[#8D270B] shadow-lg shadow-accent/10 transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto"
                       >
                         <Plus size={14} strokeWidth={3} /> Add FAQ
                       </button>
                     </div>
                     {faqs.length === 0 ? (
-                      <div className="p-8 bg-[#F1F5F9]/30 rounded-3xl border border-dashed border-[#E2E8F0] text-center">
+                      <div className="p-6 md:p-8 bg-[#F1F5F9]/30 rounded-2xl md:rounded-3xl border border-dashed border-[#E2E8F0] text-center">
                         <p className="text-sm font-bold text-[#64748B]">Intelligence void detected. Add your first FAQ above.</p>
                       </div>
                     ) : (
-                      <div className="border border-[#E2E8F0] rounded-3xl overflow-hidden bg-white shadow-sm">
-                        <table className="w-full text-left">
-                          <thead>
-                            <tr className="bg-[#F8FAFC] border-b border-[#E2E8F0]">
-                              <th className="py-4 px-6 text-[10px] font-black text-[#64748B] uppercase tracking-widest w-20">Order</th>
-                              <th className="py-4 px-6 text-[10px] font-black text-[#64748B] uppercase tracking-widest">Inquiry Details</th>
-                              <th className="py-4 px-6 text-[10px] font-black text-[#64748B] uppercase tracking-widest">Resolution Content</th>
-                              <th className="py-4 px-6 text-[10px] font-black text-[#64748B] uppercase tracking-widest">Status</th>
-                              <th className="py-4 px-6 text-[10px] font-black text-[#64748B] uppercase tracking-widest text-center">Actions</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-[#F1F5F9]">
-                            {faqs.map((f) => (
-                              <tr key={f.id} className="group/row hover:bg-[#F8FAFC] transition-colors">
-                                <td className="py-4 px-6">
-                                  <span className="text-sm font-bold text-[#475569] tabular-nums">{f.order ?? "0"}</span>
-                                </td>
-                                <td className="py-4 px-6 min-w-[200px]">
-                                  <span className="text-sm font-black text-[#0F172A] leading-relaxed line-clamp-2">{f.question || "--"}</span>
-                                </td>
-                                <td className="py-4 px-6 min-w-[300px]">
-                                  <p className="text-sm font-medium text-[#64748B] leading-relaxed line-clamp-2 italic">{f.answer || "--"}</p>
-                                </td>
-                                <td className="py-4 px-6">
-                                  <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${f.isActive === false ? "bg-accent/5 text-[#64748B] border border-[#E2E8F0]" : "bg-emerald-50 text-emerald-600 border border-emerald-100"}`}>
-                                    {f.isActive === false ? "Inactive" : "Active"}
-                                  </span>
-                                </td>
-                                <td className="py-4 px-6 text-center">
-                                  <div className="flex items-center justify-center gap-2 opacity-100 sm:opacity-0 group-hover/row:opacity-100 transition-all duration-300">
-                                    <button
-                                      onClick={() => handleEditFAQ(f)}
-                                      className="p-2 rounded-lg bg-[#F1F5F9] text-[#64748B] hover:bg-accent/10 hover:text-accent transition-colors cursor-pointer"
-                                    >
-                                      <Edit size={16} />
-                                    </button>
-                                    <button
-                                      onClick={async () => {
-                                        await dispatch(updateHelpFAQ({
-                                          id: Number(f.id),
-                                          category_id: Number(f.category_id),
-                                          isActive: !(f.isActive === false),
-                                        }));
-                                        dispatch(fetchHelpCategories());
-                                      }}
-                                      className={`p-2 rounded-lg transition-colors cursor-pointer ${f.isActive === false ? 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100' : 'bg-[#F1F5F9] text-[#64748B] hover:bg-rose-50 hover:text-rose-600'}`}
-                                    >
-                                      {f.isActive === false ? <Plus size={16} /> : <X size={16} />}
-                                    </button>
-                                    <button
-                                      onClick={() => {
-                                        setSelectedFAQ(f);
-                                        setShowFAQDeleteModal(true);
-                                      }}
-                                      className="p-2 rounded-lg bg-accent/5 text-accent hover:bg-accent/10 transition-colors cursor-pointer"
-                                    >
-                                      <Trash2 size={16} />
-                                    </button>
-                                  </div>
-                                </td>
+                      <div className="border border-[#E2E8F0] rounded-2xl md:rounded-3xl overflow-hidden bg-white shadow-sm">
+                        <div className="overflow-x-auto no-scrollbar">
+                          <table className="w-full text-left min-w-[600px]">
+                            <thead>
+                              <tr className="bg-[#F8FAFC] border-b border-[#E2E8F0]">
+                                <th className="py-4 px-6 text-[10px] font-black text-[#64748B] uppercase tracking-widest w-20">Order</th>
+                                <th className="py-4 px-6 text-[10px] font-black text-[#64748B] uppercase tracking-widest">Inquiry Details</th>
+                                <th className="py-4 px-6 text-[10px] font-black text-[#64748B] uppercase tracking-widest">Resolution Content</th>
+                                <th className="py-4 px-6 text-[10px] font-black text-[#64748B] uppercase tracking-widest">Status</th>
+                                <th className="py-4 px-6 text-[10px] font-black text-[#64748B] uppercase tracking-widest text-center">Actions</th>
                               </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                            </thead>
+                            <tbody className="divide-y divide-[#F1F5F9]">
+                              {faqs.map((f) => (
+                                <tr key={f.id} className="group/row hover:bg-[#F8FAFC] transition-colors">
+                                  <td className="py-4 px-6">
+                                    <span className="text-sm font-bold text-[#475569] tabular-nums">{f.order ?? "0"}</span>
+                                  </td>
+                                  <td className="py-4 px-6 min-w-[200px]">
+                                    <span className="text-sm font-black text-[#0F172A] leading-relaxed line-clamp-2">{f.question || "--"}</span>
+                                  </td>
+                                  <td className="py-4 px-6 min-w-[300px]">
+                                    <p className="text-sm font-medium text-[#64748B] leading-relaxed line-clamp-2 italic">{f.answer || "--"}</p>
+                                  </td>
+                                  <td className="py-4 px-6">
+                                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${f.isActive === false ? "bg-accent/5 text-[#64748B] border border-[#E2E8F0]" : "bg-emerald-50 text-emerald-600 border border-emerald-100"}`}>
+                                      {f.isActive === false ? "Inactive" : "Active"}
+                                    </span>
+                                  </td>
+                                  <td className="py-4 px-6 text-center">
+                                    <div className="flex items-center justify-center gap-2 transition-all duration-300">
+                                      <button
+                                        onClick={() => handleEditFAQ(f)}
+                                        className="p-2 rounded-lg bg-[#F1F5F9] text-[#64748B] hover:bg-accent/10 hover:text-accent transition-colors cursor-pointer"
+                                      >
+                                        <Edit size={16} />
+                                      </button>
+                                      <button
+                                        onClick={() => {
+                                          setSelectedFAQ(f);
+                                          setShowFAQDeleteModal(true);
+                                        }}
+                                        className="p-2 rounded-lg bg-accent/5 text-accent hover:bg-accent/10 transition-colors cursor-pointer"
+                                      >
+                                        <Trash2 size={16} />
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -551,20 +554,20 @@ const Support = () => {
       )}
 
       {location.pathname === "/help/tickets" && (
-        <div className="bg-white shadow-2xl shadow-gray-200/50 border border-[#E2E8F0] rounded-[2rem] overflow-hidden">
-          <div className="p-8 border-b border-[#F1F5F9] bg-[#F8FAFC]/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+        <div className="bg-white shadow-2xl shadow-gray-200/50 border border-[#E2E8F0] rounded-2xl md:rounded-[2rem] overflow-hidden">
+          <div className="p-4 md:p-8 border-b border-[#F1F5F9] bg-[#F8FAFC]/50 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
             <div className="space-y-1">
-              <h2 className="text-2xl font-black text-[#0F172A] tracking-tight">Support Tickets</h2>
-              <p className="text-xs font-black text-[#64748B] uppercase tracking-widest opacity-70 italic">Client Communication Stream</p>
+              <h2 className="text-xl md:text-2xl font-black text-[#0F172A] tracking-tight">Support Tickets</h2>
+              <p className="text-[10px] md:text-xs font-black text-[#64748B] uppercase tracking-widest opacity-70 italic">Client Communication Stream</p>
             </div>
-            <div className="flex flex-wrap gap-4 items-center">
-              <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-black text-[#64748B] uppercase tracking-widest pl-1">Status Filter</span>
+            <div className="flex flex-wrap gap-3 md:gap-4 items-end w-full lg:w-auto">
+              <div className="flex flex-col gap-1 flex-1 min-w-[120px]">
+                <span className="text-[10px] font-black text-[#64748B] uppercase tracking-widest pl-1">Status</span>
                 <div className="relative">
                   <select
                     value={ticketFilters.status}
                     onChange={(e) => setTicketFilters((p) => ({ ...p, status: e.target.value, page: 1 }))}
-                    className="appearance-none pl-4 pr-10 py-2.5 bg-white border border-[#E2E8F0] rounded-xl text-sm font-bold text-[#0F172A] focus:ring-accent/20 focus:border-accent transition-all cursor-pointer outline-none shadow-sm min-w-[140px]"
+                    className="appearance-none pl-4 pr-10 py-2.5 bg-white border border-[#E2E8F0] rounded-xl text-[12px] md:text-sm font-bold text-[#0F172A] focus:ring-accent/20 focus:border-accent transition-all cursor-pointer outline-none shadow-sm w-full"
                   >
                     <option value="">All Streams</option>
                     <option value="Open">Open</option>
@@ -573,42 +576,41 @@ const Support = () => {
                     <option value="Closed">Closed</option>
                   </select>
                   <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#9CA3AF]">
-                    <ChevronDown size={16} />
+                    <ChevronDown size={14} />
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col gap-1">
+              {/* <div className="flex flex-col gap-1 flex-1 min-w-[120px]">
                 <span className="text-[10px] font-black text-[#64748B] uppercase tracking-widest pl-1">Topic/Tag</span>
                 <div className="relative">
                   <input
                     type="text"
                     value={ticketFilters.issue_category}
                     onChange={(e) => setTicketFilters((p) => ({ ...p, issue_category: e.target.value, page: 1 }))}
-                    className="pl-10 pr-4 py-2.5 bg-white border border-[#E2E8F0] rounded-xl text-sm font-bold text-[#0F172A] focus:ring-accent/20 focus:border-accent transition-all outline-none shadow-sm placeholder-[#94A3B8] w-full max-w-[200px]"
-                    placeholder="e.g. Inventory..."
+                    className="pl-9 pr-4 py-2.5 bg-white border border-[#E2E8F0] rounded-xl text-[12px] md:text-sm font-bold text-[#0F172A] focus:ring-accent/20 focus:border-accent transition-all outline-none shadow-sm placeholder-[#94A3B8] w-full"
+                    placeholder="Search tag..."
                   />
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#9CA3AF]">
-                    <Search size={16} />
+                    <Search size={14} />
                   </div>
                 </div>
-              </div>
+              </div> */}
               <button
                 onClick={() => fetchTickets()}
-                className="mt-5 p-2.5 bg-accent/10 text-accent rounded-xl hover:bg-accent/20 transition-all active:scale-95 cursor-pointer shadow-sm shadow-accent/5 flex items-center gap-2"
-                title="Refresh Stream"
+                className="p-3 bg-accent/10 text-accent rounded-xl hover:bg-accent/20 transition-all active:scale-95 cursor-pointer shadow-sm shadow-accent/5 flex items-center justify-center gap-2"
+                title="Refresh"
               >
-                <Loader2 size={18} className={ticketsLoading ? "animate-spin" : ""} />
-                <span className="text-[10px] font-black uppercase tracking-widest">Refresh</span>
+                <Loader2 size={16} className={ticketsLoading ? "animate-spin" : ""} /> Refresh
               </button>
             </div>
           </div>
 
           {ticketStats && (
-            <div className="p-8 grid grid-cols-2 md:grid-cols-4 gap-4 bg-white border-b border-[#F1F5F9]">
+            <div className="p-4 md:p-8 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 bg-white border-b border-[#F1F5F9]">
               {Object.entries(ticketStats).map(([k, v]) => (
-                <div key={k} className="p-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl group hover:border-accent/30 hover:shadow-xl hover:shadow-gray-200/40 transition-all duration-300">
-                  <div className="text-[10px] font-black text-[#64748B] uppercase tracking-widest opacity-60 group-hover:text-accent group-hover:opacity-100 transition-colors">{k.replace(/([A-Z])/g, ' $1').trim()}</div>
-                  <div className="text-2xl font-black text-[#0F172A] mt-1 tabular-nums group-hover:scale-105 transition-transform origin-left">{String(v)}</div>
+                <div key={k} className="p-3 md:p-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl md:rounded-2xl group hover:border-accent/30 transition-all duration-300">
+                  <div className="text-[10px] font-black text-[#64748B] uppercase tracking-widest opacity-60 group-hover:text-accent transition-colors">{k.replace(/([A-Z])/g, ' $1').trim()}</div>
+                  <div className="text-xl md:text-2xl font-black text-[#0F172A] mt-1 tabular-nums">{String(v)}</div>
                 </div>
               ))}
             </div>
@@ -702,10 +704,10 @@ const Support = () => {
       )}
 
       {location.pathname === "/help/feedbacks" && (
-        <div className="bg-white shadow-2xl shadow-gray-200/50 border border-[#E2E8F0] rounded-[2rem] overflow-hidden">
-          <div className="p-8 border-b border-[#F1F5F9] bg-[#F8FAFC]/50">
-            <h2 className="text-2xl font-black text-[#0F172A] tracking-tight">User Feedbacks</h2>
-            <p className="text-xs font-black text-[#64748B] uppercase tracking-widest mt-1 opacity-70 italic">Platform Experience Logs</p>
+        <div className="bg-white shadow-2xl shadow-gray-200/50 border border-[#E2E8F0] rounded-2xl md:rounded-[2rem] overflow-hidden">
+          <div className="p-4 md:p-8 border-b border-[#F1F5F9] bg-[#F8FAFC]/50">
+            <h2 className="text-xl md:text-2xl font-black text-[#0F172A] tracking-tight">User Feedbacks</h2>
+            <p className="text-[10px] md:text-xs font-black text-[#64748B] uppercase tracking-widest mt-1 opacity-70 italic">Platform Experience Logs</p>
           </div>
           <DataTable
             columns={[
@@ -880,9 +882,10 @@ const Support = () => {
                   </button>
                   <button
                     onClick={updateTicketStatus}
-                    className="flex-1 py-4 px-6 bg-accent text-white rounded-2xl text-sm font-black uppercase tracking-widest hover:bg-[#8D270B] shadow-lg shadow-accent/20 transition-all active:scale-95 cursor-pointer"
+                    disabled={updatingStatus}
+                    className="flex-1 py-4 px-6 bg-accent text-white rounded-2xl text-sm font-black uppercase tracking-widest hover:bg-[#8D270B] shadow-lg shadow-accent/20 transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
                   >
-                    Commit Change
+                    {updatingStatus ? <Loader2 size={18} className="animate-spin" /> : "Commit Change"}
                   </button>
                 </div>
               </div>
@@ -1001,7 +1004,7 @@ const Support = () => {
                 </button>
                 <button
                   onClick={handleDeleteCategory}
-                  className="flex-1 py-4 px-6 bg-accent text-white rounded-2xl text-sm font-black uppercase tracking-widest hover:bg-[#8D270B] shadow-lg shadow-accent/10 transition-all active:scale-95 cursor-pointer"
+                  className="flex-1 py-4 px-6 bg-accent text-white rounded-2xl text-sm font-black uppercase tracking-widest hover:bg-[#8D270B] shadow-lg shadow-accent/20 transition-all active:scale-95 cursor-pointer"
                 >
                   Confirm Purge
                 </button>

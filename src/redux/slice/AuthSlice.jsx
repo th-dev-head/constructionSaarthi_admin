@@ -25,9 +25,12 @@ export const sendOtp = createAsyncThunk(
           data?.success === false || data?.status === "error" || Boolean(data?.error);
 
         if (!response.ok || apiFailure) {
-          // Prefer explicit `error` field from backend when available (e.g. "Admin not found"),
-          // otherwise fall back to `message`.
-          const msg = (data && (data.error || data.message)) || `Failed to send OTP (status ${response.status})`;
+          // Extract message string: check in error.message, message, or error itself.
+          const msg =
+            data?.error?.message ||
+            data?.message ||
+            (typeof data?.error === "string" ? data.error : null) ||
+            `Failed to send OTP (status ${response.status})`;
           return thunkAPI.rejectWithValue(msg);
         }
 
@@ -54,6 +57,18 @@ export const verifyOtp = createAsyncThunk(
       });
 
       const data = await response.json();
+
+      const apiFailure =
+        data?.success === false || data?.status === "error" || Boolean(data?.error) || !data?.token;
+
+      if (!response.ok || apiFailure) {
+        const msg =
+          data?.error?.message ||
+          data?.message ||
+          (typeof data?.error === "string" ? data.error : null) ||
+          `Verification failed (status ${response.status})`;
+        return thunkAPI.rejectWithValue(msg);
+      }
 
       if (data?.token) {
         localStorage.setItem("token", data.token);

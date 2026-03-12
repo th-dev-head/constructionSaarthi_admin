@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { apiInstance } from "../../../config/axiosInstance";
-import { Loader2, Plus, Trash2, X } from "lucide-react";
+import { Loader2, Plus, Trash2, X, ArrowLeft } from "lucide-react";
 
 const SubscriptionDescription = () => {
+    const navigate = useNavigate();
     const [features, setFeatures] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -144,22 +145,31 @@ const SubscriptionDescription = () => {
     };
 
     return (
-        <div className="pb-10 animate-in fade-in duration-500">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8 gap-6">
-                <div>
-                    <h1 className="text-3xl font-extrabold text-[#0F172A] tracking-tight leading-none">
-                        Subscription Description
-                    </h1>
-                    <p className="text-[#64748B] text-sm mt-2 font-medium">
-                        Manage subscription plan features and descriptions for your users
-                    </p>
+        <div className="space-y-4 sm:space-y-8 px-4 sm:px-8 py-4 sm:py-8 bg-[#F8FAFC] w-full min-h-screen" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="flex items-center gap-4">
+                    <button
+                        onClick={() => navigate("/subscriptions")}
+                        className="p-2.5 bg-white border border-[#E2E8F0] rounded-2xl text-[#64748B] hover:text-accent hover:border-accent/20 transition-all shadow-sm active:scale-95"
+                        title="Back to Subscriptions"
+                    >
+                        <ArrowLeft size={20} strokeWidth={2.5} />
+                    </button>
+                    <div>
+                        <h1 className="text-3xl font-extrabold text-[#0F172A] tracking-tight leading-none">
+                            Subscription Description
+                        </h1>
+                        <p className="text-[#64748B] text-sm mt-2 font-medium">
+                            Manage subscription plan features and descriptions for your users
+                        </p>
+                    </div>
                 </div>
                 <div>
                     <button
                         onClick={() => setShowAddModal(true)}
                         className="px-5 py-2.5 bg-[#B02E0C] text-white rounded-xl text-sm font-bold hover:bg-[#8d270b] transition-all shadow-lg shadow-[#B02E0C]/20 flex items-center gap-2 active:scale-95 cursor-pointer"
                     >
-                        <Plus size={18} />
+                        <Plus size={18} strokeWidth={3} />
                         Add Feature
                     </button>
                 </div>

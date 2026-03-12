@@ -5,8 +5,8 @@ import { sendOtp, setCountryCode, setPhoneNumber } from "../../../redux/slice/Au
 import { useNavigate } from "react-router-dom";
 import loginbg from "../../../assets/loginbg.png";
 import icon from "../../../assets/icon.png";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify";
+// ...existing code...
 // ...existing code...
 
 const countryCodes = [
@@ -19,21 +19,28 @@ const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { countryCode, phoneNumber, loading, error } = useSelector((state) => state.auth);
+  
+  React.useEffect(() => {
+    return () => {
+      toast.dismiss();
+    };
+  }, []);
 
   // helper to extract meaningful message from backend/rejected thunk
   const getErrorMessage = (err) => {
     if (!err) return "Something went wrong. Please try again.";
+    
+    // If it's a string, return it
     if (typeof err === "string") return err;
-    if (err.payload) {
-      if (err.payload.error && err.payload.error.message) return err.payload.error.message;
-      if (err.payload.message) return err.payload.message;
+    
+    // If it's an object from thunk rejection (err is error state or action.payload)
+    const data = err.payload || err;
+    if (data) {
+      if (data.error && typeof data.error === "object" && data.error.message) return data.error.message;
+      if (typeof data.error === "string") return data.error;
+      if (data.message) return data.message;
     }
-    if (err.error && err.error.message) return err.error.message;
-    if (err.response && err.response.data) {
-      const d = err.response.data;
-      if (d.error && d.error.message) return d.error.message;
-      if (d.message) return d.message;
-    }
+    
     if (err.message) return err.message;
     return "Something went wrong. Please try again.";
   };
@@ -52,36 +59,35 @@ const Login = () => {
       })
       .catch((err) => {
         console.error("Error sending OTP:", err);
-        const msg = getErrorMessage(err);
-        toast.error(msg);
+        // Toast is already handling the message
+        toast.error(getErrorMessage(err));
       });
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center relative">
-      <ToastContainer position="top-right" autoClose={5000} />
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center relative p-4">
       <div
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: `url(${loginbg})` }}
       ></div>
 
-      <div className="relative z-10 bg-white shadow-lg rounded-2xl p-10 w-11/12 max-w-lg">
-        <div className="flex justify-center gap-2 mb-10 text-center items-center">
-          <img src={icon} alt="Logo" className="w-12 h-auto" />
-          <p className="font-bold text-xl tracking-tight">ConstructionSaarthi</p>
+      <div className="relative z-10 bg-white shadow-lg rounded-2xl p-6 md:p-10 w-full max-w-lg">
+        <div className="flex justify-center gap-2 mb-8 md:mb-10 text-center items-center">
+          <img src={icon} alt="Logo" className="w-10 md:w-12 h-auto" />
+          <p className="font-bold text-lg md:text-xl tracking-tight">ConstructionSaarthi</p>
         </div>
 
-        <h2 className="text-3xl font-bold text-center mb-2">Sign In</h2>
-        <p className="text-center text-[16px] text-gray-600 mb-8">
+        <h2 className="text-2xl md:text-3xl font-bold text-center mb-2">Sign In</h2>
+        <p className="text-center text-sm md:text-[16px] text-gray-600 mb-6 md:mb-8">
           Please fill in your details to access your dashboard.
         </p>
 
         <form onSubmit={handleSubmit}>
-          <div className="mb-6 flex gap-3">
+          <div className="mb-6 flex flex-col sm:flex-row gap-3">
             <select
               value={countryCode}
               onChange={(e) => dispatch(setCountryCode(e.target.value))}
-              className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B02E0C] bg-white text-gray-700"
+              className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B02E0C] bg-white text-gray-700 w-full sm:w-auto min-w-[120px]"
             >
               {countryCodes.map((c) => (
                 <option key={c.code} value={c.code}>
@@ -99,22 +105,21 @@ const Login = () => {
               }}
               required
               placeholder="Enter Mobile Number"
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B02E0C]"
+              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B02E0C] w-full"
             />
           </div>
 
-          <div className="flex items-center justify-between mb-10">
-            <label className="flex items-center text-[15px] text-gray-500 cursor-pointer">
+          <div className="flex items-center justify-between mb-8 md:mb-10">
+            <label className="flex items-center text-sm md:text-[15px] text-gray-500 cursor-pointer">
               <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-[#B02E0C] focus:ring-[#B02E0C]" />
               <span className="ml-2">Remember me</span>
             </label>
-            {/* Removed Forgot Password? link as requested */}
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className={`w-full py-4 text-white rounded-xl font-bold text-lg transition-all ${loading
+            className={`w-full py-3 md:py-4 text-white rounded-xl font-bold text-base md:text-lg transition-all ${loading
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-[#B02E0C] hover:bg-[#8e240a] hover:shadow-lg active:scale-[0.98]"
               }`}
@@ -122,7 +127,7 @@ const Login = () => {
             {loading ? "Sending OTP..." : "Send OTP"}
           </button>
 
-          {error && <p className="text-red-500 mt-4 text-center font-medium bg-red-50 py-2 rounded-lg border border-red-100">{error}</p>}
+          {error && <p className="text-red-500 mt-4 text-center text-sm font-medium bg-red-50 py-2 rounded-lg border border-red-100">{getErrorMessage(error)}</p>}
         </form>
       </div>
     </div>

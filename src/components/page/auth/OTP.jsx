@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { verifyOtp, sendOtp } from "../../../redux/slice/AuthSlice";
 import loginbg from "../../../assets/loginbg.png";
 import icon from "../../../assets/icon.png";
+import { toast } from "react-toastify";
+// ...existing code...
 
 const OTPSend = () => {
   const [otpDigits, setOtpDigits] = useState(["", "", "", "", "", ""]);
@@ -17,6 +19,20 @@ const OTPSend = () => {
     (state) => state.auth
   );
 
+  // helper to extract meaningful message from backend/rejected thunk
+  const getErrorMessage = (err) => {
+    if (!err) return "Something went wrong. Please try again.";
+    if (typeof err === "string") return err;
+    const data = err.payload || err;
+    if (data) {
+      if (data.error && typeof data.error === "object" && data.error.message) return data.error.message;
+      if (typeof data.error === "string") return data.error;
+      if (data.message) return data.message;
+    }
+    if (err.message) return err.message;
+    return "Something went wrong. Please try again.";
+  };
+
   // Masked phone number: show last 2 digits only
   const maskedPhone = phoneNumber
     ? `*** *** ***${phoneNumber.slice(-2)}`
@@ -26,6 +42,9 @@ const OTPSend = () => {
   useEffect(() => {
     setTimer(30);
     setCanResend(false);
+    return () => {
+      toast.dismiss();
+    };
   }, []);
 
   useEffect(() => {
@@ -79,15 +98,22 @@ const OTPSend = () => {
 
   const handleVerify = () => {
     const otp = otpDigits.join("");
-    if (otp.length < 6) return;
+    if (otp.length < 6) {
+      toast.error("Please enter the full 6-digit OTP");
+      return;
+    }
     dispatch(verifyOtp({ countryCode, phoneNumber, otp }))
       .unwrap()
       .then((data) => {
         if (data.token) {
+          toast.success("Login successful!");
           navigate("/dashboard");
         }
       })
-      .catch((err) => console.error(err));
+      .catch((err) => {
+        console.error("Verification error:", err);
+        toast.error(getErrorMessage(err));
+      });
   };
 
   const handleResend = () => {
@@ -96,6 +122,7 @@ const OTPSend = () => {
     dispatch(sendOtp({ countryCode, phoneNumber }))
       .unwrap()
       .then(() => {
+        toast.success("OTP resent successfully");
         setOtpDigits(["", "", "", "", "", ""]);
         setTimer(30);
         setCanResend(false);
@@ -103,7 +130,8 @@ const OTPSend = () => {
         inputRefs.current[0]?.focus();
       })
       .catch((err) => {
-        console.error(err);
+        console.error("Resend error:", err);
+        toast.error(getErrorMessage(err));
         setResending(false);
       });
   };
@@ -118,14 +146,14 @@ const OTPSend = () => {
         style={{ backgroundImage: `url(${loginbg})` }}
       ></div>
 
-      <div className="otp-card relative z-10">
+      <div className="otp-card relative z-10 p-6 md:p-10 w-full max-w-[420px] mx-4">
         {/* Logo and branding matching Login screen */}
-        <div className="flex justify-start gap-2 mb-10 items-center w-full">
-          <img src={icon} alt="Logo" className="w-12 h-auto" />
-          <p className="font-bold text-xl tracking-tight text-[#1a1a1a]">ConstructionSaarthi</p>
+        <div className="flex justify-start gap-2 mb-8 md:mb-10 items-center w-full">
+          <img src={icon} alt="Logo" className="w-10 md:w-12 h-auto" />
+          <p className="font-bold text-lg md:text-xl tracking-tight text-[#1a1a1a]">ConstructionSaarthi</p>
         </div>
 
-        <h2 className="otp-title">Verify OTP</h2>
+        <h2 className="otp-title text-2xl md:text-3xl font-bold mb-2">Verify OTP</h2>
         <p className="otp-subtitle">
           Enter One Time Password which we sent on your mobile number{" "}
           <span className="otp-masked-phone">{maskedPhone}</span>
@@ -168,7 +196,7 @@ const OTPSend = () => {
         </div>
 
         {/* Error */}
-        {error && <p className="otp-error">{error}</p>}
+        {error && <p className="otp-error">{getErrorMessage(error)}</p>}
 
         {/* Verify Button */}
         <button
@@ -194,7 +222,6 @@ const OTPSend = () => {
         .otp-card {
           background: #ffffff;
           border-radius: 28px;
-          padding: 40px;
           width: 90%;
           max-width: 420px;
           box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);

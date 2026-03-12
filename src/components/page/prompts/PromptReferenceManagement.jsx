@@ -97,10 +97,10 @@ const PromptReferenceManagement = () => {
   };
 
   return (
-    <div className="space-y-8 p-8 bg-[#F8FAFC] w-full min-h-screen" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
+    <div className="space-y-4 sm:space-y-8 px-4 sm:px-8 py-4 sm:py-8 bg-[#F8FAFC] w-full min-h-screen" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
       {/* Navigation Tabs */}
-      <div className="bg-white p-2 rounded-[2rem] shadow-sm border border-[#E2E8F0]">
-        <div className="flex gap-2">
+      <div className="bg-white p-1 md:p-2 rounded-2xl md:rounded-[2rem] shadow-sm border border-[#E2E8F0] overflow-x-auto no-scrollbar">
+        <div className="flex gap-1 md:gap-2 min-w-max">
           {[
             { name: "Prompts", path: "/prompts" },
             { name: "PM Features", path: "/prompts/features" },
@@ -109,8 +109,8 @@ const PromptReferenceManagement = () => {
             <button
               key={tab.path}
               onClick={() => navigate(tab.path)}
-              className={`px-8 py-3 rounded-2xl font-bold text-sm transition-all duration-300 ${location.pathname === tab.path
-                ? "bg-accent text-white shadow-lg shadow-accent/20"
+              className={`px-4 md:px-8 py-2 md:py-3 rounded-xl md:rounded-2xl font-bold text-[12px] md:text-sm transition-all duration-300 whitespace-nowrap ${location.pathname === tab.path
+                ? "bg-accent text-white shadow-md md:shadow-lg shadow-accent/20"
                 : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
                 }`}
             >
@@ -121,20 +121,20 @@ const PromptReferenceManagement = () => {
       </div>
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-3xl font-black text-[#0F172A] tracking-tight">
+          <h1 className="text-2xl md:text-3xl font-black text-[#0F172A] tracking-tight">
             Prompt References
           </h1>
-          <p className="text-sm font-medium text-[#64748B]">
+          <p className="text-[12px] md:text-sm font-medium text-[#64748B]">
             Configure and manage global variables for your AI prompt generation logic.
           </p>
         </div>
         <button
           onClick={openAddModal}
-          className="px-8 py-4 bg-accent text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#8D270B] shadow-xl shadow-accent/20 transition-all active:scale-95 flex items-center gap-2 cursor-pointer"
+          className="px-6 md:px-8 py-3 md:py-4 bg-accent text-white rounded-xl md:rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-[#8D270B] shadow-lg md:shadow-xl shadow-accent/20 transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer w-full md:w-auto"
         >
-          <Plus size={18} strokeWidth={3} />
+          <Plus size={16} md:size={18} strokeWidth={3} />
           Add Reference
         </button>
       </div>
@@ -152,7 +152,8 @@ const PromptReferenceManagement = () => {
         </div>
       )}
 
-      <DataTable
+      <div className="bg-white shadow-2xl shadow-gray-200/50 border border-[#E2E8F0] rounded-2xl md:rounded-[2rem] overflow-hidden">
+        <DataTable
         columns={[
           {
             header: "Reference ID",
@@ -229,6 +230,7 @@ const PromptReferenceManagement = () => {
           </div>
         )}
       />
+      </div>
 
       {/* Add/Edit Modal */}
       {showModal && (
