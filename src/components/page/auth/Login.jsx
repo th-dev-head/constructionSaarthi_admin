@@ -79,7 +79,8 @@ const Login = () => {
 
         <h2 className="text-2xl md:text-3xl font-bold text-center mb-2">Sign In</h2>
         <p className="text-center text-sm md:text-[16px] text-gray-600 mb-6 md:mb-8">
-          Please fill in your details to access your dashboard.
+          Please fill in your
+           details to access your dashboard.
         </p>
 
         <form onSubmit={handleSubmit}>
