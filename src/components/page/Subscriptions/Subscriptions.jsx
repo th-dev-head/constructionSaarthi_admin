@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
-  EllipsisVertical, Eye, Lock, Ban, X, Loader2,
+  Eye, X, Loader2,
   ChevronDown, Search, Download, Filter, CreditCard
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -8,9 +8,7 @@ import { apiInstance } from "../../../config/axiosInstance";
 import DataTable from "../../common/DataTable";
 
 const Subscriptions = () => {
-  const [planOpen, setPlanOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
-  const [openMenuId, setOpenMenuId] = useState(null);
   const navigate = useNavigate();
 
   // API state
@@ -24,20 +22,7 @@ const Subscriptions = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [pagination, setPagination] = useState({ total: 0, totalPages: 0 });
-  const menuRef = useRef(null);
-
-  // Close menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        if (!event.target.closest('button[class*="rounded-xl"]')) {
-          setOpenMenuId(null);
-        }
-      }
-    };
-    if (openMenuId) document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [openMenuId]);
+  const [planOpen, setPlanOpen] = useState(false);
 
   // Fetch subscription plans for dropdown
   const fetchPlans = async () => {
@@ -171,33 +156,7 @@ const Subscriptions = () => {
     }
   ];
 
-  const renderActions = (purchase) => (
-    <div className="relative" ref={openMenuId === `purchase-${purchase.order_id || purchase.id}` ? menuRef : null}>
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          const uniqueId = `purchase-${purchase.order_id || purchase.id}`;
-          setOpenMenuId(openMenuId === uniqueId ? null : uniqueId);
-        }}
-        className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${openMenuId === `purchase-${purchase.order_id || purchase.id}` ? 'bg-accent text-white shadow-lg shadow-accent/20' : 'hover:bg-[#F1F5F9] text-[#94A3B8] hover:text-accent'}`}
-      >
-        <EllipsisVertical size={18} />
-      </button>
 
-      {openMenuId === `purchase-${purchase.order_id || purchase.id}` && (
-        <div className="absolute right-12 top-0 bg-white border border-[#E2E8F0] shadow-2xl rounded-2xl w-48 z-[100] overflow-hidden animate-in slide-in-from-right-2 duration-300">
-          <ul className="text-[#475569] text-sm font-bold">
-            <li className="px-4 py-3 flex items-center gap-3 hover:bg-[#F8FAFC] hover:text-accent cursor-pointer transition-colors">
-              <Eye size={16} /> View Profile
-            </li>
-            <li className="px-4 py-3 flex items-center gap-3 hover:bg-[#F8FAFC] hover:text-accent cursor-pointer transition-colors text-rose-600">
-              <Ban size={16} /> Suspend User
-            </li>
-          </ul>
-        </div>
-      )}
-    </div>
-  );
 
   return (
     <div className="space-y-4 sm:space-y-8 px-4 sm:px-8 py-4 sm:py-8 bg-[#F8FAFC] w-full min-h-screen" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
@@ -248,7 +207,6 @@ const Subscriptions = () => {
         columns={columns}
         data={purchases}
         loading={loading}
-        renderActions={renderActions}
         rowKey={(r) => r.order_id || r.id}
         pagination={pagination}
         onPageChange={setCurrentPage}

@@ -292,11 +292,11 @@ const PromptReferenceManagement = () => {
               </form>
             </div>
 
-            <div className="p-8 border-t border-[#F1F5F9] bg-[#F8FAFC]/50 flex gap-4">
+            <div className="p-8 border-t border-[#F1F5F9] bg-[#F8FAFC]/50 flex flex-col sm:flex-row gap-4">
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
-                className="flex-1 py-4 px-6 rounded-2xl border-2 border-[#E2E8F0] bg-white text-sm font-black text-[#64748B] uppercase tracking-widest hover:bg-[#F1F5F9] transition-all active:scale-95"
+                className="flex-1 py-4 px-6 rounded-2xl border-2 border-[#E2E8F0] bg-white text-sm font-black text-[#64748B] uppercase tracking-widest hover:bg-[#F1F5F9] transition-all active:scale-95 cursor-pointer"
               >
                 Back
               </button>
@@ -331,13 +331,13 @@ const PromptReferenceManagement = () => {
                 </div>
               </div>
 
-              <div className="flex gap-4">
+              <div className="flex flex-col sm:flex-row gap-4">
                 <button
                   onClick={() => {
                     setShowDeleteModal(false);
                     setSelectedReference(null);
                   }}
-                  className="flex-1 py-4 px-6 rounded-2xl border-2 border-[#E2E8F0] bg-white text-sm font-black text-[#64748B] uppercase tracking-widest hover:bg-[#F1F5F9] transition-all active:scale-95"
+                  className="flex-1 py-4 px-6 rounded-2xl border-2 border-[#E2E8F0] bg-white text-sm font-black text-[#64748B] uppercase tracking-widest hover:bg-[#F1F5F9] transition-all active:scale-95 cursor-pointer"
                 >
                   Cancel
                 </button>

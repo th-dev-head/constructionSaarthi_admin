@@ -28,7 +28,7 @@ const DataTable = ({
   return (
     <div className="bg-white shadow-2xl shadow-gray-200/50 border border-[#E2E8F0] rounded-[1rem] sm:rounded-[2rem] overflow-hidden transition-all duration-500">
       {/* Header Area */}
-      <div className="flex flex-col sm:flex-row items-center justify-between px-2 sm:px-6 py-4 border-b border-[#F1F5F9] gap-4">
+      <div className="flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 py-4 border-b border-[#F1F5F9] gap-4">
         {showSearch ? (
           <div className="relative w-full sm:w-72 group">
             <input
@@ -49,12 +49,12 @@ const DataTable = ({
           <thead>
             <tr className="bg-[#F8FAFC]">
               {columns.map((col) => (
-                <th key={col.key || col.accessor} className={`py-4 md:py-5 px-3 sm:px-4 md:px-8 text-[10px] font-black text-[#64748B] uppercase tracking-widest border-b border-[#F1F5F9] ${col.className || ""}`}>
+                <th key={col.key || col.accessor} className={`py-4 md:py-5 px-3 sm:px-4 md:px-4 lg:px-8 text-[10px] font-black text-[#64748B] uppercase tracking-widest border-b border-[#F1F5F9] ${col.className || ""}`}>
                   {col.header}
                 </th>
               ))}
               {renderActions && (
-                <th className="py-4 md:py-5 px-3 sm:px-4 md:px-8 text-[10px] font-black text-[#64748B] uppercase tracking-widest border-b border-[#F1F5F9] text-center">Actions</th>
+                <th className="py-4 md:py-5 px-3 sm:px-4 md:px-4 lg:px-8 text-[10px] font-black text-[#64748B] uppercase tracking-widest border-b border-[#F1F5F9] text-center">Actions</th>
               )}
             </tr>
           </thead>
@@ -73,12 +73,12 @@ const DataTable = ({
               data.map((row, idx) => (
                 <tr key={typeof rowKey === "function" ? rowKey(row, idx) : (row[rowKey] || idx)} className="group hover:bg-[#F8FAFC] transition-all duration-300">
                   {columns.map((col) => (
-                    <td key={col.key || col.accessor} className={`py-4 md:py-5 px-3 sm:px-4 md:px-8 text-sm font-medium text-[#475569] ${col.cellClass || ""}`}>
+                    <td key={col.key || col.accessor} className={`py-4 md:py-5 px-3 sm:px-4 md:px-4 lg:px-8 text-sm font-medium text-[#475569] ${col.cellClass || ""}`}>
                       {col.cell ? col.cell(row, idx) : (row[col.accessor] ?? "--")}
                     </td>
                   ))}
                   {renderActions && (
-                    <td className="py-4 md:py-5 px-3 sm:px-4 md:px-8 text-center relative overflow-visible">
+                    <td className="py-4 md:py-5 px-3 sm:px-4 md:px-4 lg:px-8 text-center relative overflow-visible">
                       {renderActions(row, idx)}
                     </td>
                   )}

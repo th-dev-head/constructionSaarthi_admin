@@ -244,7 +244,7 @@ const Users = () => {
             <span className="text-[10px] font-black text-[#94A3B8] uppercase tracking-widest">Available Actions</span>
           </div>
           <ul className="text-[#475569] text-sm font-bold space-y-1">
-            <li>
+            {/* <li>
               <button
                 onClick={() => {
                   handleViewProfile(user);
@@ -257,7 +257,7 @@ const Users = () => {
                 </div>
                 View Profile
               </button>
-            </li>
+            </li> */}
             <li>
               <button
                 onClick={async () => {
@@ -267,7 +267,7 @@ const Users = () => {
                   try {
                     await dispatch(fetchUserById(user.id || user.uid)).unwrap();
                   } catch (error) {
-                    console.error("Failed to fetch user profile:", error);
+                    console.error("Failed to fetch user profile:Restore Access?", error);
                   }
                 }}
                 className="w-full px-3 py-2.5 flex items-center gap-3 hover:bg-accent/5 rounded-xl transition-all"
@@ -290,7 +290,7 @@ const Users = () => {
   const tabs = ["All", ...Roles.map((role) => role.name)];
 
   return (
-    <div className="space-y-4 sm:space-y-8 px-4 sm:px-8 py-4 sm:py-8 bg-[#F8FAFC] w-full min-h-screen" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
+    <div className="space-y-4 md:space-y-6 px-4 lg:px-10 py-4 md:py-8 bg-[#F8FAFC] w-full min-h-screen" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-[#0F172A] tracking-tight">Users Management</h1>
@@ -309,7 +309,7 @@ const Users = () => {
             <button
               key={tab}
               onClick={() => handleTabChange(tab)}
-              className={`relative px-6 py-4 text-[13px] font-bold transition-all duration-300 tracking-wide ${activeTab === tab ? "text-accent" : "text-[#64748B] hover:text-[#0F172A]"}`}
+              className={`relative px-6 py-4 text-[13px] font-bold transition-all duration-300 tracking-wide cursor-pointer ${activeTab === tab ? "text-accent" : "text-[#64748B] hover:text-[#0F172A]"}`}
             >
               {tab}
               {activeTab === tab && <div className="absolute bottom-0 left-0 w-full h-1 bg-accent rounded-t-full" />}
@@ -448,8 +448,8 @@ const Users = () => {
               <p className="text-[#64748B] font-medium">Modify account status for <strong className="text-[#1E293B] font-black">{selectedUser.name || selectedUser.full_name}</strong>.</p>
             </div>
             <div className="p-6 pt-0 flex flex-col gap-3">
-              <button onClick={handleSuspendUser} className={`w-full py-4 rounded-2xl text-sm font-black uppercase tracking-widest text-white shadow-xl transition-all ${isUserSuspended(selectedUser) ? "bg-emerald-500 hover:bg-emerald-600" : "bg-accent hover:opacity-90"}`}>{isUserSuspended(selectedUser) ? "Activate Now" : "Confirm Suspension"}</button>
-              <button onClick={() => setShowSuspendModal(false)} className="w-full py-4 rounded-2xl text-sm font-black uppercase tracking-widest text-[#64748B] hover:bg-[#F8FAFC]">Abort Action</button>
+              <button onClick={handleSuspendUser} className={`w-full py-4 rounded-2xl text-sm font-black uppercase tracking-widest text-white shadow-xl transition-all cursor-pointer ${isUserSuspended(selectedUser) ? "bg-emerald-500 hover:bg-emerald-600" : "bg-accent hover:opacity-90"}`}>{isUserSuspended(selectedUser) ? "Activate Now" : "Confirm Suspension"}</button>
+              <button onClick={() => setShowSuspendModal(false)} className="w-full py-4 rounded-2xl text-sm font-black uppercase tracking-widest text-[#64748B] hover:bg-[#F8FAFC] cursor-pointer">Abort Action</button>
             </div>
           </div>
         </div>

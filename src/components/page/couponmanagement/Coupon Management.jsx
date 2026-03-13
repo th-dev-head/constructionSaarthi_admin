@@ -35,6 +35,10 @@ const CouponManagement = () => {
   const [showEditCriteriaModal, setShowEditCriteriaModal] = useState(false);
   const [selectedCriteria, setSelectedCriteria] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingCriteriaId, setDeletingCriteriaId] = useState(null);
+  const [showCouponDeleteModal, setShowCouponDeleteModal] = useState(false);
+  const [deletingCouponId, setDeletingCouponId] = useState(null);
 
   // Form state for criteria
   const [criteriaFormData, setCriteriaFormData] = useState({
@@ -286,13 +290,18 @@ const CouponManagement = () => {
 
   // Handle delete criteria
   const handleDeleteCriteria = async (criteriaId) => {
-    if (!window.confirm("Are you sure you want to delete this coupon criteria?")) {
-      return;
-    }
+    setDeletingCriteriaId(criteriaId);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteCriteria = async () => {
+    const criteriaId = deletingCriteriaId;
+    if (!criteriaId) return;
 
     setDeletingId(criteriaId);
     setErrorCriteria(null);
     setSuccessCriteria(null);
+    setShowDeleteModal(false);
 
     try {
       const response = await apiInstance.delete(`/api/coupon/${criteriaId}`);
@@ -459,18 +468,21 @@ const CouponManagement = () => {
   };
 
   // Handle delete coupon
-  const handleDeleteCoupon = async (couponId) => {
-    if (!window.confirm("Are you sure you want to delete this coupon?")) {
-      return;
-    }
+  const handleDeleteCoupon = (couponId) => {
+    setDeletingCouponId(couponId);
+    setShowCouponDeleteModal(true);
+  };
 
+  const confirmDeleteCoupon = async () => {
+    const couponId = deletingCouponId;
+    if (!couponId) return;
+
+    setShowCouponDeleteModal(false);
     setLoading(true);
     setError(null);
     setSuccess(null);
 
     try {
-      // Assuming the endpoint accepts the ID as a query param or body, or route param.
-      // Based on typical express patterns if the route is exact '/delete':
       const response = await apiInstance.delete(`/api/coupon/delete`, {
         data: { couponId: couponId }
       });
@@ -484,7 +496,6 @@ const CouponManagement = () => {
       }
     } catch (err) {
       console.error("Error deleting coupon:", err);
-      // Fallback try with route param if the above fails with 404
       if (err.response && err.response.status === 404) {
         try {
           const response2 = await apiInstance.delete(`/api/coupon/delete/${couponId}`);
@@ -501,6 +512,7 @@ const CouponManagement = () => {
       setError(err.response?.data?.message || "Failed to delete coupon");
     } finally {
       setLoading(false);
+      setDeletingCouponId(null);
     }
   };
 
@@ -676,6 +688,37 @@ const CouponManagement = () => {
           </ul>
         </div>
       )}
+
+      {/* Coupon Delete Confirmation Modal */}
+      {showCouponDeleteModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-[200] backdrop-blur-md bg-black/40 animate-in fade-in duration-300 px-4">
+          <div className="bg-white rounded-[2rem] w-full max-w-sm overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 border border-gray-100">
+            <div className="p-8 text-center">
+              <div className="w-20 h-20 bg-accent/5 rounded-[2.5rem] flex items-center justify-center text-accent mx-auto mb-6 ring-8 ring-accent/5">
+                <Trash2 size={36} strokeWidth={2.5} />
+              </div>
+              <h3 className="text-2xl font-black text-[#0F172A] mb-3 tracking-tight">Purge Coupon?</h3>
+              <p className="text-[#64748B] text-sm font-medium leading-relaxed px-4 italic">
+                This action will permanently dismantle the coupon code from the registry. Continue?
+              </p>
+            </div>
+            <div className="p-6 bg-gray-50/80 flex gap-3">
+              <button
+                onClick={() => setShowCouponDeleteModal(false)}
+                className="flex-1 py-4 px-6 rounded-2xl text-xs font-black uppercase tracking-widest text-[#64748B] hover:bg-white hover:shadow-sm border border-transparent hover:border-gray-200 transition-all cursor-pointer"
+              >
+                Abort
+              </button>
+              <button
+                onClick={confirmDeleteCoupon}
+                className="flex-1 py-4 px-6 rounded-2xl text-xs font-black uppercase tracking-widest bg-accent text-white shadow-lg shadow-accent/20 hover:bg-[#8D270B] transition-all active:scale-95 cursor-pointer"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 
@@ -767,12 +810,26 @@ const CouponManagement = () => {
       {showCriteriaModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-xs bg-black/50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-6xl p-4 md:p-8 relative shadow-2xl overflow-hidden flex flex-col max-h-[95vh] animate-in zoom-in-95 duration-300">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sticky top-0 bg-white z-10 pb-4 border-b border-gray-100">
-              <h2 className="text-2xl font-bold text-gray-900">Coupon Criteria</h2>
+            <div className="flex flex-col gap-4 mb-6 sticky top-0 bg-white z-10 pb-4 border-b border-gray-100 flex-shrink-0">
+              <div className="flex justify-between items-center w-full">
+                <h2 className="text-xl md:text-2xl font-bold text-gray-900">Coupon Criteria</h2>
+                <button
+                  onClick={() => {
+                    setShowCriteriaModal(false);
+                    setErrorCriteria(null);
+                    setSuccessCriteria(null);
+                    setShowRules(false);
+                  }}
+                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all cursor-pointer"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+              
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   onClick={() => setShowRules(!showRules)}
-                  className={`px-3 md:px-4 py-2 rounded-xl text-xs md:text-sm font-bold flex items-center gap-2 transition-all ${showRules ? "bg-blue-600 text-white shadow-lg" : "bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100"}`}
+                  className={`flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${showRules ? "bg-blue-600 text-white shadow-lg shadow-blue-200" : "bg-blue-50 text-blue-600 border border-blue-100 hover:bg-blue-50"}`}
                 >
                   <Info size={18} />
                   Rules & Guide
@@ -782,21 +839,10 @@ const CouponManagement = () => {
                     setShowAddCriteriaModal(true);
                     resetCriteriaForm();
                   }}
-                  className="px-3 md:px-4 py-2 bg-[#B02E0C] text-white rounded-xl hover:bg-[#8d270b] flex items-center gap-2 text-xs md:text-sm font-bold shadow-lg shadow-[#B02E0C]/20 transition-all active:scale-95"
+                  className="flex-1 sm:flex-none px-4 py-2.5 bg-accent text-white rounded-xl hover:opacity-90 flex items-center justify-center gap-2 text-xs font-bold shadow-lg shadow-accent/20 transition-all active:scale-95 cursor-pointer"
                 >
                   <Plus size={18} />
                   Add Criteria
-                </button>
-                <button
-                  onClick={() => {
-                    setShowCriteriaModal(false);
-                    setErrorCriteria(null);
-                    setSuccessCriteria(null);
-                    setShowRules(false);
-                  }}
-                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 text-gray-500 hover:text-gray-700 transition-all"
-                >
-                  <X size={24} />
                 </button>
               </div>
             </div>
@@ -844,7 +890,7 @@ const CouponManagement = () => {
                               <td colSpan="11" className="py-8 text-center text-gray-500 italic text-sm">No criteria found.</td>
                             </tr>
                           ) : (
-                            criteria.map((item) => (
+                            [...criteria].sort((a, b) => a.id - b.id).map((item) => (
                               <tr key={item.id} className="hover:bg-gray-50/80 transition-colors border-b border-gray-100 last:border-0">
                                 <td className="py-2 px-3 text-xs font-bold text-gray-700 border-x border-gray-100 text-center">{item.id}</td>
                                 <td className="py-2 px-3 text-sm text-center border-r border-gray-100">{item.attach_phone ? "✅" : "❌"}</td>
@@ -995,6 +1041,37 @@ const CouponManagement = () => {
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-[200] backdrop-blur-md bg-black/40 animate-in fade-in duration-300 px-4">
+          <div className="bg-white rounded-[2rem] w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
+            <div className="p-8 text-center">
+              <div className="w-20 h-20 bg-accent/5 rounded-full flex items-center justify-center text-accent mx-auto mb-6 ring-8 ring-accent/5">
+                <Trash2 size={40} strokeWidth={2.5} />
+              </div>
+              <h3 className="text-2xl font-black text-gray-900 mb-3 tracking-tight">Eradicate Criteria?</h3>
+              <p className="text-[#64748B] text-sm font-medium leading-relaxed px-4">
+                Are you absolutely sure? This action will permanently remove <span className="text-accent font-black italic">Criteria #{deletingCriteriaId}</span> from the neural core.
+              </p>
+            </div>
+            <div className="p-6 bg-gray-50/80 flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="flex-1 py-4 px-6 rounded-2xl text-xs font-black uppercase tracking-widest text-[#64748B] hover:bg-white hover:shadow-sm border border-transparent hover:border-gray-200 transition-all cursor-pointer"
+              >
+                Abort
+              </button>
+              <button
+                onClick={confirmDeleteCriteria}
+                className="flex-1 py-4 px-6 rounded-2xl text-xs font-black uppercase tracking-widest bg-accent text-white shadow-lg shadow-accent/20 hover:bg-[#8D270B] transition-all active:scale-95 cursor-pointer"
+              >
+                Execute
+              </button>
             </div>
           </div>
         </div>

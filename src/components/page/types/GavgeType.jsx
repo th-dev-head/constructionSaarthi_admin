@@ -64,33 +64,42 @@ const Gavge = () => {
     const payload = { ...formState };
 
     if (selectedGavge) {
-      dispatch(updateGavge({ id: selectedGavge.id, updatedData: payload })).then((res) => {
-        if (!res.error) {
+      dispatch(updateGavge({ id: selectedGavge.id, updatedData: payload }))
+        .unwrap()
+        .then(() => {
           toast.success("Gavge updated successfully");
           setShowModal(false);
           dispatch(fetchAllGavge({ page, limit, search }));
-        }
-      });
+        })
+        .catch((err) => {
+          toast.error(err.message || err.error || "Failed to update Gavge");
+        });
     } else {
-      dispatch(addGavgeType(payload)).then((res) => {
-        if (!res.error) {
+      dispatch(addGavgeType(payload))
+        .unwrap()
+        .then(() => {
           toast.success("Gavge added successfully");
           setShowModal(false);
           setFormState({ gavgeName: "", gavgeFormat: "" });
           dispatch(fetchAllGavge({ page, limit, search }));
-        }
-      });
+        })
+        .catch((err) => {
+          toast.error(err.message || err.error || "Failed to add Gavge");
+        });
     }
   };
 
   const handleDelete = () => {
-    dispatch(deleteGavge(selectedGavge.id)).then((res) => {
-      if (!res.error) {
+    dispatch(deleteGavge(selectedGavge.id))
+      .unwrap()
+      .then(() => {
         toast.success("Gavge deleted successfully");
         setShowModal(false);
         dispatch(fetchAllGavge({ page, limit, search }));
-      }
-    });
+      })
+      .catch((err) => {
+        toast.error(err.message || err.error || "Failed to delete Gavge");
+      });
   };
 
   const columns = [

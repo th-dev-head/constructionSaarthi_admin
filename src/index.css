@@ -94,3 +94,14 @@ textarea,
 select {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
+
+button,
+[role="button"],
+a,
+select {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}

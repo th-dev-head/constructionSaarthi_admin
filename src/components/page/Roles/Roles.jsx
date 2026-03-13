@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-toastify";
 import { EllipsisVertical, Eye, Lock, Ban, X, Plus, ShieldCheck, Calendar, Info, Trash2 } from "lucide-react";
 import {
   createRole,
@@ -77,15 +78,23 @@ const Roles = () => {
       dispatch(updateRole({ id: selectedRole.id, updatedData: payload }))
         .unwrap()
         .then(() => {
+          toast.success("Role updated successfully");
           setShowRoleModal(false);
-          dispatch(fetchAllRoles());
+          dispatch(fetchAllRoles({ page, limit }));
+        })
+        .catch((err) => {
+          toast.error(err.message || err.error || "Failed to update role");
         });
     } else {
       dispatch(createRole(payload))
         .unwrap()
         .then(() => {
+          toast.success("Role initialized successfully");
           setShowRoleModal(false);
-          dispatch(fetchAllRoles());
+          dispatch(fetchAllRoles({ page, limit }));
+        })
+        .catch((err) => {
+          toast.error(err.message || err.error || "Failed to initialize role");
         });
     }
   };
@@ -325,7 +334,18 @@ const Roles = () => {
 
             <div className="flex gap-4 mt-8">
               <button onClick={() => setShowDeleteModal(false)} className="flex-1 py-4 px-6 rounded-2xl border-2 border-[#E2E8F0] bg-white text-sm font-black text-[#64748B] uppercase tracking-widest hover:bg-[#F1F5F9] transition-all">Abort</button>
-              <button onClick={() => { dispatch(deleteRole(selectedRole.id)).then(() => { setShowDeleteModal(false); dispatch(fetchAllRoles({ page, limit })); }); }} className="flex-[2] py-4 px-8 bg-accent text-white rounded-2xl text-sm font-black uppercase tracking-widest shadow-lg shadow-accent/20 hover:bg-[#8D270B] transition-all">Confirm Purge</button>
+              <button onClick={() => {
+                dispatch(deleteRole(selectedRole.id))
+                  .unwrap()
+                  .then(() => {
+                    toast.success("Principal eliminated successfully");
+                    setShowDeleteModal(false);
+                    dispatch(fetchAllRoles({ page, limit }));
+                  })
+                  .catch((err) => {
+                    toast.error(err.message || err.error || "Failed to purge principal");
+                  });
+              }} className="flex-[2] py-4 px-8 bg-accent text-white rounded-2xl text-sm font-black uppercase tracking-widest shadow-lg shadow-accent/20 hover:bg-[#8D270B] transition-all">Confirm Purge</button>
             </div>
           </div>
         </div>

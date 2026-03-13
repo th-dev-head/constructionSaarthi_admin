@@ -90,6 +90,7 @@ const authSlice = createSlice({
     otpSent: false,
     error: null,
     token: localStorage.getItem("token") || null,
+    user: JSON.parse(localStorage.getItem("user")) || null,
   },
   reducers: {
     setCountryCode: (state, action) => {
@@ -100,7 +101,9 @@ const authSlice = createSlice({
     },
     logout: (state) => {
       state.token = null;
+      state.user = null;
       localStorage.removeItem("token");
+      localStorage.removeItem("user");
     },
   },
   extraReducers: (builder) => {
@@ -126,6 +129,10 @@ const authSlice = createSlice({
       .addCase(verifyOtp.fulfilled, (state, action) => {
         state.loading = false;
         state.token = action.payload.token || null;
+        state.user = action.payload.user || action.payload.data || null;
+        if (state.user) {
+          localStorage.setItem("user", JSON.stringify(state.user));
+        }
       })
       .addCase(verifyOtp.rejected, (state, action) => {
         state.loading = false;
