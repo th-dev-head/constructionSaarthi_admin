@@ -144,6 +144,17 @@ const CouponManagement = () => {
     fetchUsersList();
   }, []);
 
+  // Effect to close the action menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (openMenuId && !event.target.closest('.action-menu-container')) {
+        setOpenMenuId(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [openMenuId]);
+
   // Fetch Coupon Types
   const fetchCouponTypes = async () => {
     setLoadingTypes(true);
@@ -359,10 +370,18 @@ const CouponManagement = () => {
   // Handle coupon input change
   const handleCouponInputChange = (e) => {
     const { name, value, type, checked } = e.target;
+    let finalValue = value;
+
+    if (type === "number" && value) {
+      if (value.length > 1 && value[0] === '0' && value[1] !== '.') {
+        finalValue = value.replace(/^0+/, '');
+      }
+    }
+
     setCouponFormData((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked :
-        type === "number" ? Number(value) : value,
+        type === "number" ? (finalValue === "" ? "" : Number(finalValue)) : finalValue,
     }));
   };
 
@@ -527,10 +546,10 @@ const CouponManagement = () => {
       start_date: coupon.start_date ? coupon.start_date.split('T')[0] : "",
       end_date: coupon.end_date ? coupon.end_date.split('T')[0] : "",
       subscription_id: coupon.subscription_mappings ? coupon.subscription_mappings.map(m => m.subscription_plan_id) : [],
-      global_usage_limit: coupon.tiering?.[0]?.tier_details?.[0]?.current_tiering_limit || "",
+      global_usage_limit: coupon.tiering?.[0]?.tier_details?.[0]?.current_tiering_limit ? parseInt(coupon.tiering[0].tier_details[0].current_tiering_limit) : "",
       can_combine_with_referral_credit: coupon.can_combine_with_referral_credit,
       coupon_type_id: coupon.coupon_type_id || 1,
-      financial_value: coupon.financial_value || "",
+      financial_value: coupon.financial_value ? parseFloat(coupon.financial_value) : "",
       CouponTypeCriteriaId: String(
         coupon.CouponTypeCriteriaId ||
         coupon.coupon_type_criteria_id ||
@@ -625,10 +644,9 @@ const CouponManagement = () => {
   ];
 
   const renderActions = (coupon) => (
-    <div className="relative">
+    <div className="relative action-menu-container">
       <button
         onClick={(e) => {
-          e.stopPropagation();
           setOpenMenuId(openMenuId === coupon.id ? null : coupon.id);
         }}
         className={`p-2.5 rounded-xl border border-transparent transition-all active:scale-95 ${openMenuId === coupon.id ? 'bg-[#B02E0C] text-white shadow-lg shadow-[#B02E0C]/20' : 'hover:border-[#E2E8F0] hover:bg-white text-[#94A3B8]'}`}

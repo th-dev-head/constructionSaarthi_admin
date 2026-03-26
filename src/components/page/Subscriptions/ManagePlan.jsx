@@ -46,8 +46,8 @@ const ManagePlan = () => {
         coupon_enable: true,
         billing_period: "",
         price: "",
-        free_main_user_role: "",
-        free_main_user_count: "",
+        free_main_user_role: 0,
+        free_main_user_count: 0,
         free_sub_user_count: "",
         free_calculation: "",
         add_member_price_per_member: "",
@@ -95,9 +95,11 @@ const ManagePlan = () => {
                     subscriptionName: response.data.plan?.name || "",
                     price: response.data.plan?.price || "",
                     billing_period: response.data.plan?.billing_period || "",
-                    free_main_user_count: response.data.plan?.free_main_user_count || "",
+                    free_main_user_role: 0,
+                    free_main_user_count: 0,
                     free_sub_user_count: response.data.plan?.free_sub_user_count || "",
                     free_calculation: response.data.plan?.free_calculation || "",
+                    coupon_enable: response.data.plan?.coupon_enable !== false,
                     add_member_price_per_member: response.data.addMember?.price_per_member || "",
                     add_memberIs_active: response.data.addMember?.is_active !== false,
                     add_member_description: response.data.addMember?.description || "",
@@ -219,7 +221,8 @@ const ManagePlan = () => {
                 subscriptionName: formData.subscriptionName,
                 price: parseFloat(formData.price),
                 billing_period: parseFloat(formData.billing_period),
-                free_main_user_count: parseInt(formData.free_main_user_count),
+                free_main_user_role: 0,
+                free_main_user_count: 0,
                 free_sub_user_count: parseInt(formData.free_sub_user_count),
                 free_calculation: parseInt(formData.free_calculation),
                 add_member_price_per_member: parseFloat(formData.add_member_price_per_member) || 0,
@@ -227,7 +230,8 @@ const ManagePlan = () => {
                 add_member_description: formData.add_member_description || "",
                 minimum_calculation: parseInt(formData.minimum_calculation) || 0,
                 add_calculation_price_per_member: parseFloat(formData.add_calculation_price_per_member) || 0,
-                add_calculationIs_active: formData.add_calculationIs_active
+                add_calculationIs_active: formData.add_calculationIs_active,
+                coupon_enable: formData.coupon_enable
             };
 
             const response = await apiInstance.put(
@@ -319,8 +323,8 @@ const ManagePlan = () => {
             coupon_enable: true,
             billing_period: "",
             price: "",
-            free_main_user_role: "",
-            free_main_user_count: "",
+            free_main_user_role: 0,
+            free_main_user_count: 0,
             free_sub_user_count: "",
             free_calculation: "",
             add_member_price_per_member: "",
@@ -377,9 +381,13 @@ const ManagePlan = () => {
     // Handle form input change
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
+        let finalValue = value;
+        if (type === 'number' && value && value.length > 1 && value[0] === '0' && value[1] !== '.') {
+            finalValue = value.replace(/^0+/, '');
+        }
         setFormData(prev => ({
             ...prev,
-            [name]: type === 'checkbox' ? checked : type === 'radio' ? value === 'true' : value
+            [name]: type === 'checkbox' ? checked : type === 'radio' ? value === 'true' : finalValue
         }));
     };
 
@@ -406,8 +414,8 @@ const ManagePlan = () => {
                 coupon_enable: formData.coupon_enable,
                 billing_period: parseInt(formData.billing_period),
                 price: parseFloat(formData.price),
-                free_main_user_role: parseInt(formData.free_main_user_role),
-                free_main_user_count: parseInt(formData.free_main_user_count),
+                free_main_user_role: 0,
+                free_main_user_count: 0,
                 free_sub_user_count: parseInt(formData.free_sub_user_count),
                 free_calculation: parseInt(formData.free_calculation),
                 add_member_price_per_member: parseFloat(formData.add_member_price_per_member) || 0,
@@ -434,8 +442,8 @@ const ManagePlan = () => {
                     coupon_enable: true,
                     billing_period: "",
                     price: "",
-                    free_main_user_role: "",
-                    free_main_user_count: "",
+                    free_main_user_role: 0,
+                    free_main_user_count: 0,
                     free_sub_user_count: "",
                     free_calculation: "",
                     add_member_price_per_member: "",
@@ -537,12 +545,10 @@ const ManagePlan = () => {
                                 <div className="text-sm text-gray-600 mb-2">
                                     Billing Period: {plan.billing_period} Days
                                 </div>
+
                                 <div className="font-semibold text-[#B02E0C] text-xl mb-2">₹{parseFloat(plan.price).toFixed(2)}</div>
                                 <div className="text-sm text-gray-600 mb-1">
-                                    Free Main Users: {plan.free_main_user_count}
-                                </div>
-                                <div className="text-sm text-gray-600 mb-1">
-                                    Free Sub Users: {plan.free_sub_user_count}
+                                    Free Users: {parseInt(plan.free_main_user_count || 0) + parseInt(plan.free_sub_user_count || 0)}
                                 </div>
                                 <div className="text-sm text-gray-600 mb-2">
                                     Free Calculations: {plan.free_calculation}
@@ -693,14 +699,53 @@ const ManagePlan = () => {
                                                 />
                                             </div>
                                             <div>
-                                                <label className="text-xs font-black text-[#94A3B8] uppercase tracking-wider mb-1 block">Free Main Users</label>
+                                                <label className="text-xs font-black text-[#94A3B8] uppercase tracking-wider mb-1 block">Free User Count</label>
                                                 <input
                                                     type="number"
-                                                    name="free_main_user_count"
-                                                    value={formData.free_main_user_count}
+                                                    name="free_sub_user_count"
+                                                    value={formData.free_sub_user_count}
                                                     onChange={handleInputChange}
                                                     className="w-full border-2 border-[#060C121A] rounded-xl p-2.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20"
                                                 />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs font-black text-[#94A3B8] uppercase tracking-wider mb-1 block">Free Calculation</label>
+                                                <input
+                                                    type="number"
+                                                    name="free_calculation"
+                                                    value={formData.free_calculation}
+                                                    onChange={handleInputChange}
+                                                    className="w-full border-2 border-[#060C121A] rounded-xl p-2.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs font-black text-[#94A3B8] uppercase tracking-wider mb-1 block italic">Coupon Enabled</label>
+                                                <div className="flex gap-4 items-center mt-2">
+                                                    <label className="flex items-center gap-2 cursor-pointer text-sm font-bold">
+                                                        <input
+                                                            type="radio"
+                                                            name="coupon_enable"
+                                                            value="true"
+                                                            checked={formData.coupon_enable === true}
+                                                            onChange={handleInputChange}
+                                                            className="w-4 h-4"
+                                                            style={{ accentColor: '#B02E0C' }}
+                                                        />
+                                                        <span>True</span>
+                                                    </label>
+                                                    <label className="flex items-center gap-2 cursor-pointer text-sm font-bold">
+                                                        <input
+                                                            type="radio"
+                                                            name="coupon_enable"
+                                                            value="false"
+                                                            checked={formData.coupon_enable === false}
+                                                            onChange={handleInputChange}
+                                                            className="w-4 h-4"
+                                                            style={{ accentColor: '#B02E0C' }}
+                                                        />
+                                                        <span>False</span>
+                                                    </label>
+                                                </div>
                                             </div>
                                         </div>
                                         <div className="flex justify-end gap-2">
@@ -1010,45 +1055,18 @@ const ManagePlan = () => {
                                 </div>
                             </div>
 
-                            {/* Free Main User Role / Free Main User Count */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="text-[16px] font-medium text-[#060C12]">Free Main User Role *</label>
-                                    <input
-                                        type="number"
-                                        name="free_main_user_role"
-                                        value={formData.free_main_user_role}
-                                        onChange={handleInputChange}
-                                        placeholder="Enter User Role ID"
-                                        required
-                                        className="mt-1 w-full border-2 border-[#060C121A] rounded-[12px] p-[10px] placeholder:text-[#838588] focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                    />
-                                </div>
 
-                                <div>
-                                    <label className="text-[16px] font-medium text-[#060C12]">Free Main User Count *</label>
-                                    <input
-                                        type="number"
-                                        name="free_main_user_count"
-                                        value={formData.free_main_user_count}
-                                        onChange={handleInputChange}
-                                        placeholder="Enter User Count"
-                                        required
-                                        className="mt-1 w-full border-2 border-[#060C121A] rounded-[12px] p-[10px] placeholder:text-[#838588] focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                    />
-                                </div>
-                            </div>
 
                             {/* Sub User + Free Calculation */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="text-[16px] font-medium text-[#060C12]">Free Sub User Count *</label>
+                                    <label className="text-[16px] font-medium text-[#060C12]">Free User Count *</label>
                                     <input
                                         type="number"
                                         name="free_sub_user_count"
                                         value={formData.free_sub_user_count}
                                         onChange={handleInputChange}
-                                        placeholder="Enter Sub User Count"
+                                        placeholder="Enter User Count"
                                         required
                                         className="mt-1 w-full border-2 border-[#060C121A] rounded-[12px] p-[10px] placeholder:text-[#838588] focus:outline-none focus:ring-2 focus:ring-orange-500"
                                     />
@@ -1138,25 +1156,25 @@ const ManagePlan = () => {
                             {/* Calculation Pack Inputs */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="text-[16px] font-medium text-[#060C12]">Minimum Calculation</label>
+                                    <label className="text-[16px] font-medium text-[#060C12]">Calculations per Pack</label>
                                     <input
                                         type="number"
                                         name="minimum_calculation"
                                         value={formData.minimum_calculation}
                                         onChange={handleInputChange}
-                                        placeholder="Enter Minimum Calculation"
+                                        placeholder="Enter Calculations per Pack"
                                         className="mt-1 w-full border-2 border-[#060C121A] rounded-[12px] p-[10px] placeholder:text-[#838588] focus:outline-none focus:ring-2 focus:ring-orange-500"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="text-[16px] font-medium text-[#060C12]">Add Calculation Price Per Member</label>
+                                    <label className="text-[16px] font-medium text-[#060C12]">Price per Pack (₹)</label>
                                     <input
                                         type="number"
                                         name="add_calculation_price_per_member"
                                         value={formData.add_calculation_price_per_member}
                                         onChange={handleInputChange}
-                                        placeholder="Enter Calculation Price"
+                                        placeholder="Enter Price per Pack"
                                         step="0.01"
                                         className="mt-1 w-full border-2 border-[#060C121A] rounded-[12px] p-[10px] placeholder:text-[#838588] focus:outline-none focus:ring-2 focus:ring-orange-500"
                                     />

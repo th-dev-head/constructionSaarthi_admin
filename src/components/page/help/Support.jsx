@@ -772,8 +772,8 @@ const Support = () => {
       )}
 
       {showStatusModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-[200] p-4 backdrop-blur-md bg-white/30 animate-in fade-in duration-300">
-          <div className="relative bg-white rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-2xl border border-[#E2E8F0] animate-in zoom-in-95 duration-300">
+        <div className="fixed inset-0 flex items-center justify-center z-[200] p-2 sm:p-4 backdrop-blur-md bg-white/30 animate-in fade-in duration-300">
+          <div className="relative bg-white rounded-[2.5rem] w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl border border-[#E2E8F0] animate-in zoom-in-95 duration-300 no-scrollbar">
             <div className="p-8">
               <div className="flex justify-between items-center mb-8">
                 <div className="space-y-1">
@@ -800,8 +800,8 @@ const Support = () => {
 
                   <div className="space-y-1">
                     <span className="text-[10px] font-black text-[#64748B] uppercase tracking-widest pl-1 italic">Client Narrative</span>
-                    <div className="p-4 bg-white rounded-2xl border border-[#E2E8F0] min-h-[80px]">
-                      <p className="text-sm font-bold text-[#475569] leading-relaxed italic">
+                    <div className="p-4 bg-white rounded-2xl border border-[#E2E8F0] min-h-[80px] overflow-hidden">
+                      <p className="text-sm font-bold text-[#475569] leading-relaxed italic break-all">
                         "{selectedTicket.description || selectedTicket.message || "No detailed commentary provided by the client."}"
                       </p>
                     </div>
