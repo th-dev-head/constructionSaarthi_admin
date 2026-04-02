@@ -18,7 +18,7 @@ const Subscriptions = () => {
   const [plans, setPlans] = useState([]);
   const [selectedPlanId, setSelectedPlanId] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("PAID");
+  const [statusFilter, setStatusFilter] = useState("ALL");
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [pagination, setPagination] = useState({ total: 0, totalPages: 0 });
@@ -50,7 +50,7 @@ const Subscriptions = () => {
       const params = {
         page: currentPage,
         limit: rowsPerPage,
-        status: statusFilter || undefined,
+        status: statusFilter === "ALL" ? undefined : (statusFilter || undefined),
         subscription_plan_id: selectedPlanId || undefined,
         search: searchQuery || undefined
       };
@@ -92,6 +92,7 @@ const Subscriptions = () => {
     try {
       const params = {
         search: phoneNumber,
+        status: undefined, // "ALL" would fail on backend enum cast, omitting it returns all history
         limit: 50 // Fetch recent history for this specific user
       };
       const response = await apiInstance.get(`/api/subscription/purchases`, { params });
@@ -158,9 +159,9 @@ const Subscriptions = () => {
       cell: (purchase) => (
         <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest ${purchase.status === "PAID"
           ? "bg-emerald-50 text-emerald-600 ring-1 ring-emerald-200"
-          : purchase.status === "PENDING" ? "bg-amber-50 text-amber-600 ring-1 ring-amber-200" : "bg-rose-50 text-rose-600 ring-1 ring-rose-200"
+          : purchase.status === "PENDING" ? "bg-amber-50 text-amber-600 ring-1 ring-amber-200" : purchase.status === "EXPIRED" ? "bg-blue-50 text-blue-600 ring-1 ring-blue-200" : "bg-rose-50 text-rose-600 ring-1 ring-rose-200"
           }`}>
-          <div className={`w-1.5 h-1.5 rounded-full ${purchase.status === "PAID" ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : purchase.status === "PENDING" ? "bg-amber-500" : "bg-rose-500"}`} />
+          <div className={`w-1.5 h-1.5 rounded-full ${purchase.status === "PAID" ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : purchase.status === "PENDING" ? "bg-amber-500" : purchase.status === "EXPIRED" ? "bg-blue-500" : "bg-rose-500"}`} />
           {purchase.status || "--"}
         </div>
       )
@@ -237,7 +238,9 @@ const Subscriptions = () => {
         </div>
 
         <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }} className="px-5 py-3 bg-white border border-[#E2E8F0] rounded-2xl text-sm font-bold text-[#475569] outline-none cursor-pointer hover:bg-[#F8FAFC] transition-all">
+          <option value="ALL">ALL (Paid & Expired)</option>
           <option value="PAID">PAID</option>
+          <option value="EXPIRED">EXPIRED</option>
           <option value="PENDING">PENDING</option>
           <option value="FAILED">FAILED</option>
           <option value="">All Status</option>
@@ -293,9 +296,11 @@ const Subscriptions = () => {
                 <div className="flex flex-col items-center md:items-end gap-2">
                   <div className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg ${selectedPurchase.status === "PAID"
                     ? "bg-emerald-500 text-white shadow-emerald-500/20"
-                    : selectedPurchase.status === "PENDING"
-                      ? "bg-amber-500 text-white shadow-amber-500/20"
-                      : "bg-rose-500 text-white shadow-rose-500/20"
+                    : selectedPurchase.status === "EXPIRED"
+                      ? "bg-blue-500 text-white shadow-blue-500/20"
+                      : selectedPurchase.status === "PENDING"
+                        ? "bg-amber-500 text-white shadow-amber-500/20"
+                        : "bg-rose-500 text-white shadow-rose-500/20"
                     }`}>
                     {selectedPurchase.status}
                   </div>
@@ -411,7 +416,7 @@ const Subscriptions = () => {
                        Professional Evolution Timeline
                     </h3>
                     <div className="px-4 py-1.5 rounded-full bg-[#F1F5F9] text-[#64748B] text-[10px] font-black uppercase tracking-widest ring-1 ring-[#E2E8F0]">
-                      Total Expired Plans: {Math.max(0, userHistory.filter(h => h.status === 'PAID').length - 1)}
+                      Total Expired Plans: {Math.max(0, userHistory.filter(h => h.status === 'PAID' || h.status === 'EXPIRED').length - (selectedPurchase.status === 'PAID' || selectedPurchase.status === 'EXPIRED' ? 1 : 0))}
                     </div>
                   </div>
 
@@ -444,8 +449,8 @@ const Subscriptions = () => {
                             </div>
                             <div className="text-right">
                               <p className="text-xs font-black text-[#0F172A] tabular-nums">{formatCurrency(history.final_price)}</p>
-                              <div className={`text-[8px] font-black uppercase tracking-tighter mt-1 px-2 py-0.5 rounded-md inline-block ${history.status === 'PAID' ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-100 text-gray-400'}`}>
-                                {history.order_id === selectedPurchase.order_id ? 'CURRENT' : history.status === 'PAID' ? 'EXPIRED' : history.status}
+                              <div className={`text-[8px] font-black uppercase tracking-tighter mt-1 px-2 py-0.5 rounded-md inline-block ${history.status === 'PAID' ? 'bg-emerald-50 text-emerald-600' : history.status === 'EXPIRED' ? 'bg-blue-50 text-blue-600' : 'bg-gray-100 text-gray-400'}`}>
+                                {history.order_id === selectedPurchase.order_id ? 'CURRENT' : (history.status === 'PAID' || history.status === 'EXPIRED') ? 'EXPIRED' : history.status}
                               </div>
                             </div>
                           </div>
