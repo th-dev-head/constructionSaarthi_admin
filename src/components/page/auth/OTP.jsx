@@ -75,11 +75,18 @@ const OTPSend = () => {
     if (value && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
+
+    // Auto verify if complete
+    if (updated.every((d) => d !== "")) {
+      verify(updated.join(""));
+    }
   };
 
   const handleKeyDown = (index, e) => {
     if (e.key === "Backspace" && !otpDigits[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
+    } else if (e.key === "Enter") {
+      handleVerify();
     }
   };
 
@@ -94,14 +101,15 @@ const OTPSend = () => {
     setOtpDigits(updated);
     const nextIndex = Math.min(pasted.length, 5);
     inputRefs.current[nextIndex]?.focus();
+
+    // Auto verify if complete
+    if (updated.every((d) => d !== "")) {
+      verify(updated.join(""));
+    }
   };
 
-  const handleVerify = () => {
-    const otp = otpDigits.join("");
-    if (otp.length < 6) {
-      toast.error("Please enter the full 6-digit OTP");
-      return;
-    }
+  const verify = (otp) => {
+    if (loading) return;
     dispatch(verifyOtp({ countryCode, phoneNumber, otp }))
       .unwrap()
       .then((data) => {
@@ -114,6 +122,15 @@ const OTPSend = () => {
         console.error("Verification error:", err);
         toast.error(getErrorMessage(err));
       });
+  };
+
+  const handleVerify = () => {
+    const otp = otpDigits.join("");
+    if (otp.length < 6) {
+      toast.error("Please enter the full 6-digit OTP");
+      return;
+    }
+    verify(otp);
   };
 
   const handleResend = () => {
