@@ -170,7 +170,14 @@ const Subscriptions = () => {
       header: "Amount",
       accessor: "final_price",
       cell: (purchase) => (
-        <span className="text-sm font-black text-[#0F172A] tabular-nums">{formatCurrency(purchase.final_price)}</span>
+        <div className="flex flex-col gap-0.5">
+          <span className="text-sm font-black text-[#0F172A] tabular-nums">{formatCurrency(purchase.final_price)}</span>
+          {parseFloat(purchase.wallet_used) > 0 && (
+            <span className="text-[10px] font-bold text-violet-500 tabular-nums">
+              (Wallet: {formatCurrency(purchase.wallet_used)})
+            </span>
+          )}
+        </div>
       )
     },
     {
@@ -397,6 +404,14 @@ const Subscriptions = () => {
                             <Tag size={12} /> Discount Applied {selectedPurchase.coupon_code && `(${selectedPurchase.coupon_code})`}
                           </span>
                           <span className="font-black">-{formatCurrency(selectedPurchase.discount_amount)}</span>
+                        </div>
+                      )}
+                      {parseFloat(selectedPurchase.wallet_used) > 0 && (
+                        <div className="flex justify-between items-center text-sm text-violet-600">
+                          <span className="font-medium flex items-center gap-1.5">
+                            Wallet Used
+                          </span>
+                          <span className="font-black">-{formatCurrency(selectedPurchase.wallet_used)}</span>
                         </div>
                       )}
                       <div className="h-px bg-[#F1F5F9] my-2" />
