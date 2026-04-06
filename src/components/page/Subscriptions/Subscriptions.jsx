@@ -145,11 +145,29 @@ const Subscriptions = () => {
       )
     },
     {
-      header: "Active Plan",
-      accessor: "plan.name",
+      header: "Purchase Details",
+      accessor: "purchase_type",
       cell: (purchase) => (
-        <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-bold ring-1 ring-blue-200">
-          {purchase.plan?.name || "--"}
+        <div className="flex flex-col gap-1 shrink-0">
+          <div className={`w-fit inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-normal ${
+            purchase.purchase_type === "Main Plan" 
+              ? "bg-indigo-50 text-indigo-600 ring-1 ring-indigo-100" 
+              : "bg-amber-50 text-amber-600 ring-1 ring-amber-100"
+          }`}>
+            {purchase.purchase_type === "Main Plan" ? "Standard Plan" : "Add-on Purchase"}
+          </div>
+          <div className="text-sm font-bold text-[#475569] pl-0.5">
+            {purchase.purchase_type === "Main Plan" 
+              ? (purchase.plan?.name || "--")
+              : (
+                <span className="flex items-center gap-1.5">
+                  {purchase.addons_purchased?.extra_members > 0 && `+${purchase.addons_purchased.extra_members} User Slots`}
+                  {purchase.addons_purchased?.extra_calculations > 0 && `+${purchase.addons_purchased.extra_calculations} Calculations`}
+                  {!purchase.addons_purchased?.extra_members && !purchase.addons_purchased?.extra_calculations && "Subscription Extension"}
+                </span>
+              )
+            }
+          </div>
         </div>
       )
     },
@@ -168,17 +186,32 @@ const Subscriptions = () => {
     },
     {
       header: "Amount",
-      accessor: "final_price",
-      cell: (purchase) => (
-        <div className="flex flex-col gap-0.5">
-          <span className="text-sm font-black text-[#0F172A] tabular-nums">{formatCurrency(purchase.final_price)}</span>
-          {parseFloat(purchase.wallet_used) > 0 && (
-            <span className="text-[12px] font-bold text-accent tabular-nums">
-              (Wallet: {formatCurrency(purchase.wallet_used)})
+      accessor: "total_amount",
+      cell: (purchase) => {
+        const isFree = parseFloat(purchase.total_amount) === 0;
+        const isWalletOnly = parseFloat(purchase.wallet_used) >= parseFloat(purchase.total_amount) && !isFree;
+        
+        return (
+          <div className="flex flex-col gap-1 items-start">
+            <span className="text-sm font-black text-[#0F172A] tabular-nums">
+              {formatCurrency(purchase.total_amount || purchase.final_price)}
             </span>
-          )}
-        </div>
-      )
+            {isWalletOnly ? (
+              <span className="px-2 py-0.5 bg-violet-100 text-violet-600 text-[11px] font-normal rounded-full">
+                Paid via Wallet
+              </span>
+            ) : parseFloat(purchase.wallet_used) > 0 ? (
+              <span className="text-[9px] font-bold text-violet-500 italic">
+                (inc. {formatCurrency(purchase.wallet_used)} Wallet)
+              </span>
+            ) : isFree ? (
+              <span className="px-2 py-0.5 bg-emerald-100 text-emerald-600 text-[9px] font-black rounded-md uppercase tracking-tighter">
+                Referral Bonus
+              </span>
+            ) : null}
+          </div>
+        );
+      }
     },
     {
       header: "Purchase Date",
@@ -309,7 +342,7 @@ const Subscriptions = () => {
                         ? "bg-amber-500 text-white shadow-amber-500/20"
                         : "bg-rose-500 text-white shadow-rose-500/20"
                     }`}>
-                    {selectedPurchase.status}
+                    {selectedPurchase.final_price === 0 && selectedPurchase.wallet_used > 0 ? "PAID (WALLET)" : selectedPurchase.status}
                   </div>
                   <p className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider">
                     {formatDate(selectedPurchase.purchase_date)}
