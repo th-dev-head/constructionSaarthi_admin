@@ -173,7 +173,7 @@ const Subscriptions = () => {
         <div className="flex flex-col gap-0.5">
           <span className="text-sm font-black text-[#0F172A] tabular-nums">{formatCurrency(purchase.final_price)}</span>
           {parseFloat(purchase.wallet_used) > 0 && (
-            <span className="text-[10px] font-bold text-violet-500 tabular-nums">
+            <span className="text-[12px] font-bold text-violet-500 tabular-nums">
               (Wallet: {formatCurrency(purchase.wallet_used)})
             </span>
           )}
