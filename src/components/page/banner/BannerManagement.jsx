@@ -214,8 +214,8 @@ const BannerManagement = () => {
 
     const filteredBanners = banners.filter(b => {
         const matchesTab = activeTab === "all" || b.type === activeTab;
-        const matchesSearch = 
-            (b.heading || "").toLowerCase().includes(searchQuery.toLowerCase()) || 
+        const matchesSearch =
+            (b.heading || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
             (b.sub_heading || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
             (b.button_text || "").toLowerCase().includes(searchQuery.toLowerCase());
         return matchesTab && matchesSearch;
