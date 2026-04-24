@@ -25,6 +25,11 @@ export const MenuItems = [
     icon: <Users size={22} />,
   },
   {
+    name: "Leads",
+    link: "/leads",
+    icon: <Users2 size={22} />,
+  },
+  {
     name: "Subscriptions",
     link: "/subscriptions",
     icon: <CreditCard size={22} />,

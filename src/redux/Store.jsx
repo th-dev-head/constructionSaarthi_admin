@@ -17,6 +17,7 @@ import bannerReducer from "./slice/BannerSlice";
 import categoryReducer from "./slice/CategorySlice";
 import constructionReducer from "./slice/Types/ConstructionSlice";
 import contractTypeReducer from "./slice/Types/ContractTypeSlice";
+import leadReducer from "./slice/LeadSlice";
 
 export const store = configureStore({
   reducer: {
@@ -38,5 +39,6 @@ export const store = configureStore({
     category: categoryReducer,
     construction: constructionReducer,
     contractType: contractTypeReducer,
+    lead: leadReducer,
   },
 });

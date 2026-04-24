@@ -28,6 +28,7 @@ import BannerManagement from "./page/banner/BannerManagement";
 import CategoryManagement from "./page/category/CategoryManagement";
 import ConstructionType from "./page/types/ConstructionType";
 import ContractType from "./page/types/ContractType";
+import Leads from "./page/leads/Leads";
 
 const Navigation = () => (
   <BrowserRouter>
@@ -54,6 +55,7 @@ const Navigation = () => (
         <Route path="/bank" element={<BankType />} />
         <Route path="/construction" element={<ConstructionType />} />
         <Route path="/contract-type" element={<ContractType />} />
+        <Route path="/leads" element={<Leads />} />
         <Route path="/coupon-management" element={<CouponManagement />} />
         <Route path="/prompts" element={<PromptsList />} />
         <Route path="/prompts/create" element={<CreatePrompt />} />
