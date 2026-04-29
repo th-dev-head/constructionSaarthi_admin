@@ -5,13 +5,15 @@ import { apiInstance } from "../../config/axiosInstance";
 // Fetch all leads
 export const fetchAllLeads = createAsyncThunk(
   "lead/fetchAllLeads",
-  async ({ page = 1, limit = 10, search = "" } = {}, thunkAPI) => {
+  async ({ page = 1, limit = 10, search = "", startDate = "", endDate = "" } = {}, thunkAPI) => {
     try {
       const response = await apiInstance.get(`${baseUrl}/api/leads/all`, {
         params: {
           page,
           limit,
           search,
+          startDate,
+          endDate,
         },
       });
       return response.data;
@@ -58,12 +60,12 @@ const leadSlice = createSlice({
         if (payload.pagination) {
           page = payload.pagination.page || 1;
           limit = payload.pagination.limit || state.pagination.limit;
-          totalRecords = payload.pagination.totalRecords || 0;
+          totalRecords = payload.pagination.totalCount || payload.pagination.totalRecords || 0;
           totalPages = payload.pagination.totalPages || Math.ceil(totalRecords / limit) || 1;
         } else {
           page = payload.currentPage || payload.page || 1;
           limit = payload.limit || state.pagination.limit;
-          totalRecords = payload.total || payload.totalRecords || 0;
+          totalRecords = payload.totalCount || payload.total || payload.totalRecords || 0;
           totalPages = payload.totalPages || Math.ceil(totalRecords / limit) || 1;
         }
         

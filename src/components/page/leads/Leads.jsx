@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { X, Loader2 } from "lucide-react";
+import { X, Loader2, Calendar, Filter, Download } from "lucide-react";
 import { fetchAllLeads, clearError } from "../../../redux/slice/LeadSlice";
 import DataTable from "../../common/DataTable";
 import { toPascalCase } from "../../../utils/stringUtils";
@@ -15,6 +15,8 @@ const Leads = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   // Fetch leads when filters change
   useEffect(() => {
@@ -23,9 +25,11 @@ const Leads = () => {
         page: currentPage,
         limit: rowsPerPage,
         search: searchQuery,
+        startDate,
+        endDate,
       })
     );
-  }, [dispatch, searchQuery, currentPage, rowsPerPage]);
+  }, [dispatch, searchQuery, currentPage, rowsPerPage, startDate, endDate]);
 
   // Format date and time
   const formatDateTime = (dateString) => {
@@ -52,11 +56,11 @@ const Leads = () => {
       cell: (lead) => (
         <div className="flex items-center gap-4">
           <div className="w-11 h-11 rounded-2xl bg-[#EEF2FF] border-2 border-white shadow-sm flex items-center justify-center text-accent font-black text-lg select-none group-hover:scale-110 transition-transform">
-            {(lead.name || "?")[0].toUpperCase()}
+            {(lead.name || lead.firstName || "?")[0].toUpperCase()}
           </div>
           <div>
             <p className="font-medium text-[#0F172A] group-hover:text-accent transition-colors">
-              {toPascalCase(lead.name) || "--"}
+              {toPascalCase(lead.name || `${lead.firstName || ""} ${lead.lastName || ""}`.trim()) || "--"}
             </p>
             <p className="text-[10px] font-black text-[#94A3B8] uppercase tracking-wider">
               {lead.email || "No Email"}
@@ -141,10 +145,65 @@ const Leads = () => {
 
   return (
     <div className="space-y-4 md:space-y-6 px-4 lg:px-10 py-4 md:py-8 bg-[#F8FAFC] w-full min-h-screen" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-extrabold text-[#0F172A] tracking-tight">Leads Management</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-extrabold text-[#0F172A] tracking-tight">Leads Management</h1>
+            <span className="px-3 py-1 bg-accent/10 text-accent text-sm font-black rounded-full border border-accent/20">
+              {pagination.totalRecords} Total
+            </span>
+          </div>
           <p className="text-[#64748B] mt-1 text-sm font-medium">Review and track incoming leads from marketing campaigns</p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-end gap-4">
+          <div className="space-y-1.5 w-full sm:w-auto">
+            <label className="text-[10px] font-black text-[#64748B] uppercase tracking-wider ml-1">Start Date</label>
+            <div className="relative group">
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => {
+                  setStartDate(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E2E8F0] rounded-xl text-sm font-bold text-[#0F172A] outline-none focus:border-accent/30 transition-all cursor-pointer shadow-sm"
+              />
+              <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8] group-focus-within:text-accent transition-colors" size={16} />
+            </div>
+          </div>
+
+          <div className="space-y-1.5 w-full sm:w-auto">
+            <label className="text-[10px] font-black text-[#64748B] uppercase tracking-wider ml-1">End Date</label>
+            <div className="relative group">
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => {
+                  setEndDate(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E2E8F0] rounded-xl text-sm font-bold text-[#0F172A] outline-none focus:border-accent/30 transition-all cursor-pointer shadow-sm"
+              />
+              <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8] group-focus-within:text-accent transition-colors" size={16} />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {(startDate || endDate) && (
+              <button
+                onClick={() => {
+                  setStartDate("");
+                  setEndDate("");
+                  setCurrentPage(1);
+                }}
+                className="p-2.5 bg-rose-50 text-rose-600 rounded-xl hover:bg-rose-100 transition-colors border border-rose-100 shadow-sm"
+                title="Clear Filters"
+              >
+                <X size={20} />
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
