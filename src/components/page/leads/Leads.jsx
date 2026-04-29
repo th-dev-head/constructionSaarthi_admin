@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { X, Loader2, Calendar, Filter, Download } from "lucide-react";
+import { X, Loader2, Calendar, Filter, Download, ChevronLeft, ChevronRight } from "lucide-react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import { fetchAllLeads, clearError } from "../../../redux/slice/LeadSlice";
 import DataTable from "../../common/DataTable";
 import { toPascalCase } from "../../../utils/stringUtils";
@@ -15,18 +17,27 @@ const Leads = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
 
   // Fetch leads when filters change
   useEffect(() => {
+    // Format dates to YYYY-MM-DD for the API
+    const formatDate = (date) => {
+      if (!date) return "";
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
     dispatch(
       fetchAllLeads({
         page: currentPage,
         limit: rowsPerPage,
         search: searchQuery,
-        startDate,
-        endDate,
+        startDate: formatDate(startDate),
+        endDate: formatDate(endDate),
       })
     );
   }, [dispatch, searchQuery, currentPage, rowsPerPage, startDate, endDate]);
@@ -160,32 +171,35 @@ const Leads = () => {
           <div className="space-y-1.5 w-full sm:w-auto">
             <label className="text-[10px] font-black text-[#64748B] uppercase tracking-wider ml-1">Start Date</label>
             <div className="relative group">
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => {
-                  setStartDate(e.target.value);
+              <DatePicker
+                selected={startDate}
+                onChange={(date) => {
+                  setStartDate(date);
                   setCurrentPage(1);
                 }}
-                className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E2E8F0] rounded-xl text-sm font-bold text-[#0F172A] outline-none focus:border-accent/30 transition-all cursor-pointer shadow-sm"
+                placeholderText="Select Date"
+                className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E2E8F0] rounded-xl text-sm font-bold text-[#0F172A] outline-none focus:border-accent/30 transition-all cursor-pointer shadow-sm hover:border-[#CBD5E1]"
+                dateFormat="dd-MM-yyyy"
               />
-              <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8] group-focus-within:text-accent transition-colors" size={16} />
+              <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8] group-focus-within:text-accent transition-colors z-10" size={16} />
             </div>
           </div>
 
           <div className="space-y-1.5 w-full sm:w-auto">
             <label className="text-[10px] font-black text-[#64748B] uppercase tracking-wider ml-1">End Date</label>
             <div className="relative group">
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => {
-                  setEndDate(e.target.value);
+              <DatePicker
+                selected={endDate}
+                onChange={(date) => {
+                  setEndDate(date);
                   setCurrentPage(1);
                 }}
-                className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E2E8F0] rounded-xl text-sm font-bold text-[#0F172A] outline-none focus:border-accent/30 transition-all cursor-pointer shadow-sm"
+                placeholderText="Select Date"
+                className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E2E8F0] rounded-xl text-sm font-bold text-[#0F172A] outline-none focus:border-accent/30 transition-all cursor-pointer shadow-sm hover:border-[#CBD5E1]"
+                dateFormat="dd-MM-yyyy"
+                minDate={startDate}
               />
-              <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8] group-focus-within:text-accent transition-colors" size={16} />
+              <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8] group-focus-within:text-accent transition-colors z-10" size={16} />
             </div>
           </div>
 
@@ -193,19 +207,79 @@ const Leads = () => {
             {(startDate || endDate) && (
               <button
                 onClick={() => {
-                  setStartDate("");
-                  setEndDate("");
+                  setStartDate(null);
+                  setEndDate(null);
                   setCurrentPage(1);
                 }}
-                className="p-2.5 bg-rose-50 text-rose-600 rounded-xl hover:bg-rose-100 transition-colors border border-rose-100 shadow-sm"
+                className="p-2.5 bg-rose-50 text-rose-600 rounded-xl hover:bg-rose-100 transition-colors border border-rose-100 shadow-sm flex items-center gap-2 group"
                 title="Clear Filters"
               >
-                <X size={20} />
+                <X size={20} className="group-hover:rotate-90 transition-transform duration-300" />
               </button>
             )}
           </div>
         </div>
       </div>
+
+      <style>{`
+        .react-datepicker-wrapper {
+          width: 100%;
+        }
+        .react-datepicker {
+          font-family: inherit;
+          border: 1px solid #E2E8F0;
+          border-radius: 1rem;
+          box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+          overflow: hidden;
+        }
+        .react-datepicker__header {
+          background-color: #F8FAFC;
+          border-bottom: 1px solid #E2E8F0;
+          padding-top: 1rem;
+        }
+        .react-datepicker__current-month {
+          font-weight: 800;
+          color: #0F172A;
+          text-transform: uppercase;
+          letter-spacing: 0.025em;
+          font-size: 0.875rem;
+          margin-bottom: 0.5rem;
+        }
+        .react-datepicker__day-name {
+          color: #64748B;
+          font-weight: 700;
+          font-size: 0.75rem;
+          width: 2.25rem;
+        }
+        .react-datepicker__day {
+          width: 2.25rem;
+          line-height: 2.25rem;
+          border-radius: 0.75rem;
+          color: #334155;
+          font-weight: 600;
+          transition: all 0.2s;
+        }
+        .react-datepicker__day:hover {
+          background-color: #EEF2FF;
+          color: #B02E0C;
+        }
+        .react-datepicker__day--selected {
+          background-color: #B02E0C !important;
+          color: white !important;
+          font-weight: 800;
+        }
+        .react-datepicker__day--keyboard-selected {
+          background-color: #FEF2F2;
+          color: #B02E0C;
+        }
+        .react-datepicker__navigation {
+          top: 1rem;
+        }
+        .react-datepicker__navigation-icon::before {
+          border-color: #94A3B8;
+          border-width: 2px 2px 0 0;
+        }
+      `}</style>
 
       <DataTable
         columns={columns}
