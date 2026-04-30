@@ -293,7 +293,7 @@ const Users = () => {
     <div className="space-y-4 md:space-y-6 px-4 lg:px-10 py-4 md:py-8 bg-[#F8FAFC] w-full min-h-screen" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-[#0F172A] tracking-tight">Users Management</h1>
+          <h1 className="text-xl font-bold text-[#0F172A] tracking-tight">Users Management</h1>
           <p className="text-[#64748B] mt-1 text-sm font-medium">Monitor and manage your platform's growing community of professionals</p>
         </div>
       </div>

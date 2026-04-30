@@ -118,7 +118,7 @@ const PMFeatureManagement = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-2xl md:text-3xl font-black text-[#0F172A] tracking-tight">
+          <h1 className="text-2xl md:text-xl font-bold text-[#0F172A] tracking-tight">
             PM Features
           </h1>
           <p className="text-[12px] md:text-sm font-medium text-[#64748B]">

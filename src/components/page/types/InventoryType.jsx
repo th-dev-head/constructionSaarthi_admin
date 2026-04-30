@@ -196,7 +196,7 @@ const Inventory = () => {
     <div className="space-y-4 sm:space-y-8 px-4 sm:px-8 py-4 sm:py-8 bg-[#F8FAFC] w-full min-h-screen" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-3xl font-black text-[#0F172A] tracking-tight">Inventory-Metrix</h1>
+          <h1 className="text-xl font-bold text-[#0F172A] tracking-tight">Inventory-Metrix</h1>
           <p className="text-sm font-medium text-[#64748B]">Management of physical raw materials and onsite resource classification.</p>
         </div>
 

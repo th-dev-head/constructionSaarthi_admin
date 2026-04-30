@@ -282,7 +282,7 @@ const Subscriptions = () => {
     <div className="space-y-4 sm:space-y-8 px-4 sm:px-8 py-4 sm:py-8 bg-[#F8FAFC] w-full min-h-screen" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-extrabold text-[#0F172A] tracking-tight leading-none">Subscriptions</h1>
+          <h1 className="text-xl font-bold text-[#0F172A] tracking-tight">Subscriptions</h1>
           <p className="text-[#64748B] text-sm mt-1 font-medium">Keep track of all user subscriptions effortlessly</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">

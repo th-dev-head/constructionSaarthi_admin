@@ -343,7 +343,7 @@ const Support = () => {
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="space-y-1">
-              <h1 className="text-2xl md:text-3xl font-black text-[#0F172A] tracking-tight">
+              <h1 className="text-2xl md:text-xl font-bold text-[#0F172A] tracking-tight">
                 Help Support
               </h1>
               <p className="text-[12px] md:text-sm font-medium text-[#64748B]">
@@ -444,7 +444,7 @@ const Support = () => {
         <>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="space-y-1">
-              <h1 className="text-3xl font-black text-[#0F172A] tracking-tight">
+              <h1 className="text-xl font-bold text-[#0F172A] tracking-tight">
                 FAQs
               </h1>
               <p className="text-sm font-medium text-[#64748B]">

@@ -158,7 +158,7 @@ const Leads = () => {
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-extrabold text-[#0F172A] tracking-tight">Leads Management</h1>
+            <h1 className="text-xl font-bold text-[#0F172A] tracking-tight">Leads Management</h1>
             <span className="px-3 py-1 bg-accent/10 text-accent text-sm font-black rounded-full border border-accent/20">
               {pagination.totalRecords} Total
             </span>

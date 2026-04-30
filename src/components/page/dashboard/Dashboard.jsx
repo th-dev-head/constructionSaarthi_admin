@@ -94,7 +94,7 @@ export const Dashboard = () => {
     <div className="space-y-4 md:space-y-6 px-4 lg:px-10 py-4 md:py-8 bg-[#F8FAFC] w-full min-h-screen" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Admin Dashboard</h1>
+          <h1 className="text-xl font-bold text-[#0F172A] tracking-tight">Admin Dashboard</h1>
           <p className="text-gray-500 mt-1">Welcome back! Here's what's happening today.</p>
         </div>
         {/* <div className="flex items-center gap-3 bg-white p-1.5 rounded-2xl shadow-sm border border-gray-100">

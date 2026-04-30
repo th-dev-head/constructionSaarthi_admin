@@ -823,7 +823,7 @@ const CouponManagement = () => {
     <div className="space-y-4 sm:space-y-8 px-4 sm:px-8 py-4 sm:py-8 bg-[#F8FAFC] w-full min-h-screen">
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-[#0F172A] tracking-tight">
+          <h1 className="text-xl font-bold text-[#0F172A] tracking-tight">
             Coupon Management
           </h1>
           <p className="text-[#64748B] text-sm mt-1 font-medium">

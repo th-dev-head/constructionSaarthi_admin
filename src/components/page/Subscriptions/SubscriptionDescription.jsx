@@ -156,7 +156,7 @@ const SubscriptionDescription = () => {
                         <ArrowLeft size={20} strokeWidth={2.5} />
                     </button>
                     <div>
-                        <h1 className="text-3xl font-extrabold text-[#0F172A] tracking-tight leading-none">
+                        <h1 className="text-xl font-bold text-[#0F172A] tracking-tight">
                             Subscription Description
                         </h1>
                         <p className="text-[#64748B] text-sm mt-2 font-medium">

@@ -492,7 +492,7 @@ const ManagePlan = () => {
                         <ArrowLeft size={20} strokeWidth={2.5} />
                     </button>
                     <div>
-                        <h2 className="text-3xl font-black text-[#0F172A] tracking-tight leading-none">Manage Plans</h2>
+                        <h2 className="text-xl font-bold text-[#0F172A] tracking-tight leading-none">Manage Plans</h2>
                         <p className="text-[#64748B] text-sm mt-1 font-medium">Handle all your plans effortlessly at the best rates</p>
                     </div>
                 </div>
