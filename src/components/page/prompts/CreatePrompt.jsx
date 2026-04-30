@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { X, Plus, Trash2, Loader2, ArrowLeft } from "lucide-react";
+import CustomSelect from "../../common/CustomSelect";
 import {
   createPrompt,
   updatePrompt,
@@ -342,24 +343,14 @@ const CreatePrompt = () => {
                   Select Feature <span className="text-red-500">*</span>
                 </label>
                 <div className="flex gap-2">
-                  <select
-                    name="feature_id"
+                  <CustomSelect
+                    options={pmFeatures.map(f => ({ value: String(f.id), label: f.feature || f.name }))}
                     value={formData.feature_id}
-                    onChange={handleInputChange}
-                    disabled={isViewMode}
-                    className={`flex-1 border-2 border-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#B02E0C] focus:ring-2 focus:ring-[#B02E0C]/20 transition-all ${isViewMode ? "bg-gray-100 cursor-not-allowed" : ""}`}
-                  >
-                    <option value="">Select Feature</option>
-                    {featureLoading ? (
-                      <option>Loading features...</option>
-                    ) : (
-                      pmFeatures.map((feature) => (
-                        <option key={feature.id} value={feature.id}>
-                          {feature.feature || feature.name}
-                        </option>
-                      ))
-                    )}
-                  </select>
+                    onChange={(val) => setFormData(prev => ({ ...prev, feature_id: val }))}
+                    placeholder={featureLoading ? "Loading features..." : "Select Feature"}
+                    isDisabled={isViewMode || featureLoading}
+                    className="flex-1"
+                  />
                   {!isViewMode && (
                     <button
                       type="button"
@@ -395,17 +386,15 @@ const CreatePrompt = () => {
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Type <span className="text-red-500">*</span>
                 </label>
-                <select
-                  name="type"
+                <CustomSelect
+                  options={[
+                    { value: "documnets", label: "documnets" },
+                    { value: "other", label: "Other" }
+                  ]}
                   value={formData.type}
-                  onChange={handleInputChange}
-                  disabled={isViewMode}
-                  className={`w-full border-2 border-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#B02E0C] focus:ring-2 focus:ring-[#B02E0C]/20 transition-all ${isViewMode ? "bg-gray-100 cursor-not-allowed" : ""}`}
-                  required
-                >
-                  <option value="documnets">documnets</option>
-                  <option value="other">Other</option>
-                </select>
+                  onChange={(val) => setFormData(prev => ({ ...prev, type: val }))}
+                  isDisabled={isViewMode}
+                />
               </div>
             </div>
           </div>
@@ -497,29 +486,13 @@ const CreatePrompt = () => {
                           <label className="block text-xs font-semibold text-gray-700 mb-2">
                             Prompt Reference
                           </label>
-                          <select
+                          <CustomSelect
+                            options={promptReferences.map(r => ({ value: String(r.id), label: r.name }))}
                             value={variable.promptReferenceId}
-                            onChange={(e) =>
-                              handleVariableChange(
-                                index,
-                                "promptReferenceId",
-                                e.target.value
-                              )
-                            }
-                            disabled={isViewMode}
-                            className={`w-full border-2 border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#B02E0C] focus:ring-2 focus:ring-[#B02E0C]/20 transition-all ${isViewMode ? "bg-gray-100 cursor-not-allowed" : ""}`}
-                          >
-                            <option value="">Select Reference</option>
-                            {referenceLoading ? (
-                              <option>Loading...</option>
-                            ) : (
-                              promptReferences.map((ref) => (
-                                <option key={ref.id} value={ref.id}>
-                                  {ref.name}
-                                </option>
-                              ))
-                            )}
-                          </select>
+                            onChange={(val) => handleVariableChange(index, "promptReferenceId", val)}
+                            placeholder={referenceLoading ? "Loading..." : "Select Reference"}
+                            isDisabled={isViewMode || referenceLoading}
+                          />
                         </div>
                         {!isViewMode && (
                           <button

@@ -4,6 +4,7 @@ import {
   User, Calendar, Hash, ArrowRight, ShieldCheck, Layers, Tag, History, Clock
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import CustomSelect from "../../common/CustomSelect";
 import { apiInstance } from "../../../config/axiosInstance";
 import DataTable from "../../common/DataTable";
 
@@ -259,32 +260,28 @@ const Subscriptions = () => {
           <Search className="absolute left-4 top-3.5 w-5 h-5 text-[#94A3B8]" />
         </div>
 
-        <div className="relative">
-          <button onClick={() => setPlanOpen(!planOpen)} className="px-5 py-3 bg-white border border-[#E2E8F0] rounded-2xl text-sm font-bold text-[#475569] flex items-center gap-2 hover:bg-[#F8FAFC] transition-all">
-            <Filter size={18} className="text-[#94A3B8]" />
-            <span>{plans.find(p => p.id === selectedPlanId)?.name || 'All Plans'}</span>
-            <ChevronDown size={14} className={`transition-transform ${planOpen ? 'rotate-180' : ''}`} />
-          </button>
-          {planOpen && (
-            <div className="absolute top-full mt-2 left-0 bg-white shadow-2xl border border-[#E2E8F0] rounded-2xl w-56 z-[60] py-2 animate-in slide-in-from-top-2 duration-300">
-              <ul className="text-[#475569] text-sm font-bold">
-                <li onClick={() => { setSelectedPlanId(""); setPlanOpen(false); setCurrentPage(1); }} className="px-4 py-3 hover:bg-[#F8FAFC] hover:text-accent cursor-pointer transition-colors">All Plans</li>
-                {plans.map(plan => (
-                  <li key={plan.id} onClick={() => { setSelectedPlanId(plan.id); setPlanOpen(false); setCurrentPage(1); }} className="px-4 py-3 hover:bg-[#F8FAFC] hover:text-accent cursor-pointer transition-colors">{plan.name}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
+        <CustomSelect
+          options={plans.map(p => ({ value: p.id, label: p.name }))}
+          value={selectedPlanId}
+          onChange={(val) => { setSelectedPlanId(val); setCurrentPage(1); }}
+          placeholder="All Plans"
+          className="w-56"
+        />
 
-        <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }} className="px-5 py-3 bg-white border border-[#E2E8F0] rounded-2xl text-sm font-bold text-[#475569] outline-none cursor-pointer hover:bg-[#F8FAFC] transition-all">
-          <option value="ALL">ALL (Paid & Expired)</option>
-          <option value="PAID">PAID</option>
-          <option value="EXPIRED">EXPIRED</option>
-          <option value="PENDING">PENDING</option>
-          <option value="FAILED">FAILED</option>
-          <option value="">All Status</option>
-        </select>
+        <CustomSelect
+          options={[
+            { value: "ALL", label: "ALL (Paid & Expired)" },
+            { value: "PAID", label: "PAID" },
+            { value: "EXPIRED", label: "EXPIRED" },
+            { value: "PENDING", label: "PENDING" },
+            { value: "FAILED", label: "FAILED" },
+            { value: "", label: "All Status" }
+          ]}
+          value={statusFilter}
+          onChange={(val) => { setStatusFilter(val); setCurrentPage(1); }}
+          placeholder="All Status"
+          className="w-56"
+        />
       </div>
 
       <DataTable

@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import loginbg from "../../../assets/loginbg.png";
 import icon from "../../../assets/icon.png";
 import { toast } from "react-toastify";
+import CustomSelect from "../../common/CustomSelect";
 // ...existing code...
 // ...existing code...
 
@@ -85,17 +86,12 @@ const Login = () => {
 
         <form onSubmit={handleSubmit}>
           <div className="mb-6 flex flex-col sm:flex-row gap-3">
-            <select
+            <CustomSelect
+              options={countryCodes.map(c => ({ value: c.code, label: `${c.name} (${c.code})` }))}
               value={countryCode}
-              onChange={(e) => dispatch(setCountryCode(e.target.value))}
-              className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B02E0C] bg-white text-gray-700 w-full sm:w-auto min-w-[120px]"
-            >
-              {countryCodes.map((c) => (
-                <option key={c.code} value={c.code}>
-                  {c.name} ({c.code})
-                </option>
-              ))}
-            </select>
+              onChange={(val) => dispatch(setCountryCode(val))}
+              className="w-full sm:w-[150px]"
+            />
 
             <input
               type="tel"

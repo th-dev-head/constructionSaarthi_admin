@@ -11,6 +11,7 @@ import {
 import { fetchAllRoles } from "../../../redux/slice/RolesPermission/RolesSlice";
 import { fetchAllFeature } from "../../../redux/slice/RolesPermission/FeatureSlice";
 import DataTable from "../../common/DataTable";
+import CustomSelect from "../../common/CustomSelect";
 
 const Permissions = () => {
   const dispatch = useDispatch();
@@ -298,19 +299,25 @@ const Permissions = () => {
                 <form id="permission-form" onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-[#64748B] uppercase tracking-widest px-1">Authority Role <span className="text-accent">*</span></label>
-                      <select name="role_id" value={formState.role_id} onChange={handleFormChange} className="w-full bg-[#F8FAFC] border-2 border-transparent focus:border-accent/20 focus:bg-white rounded-2xl px-5 py-4 text-sm font-bold text-[#0F172A] transition-all outline-none appearance-none" required>
-                        <option value="" disabled>Select Role</option>
-                        {Roles.map((role) => <option key={role.id} value={role.id}>{role.name}</option>)}
-                      </select>
+                      <CustomSelect
+                        options={Roles.map(r => ({ value: String(r.id), label: r.name }))}
+                        value={String(formState.role_id)}
+                        onChange={(val) => setFormState(prev => ({ ...prev, role_id: val }))}
+                        label="Authority Role"
+                        placeholder="Select Role"
+                        required
+                      />
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-[#64748B] uppercase tracking-widest px-1">Target Feature <span className="text-accent">*</span></label>
-                      <select name="feature_id" value={formState.feature_id} onChange={handleFormChange} className="w-full bg-[#F8FAFC] border-2 border-transparent focus:border-accent/20 focus:bg-white rounded-2xl px-5 py-4 text-sm font-bold text-[#0F172A] transition-all outline-none appearance-none" required>
-                        <option value="" disabled>Select Feature</option>
-                        {Features.map((feature) => <option key={feature.id} value={feature.id}>{feature.name}</option>)}
-                      </select>
+                      <CustomSelect
+                        options={Features.map(f => ({ value: String(f.id), label: f.name }))}
+                        value={String(formState.feature_id)}
+                        onChange={(val) => setFormState(prev => ({ ...prev, feature_id: val }))}
+                        label="Target Feature"
+                        placeholder="Select Feature"
+                        required
+                      />
                     </div>
                   </div>
 

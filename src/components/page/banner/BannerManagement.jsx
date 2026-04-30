@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { EllipsisVertical, X, Upload, Plus, Eye, Edit, Trash2, Layout, Image as ImageIcon, ChevronDown } from "lucide-react";
+import CustomSelect from "../../common/CustomSelect";
 import {
     fetchAllBanners,
     addBanner,
@@ -489,38 +490,26 @@ const BannerManagement = () => {
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-6 col-span-1 md:col-span-2">
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-[#64748B] uppercase tracking-widest px-1">Layout Logic</label>
-                                            <div className="relative">
-                                                <select
-                                                    name="text_alignment"
-                                                    value={formState.text_alignment}
-                                                    onChange={handleFormChange}
-                                                    className="w-full appearance-none bg-[#F8FAFC] border-2 border-transparent focus:border-accent/20 focus:bg-white rounded-2xl px-5 py-4 text-sm font-bold text-[#0F172A] transition-all outline-none cursor-pointer"
-                                                >
-                                                    <option value="left">Left Aligned</option>
-                                                    <option value="center">Centered</option>
-                                                    <option value="right">Right Aligned</option>
-                                                </select>
-                                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-[#94A3B8] pointer-events-none" size={16} />
-                                            </div>
-                                        </div>
+                                            <CustomSelect
+                                                options={[
+                                                    { value: "left", label: "Left Aligned" },
+                                                    { value: "center", label: "Centered" },
+                                                    { value: "right", label: "Right Aligned" }
+                                                ]}
+                                                value={formState.text_alignment}
+                                                onChange={(val) => setFormState({ ...formState, text_alignment: val })}
+                                                label="Layout Logic"
+                                            />
 
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-[#64748B] uppercase tracking-widest px-1">Banner Type</label>
-                                            <div className="relative">
-                                                <select
-                                                    name="type"
-                                                    value={formState.type}
-                                                    onChange={handleFormChange}
-                                                    className="w-full appearance-none bg-[#F8FAFC] border-2 border-transparent focus:border-accent/20 focus:bg-white rounded-2xl px-5 py-4 text-sm font-bold text-[#0F172A] transition-all outline-none cursor-pointer"
-                                                >
-                                                    <option value="header">Header Banner</option>
-                                                    <option value="footer">Footer Banner</option>
-                                                </select>
-                                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-[#94A3B8] pointer-events-none" size={16} />
-                                            </div>
-                                        </div>
+                                            <CustomSelect
+                                                options={[
+                                                    { value: "header", label: "Header Banner" },
+                                                    { value: "footer", label: "Footer Banner" }
+                                                ]}
+                                                value={formState.type}
+                                                onChange={(val) => setFormState({ ...formState, type: val })}
+                                                label="Banner Type"
+                                            />
 
                                         <div className="space-y-2 flex flex-col">
                                             <label className="text-[10px] font-black text-[#64748B] uppercase tracking-widest px-1 mb-2">Visibility Status</label>

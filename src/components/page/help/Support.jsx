@@ -14,6 +14,7 @@ import {
 } from "../../../redux/slice/HelpSlice";
 import { apiInstance } from "../../../config/axiosInstance";
 import DataTable from "../../common/DataTable";
+import CustomSelect from "../../common/CustomSelect";
 import { toPascalCase } from "../../../utils/stringUtils";
 
 const Support = () => {
@@ -562,23 +563,18 @@ const Support = () => {
             </div>
             <div className="flex flex-wrap gap-3 md:gap-4 items-end w-full lg:w-auto">
               <div className="flex flex-col gap-1 flex-1 min-w-[120px]">
-                <span className="text-[10px] font-black text-[#64748B] uppercase tracking-widest pl-1">Status</span>
-                <div className="relative">
-                  <select
-                    value={ticketFilters.status}
-                    onChange={(e) => setTicketFilters((p) => ({ ...p, status: e.target.value, page: 1 }))}
-                    className="appearance-none pl-4 pr-10 py-2.5 bg-white border border-[#E2E8F0] rounded-xl text-[12px] md:text-sm font-bold text-[#0F172A] focus:ring-accent/20 focus:border-accent transition-all cursor-pointer outline-none shadow-sm w-full"
-                  >
-                    <option value="">All Streams</option>
-                    <option value="Open">Open</option>
-                    <option value="InProgress">In Progress</option>
-                    <option value="Resolved">Resolved</option>
-                    <option value="Closed">Closed</option>
-                  </select>
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#9CA3AF]">
-                    <ChevronDown size={14} />
-                  </div>
-                </div>
+                <CustomSelect
+                  options={[
+                    { value: "", label: "All Streams" },
+                    { value: "Open", label: "Open" },
+                    { value: "InProgress", label: "In Progress" },
+                    { value: "Resolved", label: "Resolved" },
+                    { value: "Closed", label: "Closed" }
+                  ]}
+                  value={ticketFilters.status}
+                  onChange={(val) => setTicketFilters((p) => ({ ...p, status: val, page: 1 }))}
+                  label="Status"
+                />
               </div>
               {/* <div className="flex flex-col gap-1 flex-1 min-w-[120px]">
                 <span className="text-[10px] font-black text-[#64748B] uppercase tracking-widest pl-1">Topic/Tag</span>
@@ -844,22 +840,17 @@ const Support = () => {
               <div className="space-y-6">
 
                 <div>
-                  <label className="block text-[10px] font-black text-[#64748B] uppercase tracking-widest mb-2 pl-1 italic">Lifecycle State</label>
-                  <div className="relative">
-                    <select
+                    <CustomSelect
+                      options={[
+                        { value: "Open", label: "Open" },
+                        { value: "InProgress", label: "In Progress" },
+                        { value: "Resolved", label: "Resolved" },
+                        { value: "Closed", label: "Closed" }
+                      ]}
                       value={statusForm.status}
-                      onChange={(e) => setStatusForm((p) => ({ ...p, status: e.target.value }))}
-                      className="appearance-none w-full pl-4 pr-10 py-4 bg-[#F8FAFC] border-2 border-[#E2E8F0] rounded-2xl text-sm font-bold text-[#0F172A] focus:ring-accent/20 focus:border-accent transition-all cursor-pointer outline-none shadow-sm"
-                    >
-                      <option value="Open">Open</option>
-                      <option value="InProgress">In Progress</option>
-                      <option value="Resolved">Resolved</option>
-                      <option value="Closed">Closed</option>
-                    </select>
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[#9CA3AF]">
-                      <ChevronDown size={18} />
-                    </div>
-                  </div>
+                      onChange={(val) => setStatusForm((p) => ({ ...p, status: val }))}
+                      label="Lifecycle State"
+                    />
                 </div>
 
                 <div>
@@ -1033,22 +1024,13 @@ const Support = () => {
 
               <div className="space-y-6">
                 <div>
-                  <label className="block text-[10px] font-black text-[#64748B] uppercase tracking-widest mb-2 pl-1 italic">Structural Category</label>
-                  <div className="relative">
-                    <select
-                      value={faqForm.category_id}
-                      onChange={(e) => setFaqForm((p) => ({ ...p, category_id: e.target.value }))}
-                      className="appearance-none w-full pl-4 pr-10 py-4 bg-[#F8FAFC] border-2 border-[#E2E8F0] rounded-2xl text-sm font-bold text-[#0F172A] focus:ring-accent/20 focus:border-accent transition-all cursor-pointer outline-none shadow-sm"
-                    >
-                      <option value="">Select Domain Taxonomy</option>
-                      {(sortedCategories || []).map((c) => (
-                        <option key={c.id} value={c.id}>{c.name}</option>
-                      ))}
-                    </select>
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[#9CA3AF]">
-                      <ChevronDown size={18} />
-                    </div>
-                  </div>
+                    <CustomSelect
+                      options={(sortedCategories || []).map((c) => ({ value: String(c.id), label: c.name }))}
+                      value={String(faqForm.category_id)}
+                      onChange={(val) => setFaqForm((p) => ({ ...p, category_id: val }))}
+                      label="Structural Category"
+                      placeholder="Select Domain Taxonomy"
+                    />
                 </div>
 
                 <div>

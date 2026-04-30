@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { EllipsisVertical, Eye, Edit, Trash2, Loader2, Plus, X, Search, Filter, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+import CustomSelect from "../../common/CustomSelect";
 import {
   fetchAllPrompts,
   deletePrompt,
@@ -136,26 +137,17 @@ const PromptsList = () => {
       {/* Filters & Search */}
       <div className="bg-white p-4 md:p-6 rounded-2xl md:rounded-[2rem] shadow-sm border border-[#E2E8F0] flex flex-wrap items-center gap-4">
         <div className="flex-1 min-w-full md:min-w-[300px] relative">
-          <label className="text-[10px] font-black text-[#64748B] uppercase tracking-widest px-1 mb-2 block">Module Filter</label>
-          <div className="relative">
-            <select
-              value={selectedFeature}
-              onChange={(e) => setSelectedFeature(e.target.value)}
-              className="w-full appearance-none bg-[#F8FAFC] border-2 border-transparent focus:border-accent/20 focus:bg-white rounded-xl md:rounded-2xl px-5 py-3 md:py-3.5 text-sm font-bold text-[#0F172A] transition-all outline-none cursor-pointer"
-            >
-              <option value="">All Active Modules</option>
-              {featuresLoading ? (
-                <option disabled>Loading system modules...</option>
-              ) : (
-                pmFeatures.map((f) => (
-                  <option key={f.id} value={f.id}>
-                    {f.feature || f.name}
-                  </option>
-                ))
-              )}
-            </select>
-            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8] pointer-events-none" />
-          </div>
+          <CustomSelect
+            options={[
+              { value: "", label: "All Active Modules" },
+              ...pmFeatures.map(f => ({ value: String(f.id), label: f.feature || f.name }))
+            ]}
+            value={selectedFeature}
+            onChange={(val) => setSelectedFeature(val)}
+            placeholder={featuresLoading ? "Loading system modules..." : "Select Module"}
+            isDisabled={featuresLoading}
+            label="Module Filter"
+          />
         </div>
       </div>
 

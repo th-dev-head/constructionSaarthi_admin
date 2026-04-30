@@ -15,6 +15,8 @@ import {
 
 import { apiInstance } from "../../../config/axiosInstance";
 import DataTable from "../../common/DataTable";
+import CustomDatePicker from "../../common/CustomDatePicker";
+import CustomSelect from "../../common/CustomSelect";
 
 const CouponManagement = () => {
 
@@ -1518,60 +1520,45 @@ const CouponManagement = () => {
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                        Start Date
-                      </label>
-                      <input
-                        type="date"
-                        name="start_date"
-                        value={couponFormData.start_date}
-                        onChange={handleCouponInputChange}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                        End Date
-                      </label>
-                      <input
-                        type="date"
-                        name="end_date"
-                        value={couponFormData.end_date}
-                        onChange={handleCouponInputChange}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50"
-                        required
-                      />
-                    </div>
+                    <CustomDatePicker
+                      selected={couponFormData.start_date ? new Date(couponFormData.start_date) : null}
+                      onChange={(date) => {
+                        setCouponFormData(prev => ({
+                          ...prev,
+                          start_date: date ? date.toISOString().split('T')[0] : ""
+                        }));
+                      }}
+                      label="Start Date"
+                      required
+                    />
+                    <CustomDatePicker
+                      selected={couponFormData.end_date ? new Date(couponFormData.end_date) : null}
+                      onChange={(date) => {
+                        setCouponFormData(prev => ({
+                          ...prev,
+                          end_date: date ? date.toISOString().split('T')[0] : ""
+                        }));
+                      }}
+                      label="End Date"
+                      required
+                      minDate={couponFormData.start_date ? new Date(couponFormData.start_date) : null}
+                    />
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-gray-50">
-                    <div className="space-y-2">
-                      <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                        Coupon Type
-                      </label>
-                      <select
-                        name="coupon_type_id"
-                        value={couponFormData.coupon_type_id}
-                        onChange={(e) => {
-                          const { name, value } = e.target;
-                          setCouponFormData(prev => ({
-                            ...prev,
-                            [name]: Number(value)
-                          }));
-                        }}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50 appearance-none cursor-pointer"
-                        required
-                      >
-                        <option value="">Select Type</option>
-                        {couponTypes.map((type) => (
-                          <option key={type.id} value={type.id}>
-                            {type.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                    <CustomSelect
+                      options={couponTypes.map(t => ({ value: t.id, label: t.name }))}
+                      value={couponFormData.coupon_type_id}
+                      onChange={(val) => {
+                        setCouponFormData(prev => ({
+                          ...prev,
+                          coupon_type_id: Number(val)
+                        }));
+                      }}
+                      label="Coupon Type"
+                      placeholder="Select Type"
+                      required
+                    />
                     <div className="space-y-2">
                       <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
                         {couponTypes.find(t => Number(t.id) === Number(couponFormData.coupon_type_id))?.name || "Financial Value"}
@@ -1610,28 +1597,22 @@ const CouponManagement = () => {
                         required
                       />
                     </div>
-                    <div className="space-y-2">
-                      <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                        Criteria Configuration
-                      </label>
-                      <select
-                        name="CouponTypeCriteriaId"
-                        value={couponFormData.CouponTypeCriteriaId}
-                        onChange={handleCouponInputChange}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50 appearance-none cursor-pointer"
-                        required
-                      >
-                        <option value="">Select Criteria</option>
-                        {criteria.map((c) => {
-                          const critId = c.id || c.coupon_type_criteria_id;
-                          return (
-                            <option key={critId} value={String(critId)}>
-                              Criteria #{critId}
-                            </option>
-                          );
-                        })}
-                      </select>
-                    </div>
+                    <CustomSelect
+                      options={criteria.map((c) => {
+                        const critId = c.id || c.coupon_type_criteria_id;
+                        return { value: String(critId), label: `Criteria #${critId}` };
+                      })}
+                      value={couponFormData.CouponTypeCriteriaId}
+                      onChange={(val) => {
+                        setCouponFormData(prev => ({
+                          ...prev,
+                          CouponTypeCriteriaId: val
+                        }));
+                      }}
+                      label="Criteria Configuration"
+                      placeholder="Select Criteria"
+                      required
+                    />
                   </div>
 
                   {/* Conditional User Selection List for Create Modal */}
@@ -1868,61 +1849,44 @@ const CouponManagement = () => {
                     ></textarea>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                        Start Date
-                      </label>
-                      <input
-                        type="date"
-                        name="start_date"
-                        value={couponFormData.start_date}
-                        onChange={handleCouponInputChange}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                        End Date
-                      </label>
-                      <input
-                        type="date"
-                        name="end_date"
-                        value={couponFormData.end_date}
-                        onChange={handleCouponInputChange}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50"
-                        required
-                      />
-                    </div>
-                  </div>
+                    <CustomDatePicker
+                      selected={couponFormData.start_date ? new Date(couponFormData.start_date) : null}
+                      onChange={(date) => {
+                        setCouponFormData(prev => ({
+                          ...prev,
+                          start_date: date ? date.toISOString().split('T')[0] : ""
+                        }));
+                      }}
+                      label="Start Date"
+                      required
+                    />
+                    <CustomDatePicker
+                      selected={couponFormData.end_date ? new Date(couponFormData.end_date) : null}
+                      onChange={(date) => {
+                        setCouponFormData(prev => ({
+                          ...prev,
+                          end_date: date ? date.toISOString().split('T')[0] : ""
+                        }));
+                      }}
+                      label="End Date"
+                      required
+                      minDate={couponFormData.start_date ? new Date(couponFormData.start_date) : null}
+                    />
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-gray-100">
-                    <div className="space-y-2">
-                      <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                        Coupon Type
-                      </label>
-                      <select
-                        name="coupon_type_id"
-                        value={couponFormData.coupon_type_id}
-                        onChange={(e) => {
-                          const { name, value } = e.target;
-                          setCouponFormData(prev => ({
-                            ...prev,
-                            [name]: Number(value)
-                          }));
-                        }}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50 appearance-none cursor-pointer"
-                        required
-                      >
-                        <option value="">Select Type</option>
-                        {couponTypes.map((type) => (
-                          <option key={type.id} value={type.id}>
-                            {type.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                    <CustomSelect
+                      options={couponTypes.map(t => ({ value: t.id, label: t.name }))}
+                      value={couponFormData.coupon_type_id}
+                      onChange={(val) => {
+                        setCouponFormData(prev => ({
+                          ...prev,
+                          coupon_type_id: Number(val)
+                        }));
+                      }}
+                      label="Coupon Type"
+                      placeholder="Select Type"
+                      required
+                    />
                     <div className="space-y-2">
                       <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
                         {couponTypes.find(t => Number(t.id) === Number(couponFormData.coupon_type_id))?.name || "Financial Value"}
@@ -1961,28 +1925,22 @@ const CouponManagement = () => {
                         required
                       />
                     </div>
-                    <div className="space-y-2">
-                      <label className="block text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                        Criteria Configuration
-                      </label>
-                      <select
-                        name="CouponTypeCriteriaId"
-                        value={String(couponFormData.CouponTypeCriteriaId || "")}
-                        onChange={handleCouponInputChange}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B02E0C]/20 focus:border-[#B02E0C] transition-all bg-gray-50/50 appearance-none cursor-pointer"
-                        required
-                      >
-                        <option value="">Select Criteria</option>
-                        {criteria.map((c) => {
-                          const critId = c.id || c.coupon_type_criteria_id;
-                          return (
-                            <option key={critId} value={String(critId)}>
-                              Criteria #{critId}
-                            </option>
-                          );
-                        })}
-                      </select>
-                    </div>
+                    <CustomSelect
+                      options={criteria.map((c) => {
+                        const critId = c.id || c.coupon_type_criteria_id;
+                        return { value: String(critId), label: `Criteria #${critId}` };
+                      })}
+                      value={String(couponFormData.CouponTypeCriteriaId || "")}
+                      onChange={(val) => {
+                        setCouponFormData(prev => ({
+                          ...prev,
+                          CouponTypeCriteriaId: val
+                        }));
+                      }}
+                      label="Criteria Configuration"
+                      placeholder="Select Criteria"
+                      required
+                    />
                   </div>
 
                   {/* Conditional User Selection List for Update Modal */}
