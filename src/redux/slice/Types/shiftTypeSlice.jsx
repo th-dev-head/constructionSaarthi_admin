@@ -1,6 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { baseUrl } from "../../../config/api";
 import { apiInstance } from "../../../config/axiosInstance";
+import {
+  markRequestCached,
+  shouldSkipCachedRequest,
+} from "../../utils/fetchCache";
 
 // GET SHIFT TYPES
 export const fetchShiftTypes = createAsyncThunk(
@@ -10,11 +14,24 @@ export const fetchShiftTypes = createAsyncThunk(
       const res = await apiInstance.get(`${baseUrl}/api/shift-type`, {
         params: { page, limit, search },
       });
+      markRequestCached("shiftTypes/fetchShiftTypes", { page, limit, search });
       // return the whole payload so reducer can read shiftTypes and pagination
       return res.data; // expected: { shiftTypes: [...], pagination: { page, limit, totalPages, totalRecords } }
     } catch (err) {
       return thunkAPI.rejectWithValue(err.response?.data || "Error");
     }
+  },
+  {
+    condition: (arg = {}, { getState }) => {
+      const { page = 1, limit = 10, search = "" } = arg;
+      const state = getState()?.shiftTypes;
+      return !shouldSkipCachedRequest({
+        prefix: "shiftTypes/fetchShiftTypes",
+        params: { page, limit, search, force: arg?.force },
+        hasData: Array.isArray(state?.list) && state.list.length > 0,
+        isLoading: state?.loading,
+      });
+    },
   }
 );
 

@@ -1,6 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { baseUrl } from "../../../config/api";
 import { apiInstance } from "../../../config/axiosInstance";
+import {
+  markRequestCached,
+  shouldSkipCachedRequest,
+} from "../../utils/fetchCache";
 
 export const fetchAllPermission = createAsyncThunk(
   "permission/fetchAllPermission",
@@ -23,10 +27,24 @@ export const fetchAllPermission = createAsyncThunk(
         },
       });
       const data = await response.json();
+      markRequestCached("permission/fetchAllPermission", { page, limit, search });
       return data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
     }
+  },
+  {
+    condition: (arg = {}, { getState }) => {
+      const { page = 1, limit = 10, search = "" } = arg;
+      const state = getState()?.permission;
+      return !shouldSkipCachedRequest({
+        prefix: "permission/fetchAllPermission",
+        params: { page, limit, search, force: arg?.force },
+        hasData:
+          Array.isArray(state?.Permissions) && state.Permissions.length > 0,
+        isLoading: state?.loading,
+      });
+    },
   }
 );
 

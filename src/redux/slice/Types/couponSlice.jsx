@@ -1,5 +1,9 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { baseUrl } from "../../../config/api";
+import {
+  markRequestCached,
+  shouldSkipCachedRequest,
+} from "../../utils/fetchCache";
 
 // Async thunk to create a new coupon
 export const createCoupon = createAsyncThunk(
@@ -169,6 +173,7 @@ export const fetchCoupons = createAsyncThunk(
         };
       }
 
+      markRequestCached("coupon/fetchCoupons", { page, limit, search });
       return {
         coupons,
         pagination: paginationData
@@ -177,6 +182,19 @@ export const fetchCoupons = createAsyncThunk(
       console.error("Error in fetchCoupons:", err);
       return thunkAPI.rejectWithValue(err.message);
     }
+  },
+  {
+    condition: (arg = {}, { getState }) => {
+      const { page = 1, limit = 10, search = "" } = arg;
+      const state = getState()?.coupon;
+      return !shouldSkipCachedRequest({
+        prefix: "coupon/fetchCoupons",
+        params: { page, limit, search, force: arg?.force },
+        hasData:
+          Array.isArray(state?.couponList) && state.couponList.length > 0,
+        isLoading: state?.loading,
+      });
+    },
   }
 );
 

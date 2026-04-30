@@ -17,6 +17,11 @@ import { apiInstance } from "../../../config/axiosInstance";
 import DataTable from "../../common/DataTable";
 import CustomDatePicker from "../../common/CustomDatePicker";
 import CustomSelect from "../../common/CustomSelect";
+import {
+  buildRequestKey,
+  getCachedResponse,
+  setCachedResponse,
+} from "../../../redux/utils/fetchCache";
 
 const CouponManagement = () => {
 
@@ -123,12 +128,23 @@ const CouponManagement = () => {
   ];
 
   // Fetch Coupons
-  const fetchCoupons = async () => {
+  const fetchCoupons = async ({ force = false } = {}) => {
+    const requestKey = buildRequestKey("couponManagement/fetchCoupons", {});
+    if (!force) {
+      const cached = getCachedResponse(requestKey);
+      if (Array.isArray(cached)) {
+        setCoupons(cached);
+        return;
+      }
+    }
+
     setLoadingCoupons(true);
     try {
       const response = await apiInstance.get("/api/coupon/all");
       if (response.data.success || response.data.message === "Coupons retrieved successfully") {
-        setCoupons(response.data.data || []);
+        const nextCoupons = response.data.data || [];
+        setCoupons(nextCoupons);
+        setCachedResponse(requestKey, nextCoupons);
       }
     } catch (err) {
       console.error("Error fetching coupons:", err);
@@ -158,12 +174,23 @@ const CouponManagement = () => {
   }, [openMenuId]);
 
   // Fetch Coupon Types
-  const fetchCouponTypes = async () => {
+  const fetchCouponTypes = async ({ force = false } = {}) => {
+    const requestKey = buildRequestKey("couponManagement/fetchCouponTypes", {});
+    if (!force) {
+      const cached = getCachedResponse(requestKey);
+      if (Array.isArray(cached)) {
+        setCouponTypes(cached);
+        return;
+      }
+    }
+
     setLoadingTypes(true);
     try {
       const response = await apiInstance.get("/api/coupon-type/getAllCoupon?page=1&limit=10");
       if (response.data.message === "All Coupon Types fetched successfully") {
-        setCouponTypes(response.data.couponTypes || []);
+        const nextCouponTypes = response.data.couponTypes || [];
+        setCouponTypes(nextCouponTypes);
+        setCachedResponse(requestKey, nextCouponTypes);
       }
     } catch (err) {
       console.error("Error fetching coupon types:", err);
@@ -172,12 +199,23 @@ const CouponManagement = () => {
     }
   };
 
-  const fetchUsersList = async () => {
+  const fetchUsersList = async ({ force = false } = {}) => {
+    const requestKey = buildRequestKey("couponManagement/fetchUsersList", {});
+    if (!force) {
+      const cached = getCachedResponse(requestKey);
+      if (Array.isArray(cached)) {
+        setAllUsers(cached);
+        return;
+      }
+    }
+
     setLoadingUsers(true);
     try {
       const response = await apiInstance.get("/api/coupon/admin/users");
       if (response.data.data) {
-        setAllUsers(response.data.data || []);
+        const nextUsers = response.data.data || [];
+        setAllUsers(nextUsers);
+        setCachedResponse(requestKey, nextUsers);
       }
     } catch (err) {
       console.error("Error fetching users:", err);
@@ -187,11 +225,22 @@ const CouponManagement = () => {
   };
 
   // Fetch subscription plans
-  const fetchPlans = async () => {
+  const fetchPlans = async ({ force = false } = {}) => {
+    const requestKey = buildRequestKey("couponManagement/fetchPlans", {});
+    if (!force) {
+      const cached = getCachedResponse(requestKey);
+      if (Array.isArray(cached)) {
+        setPlans(cached);
+        return;
+      }
+    }
+
     try {
       const response = await apiInstance.get(`/api/subscription/getSubscriptionPlans`);
       if (response.data.success) {
-        setPlans(response.data.data || []);
+        const nextPlans = response.data.data || [];
+        setPlans(nextPlans);
+        setCachedResponse(requestKey, nextPlans);
       }
     } catch (err) {
       console.error("Error fetching plans:", err);
@@ -199,13 +248,24 @@ const CouponManagement = () => {
   };
 
   // Fetch coupon criteria
-  const fetchCriteria = async () => {
+  const fetchCriteria = async ({ force = false } = {}) => {
+    const requestKey = buildRequestKey("couponManagement/fetchCriteria", {});
+    if (!force) {
+      const cached = getCachedResponse(requestKey);
+      if (Array.isArray(cached)) {
+        setCriteria(cached);
+        return;
+      }
+    }
+
     setLoadingCriteria(true);
     setErrorCriteria(null);
     try {
       const response = await apiInstance.get(`/api/coupon`);
       if (response.data && response.data.data) {
-        setCriteria(response.data.data);
+        const nextCriteria = response.data.data;
+        setCriteria(nextCriteria);
+        setCachedResponse(requestKey, nextCriteria);
       } else {
         setErrorCriteria("Failed to fetch coupon criteria");
       }
@@ -249,7 +309,7 @@ const CouponManagement = () => {
         setSuccessCriteria("Coupon criteria created successfully!");
         setShowAddCriteriaModal(false);
         resetCriteriaForm();
-        fetchCriteria();
+        fetchCriteria({ force: true });
         setTimeout(() => {
           setSuccessCriteria(null);
         }, 3000);
@@ -288,7 +348,7 @@ const CouponManagement = () => {
         setShowEditCriteriaModal(false);
         setSelectedCriteria(null);
         resetCriteriaForm();
-        fetchCriteria();
+        fetchCriteria({ force: true });
         setTimeout(() => {
           setSuccessCriteria(null);
         }, 3000);
@@ -321,7 +381,7 @@ const CouponManagement = () => {
 
       if (response.status === 200 || response.status === 204 || response.data?.success) {
         setSuccessCriteria("Coupon criteria deleted successfully!");
-        fetchCriteria();
+        fetchCriteria({ force: true });
         setTimeout(() => {
           setSuccessCriteria(null);
         }, 3000);
@@ -439,7 +499,7 @@ const CouponManagement = () => {
         setSuccess("Coupon created successfully!");
         setShowAddModal(false);
         resetCouponForm();
-        fetchCoupons();
+        fetchCoupons({ force: true });
         setTimeout(() => setSuccess(null), 3000);
       } else {
         setError(response.data?.message || "Failed to create coupon");
@@ -475,7 +535,7 @@ const CouponManagement = () => {
         setShowEditModal(false);
         setSelectedCoupon(null);
         resetCouponForm();
-        fetchCoupons();
+        fetchCoupons({ force: true });
         setTimeout(() => setSuccess(null), 3000);
       } else {
         setError(response.data?.message || "Failed to update coupon");
@@ -510,7 +570,7 @@ const CouponManagement = () => {
 
       if (response.status === 200 || response.status === 201 || response.data?.success) {
         setSuccess("Coupon deleted successfully!");
-        fetchCoupons();
+        fetchCoupons({ force: true });
         setTimeout(() => setSuccess(null), 3000);
       } else {
         setError(response.data?.message || "Failed to delete coupon");
@@ -522,7 +582,7 @@ const CouponManagement = () => {
           const response2 = await apiInstance.delete(`/api/coupon/delete/${couponId}`);
           if (response2.status === 200 || response2.status === 201 || response2.data?.success) {
             setSuccess("Coupon deleted successfully!");
-            fetchCoupons();
+            fetchCoupons({ force: true });
             setTimeout(() => setSuccess(null), 3000);
             return;
           }

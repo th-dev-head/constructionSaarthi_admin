@@ -1,5 +1,9 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { apiInstance } from "../../../config/axiosInstance";
+import {
+    markRequestCached,
+    shouldSkipCachedRequest,
+} from "../../utils/fetchCache";
 
 // Fetch all constructions
 export const fetchConstructions = createAsyncThunk(
@@ -7,10 +11,22 @@ export const fetchConstructions = createAsyncThunk(
     async (_, thunkAPI) => {
         try {
             const response = await apiInstance.get("/api/construction/admin/get-all");
+            markRequestCached("construction/fetchConstructions", {});
             return response.data;
         } catch (error) {
             return thunkAPI.rejectWithValue(error.response?.data || error.message);
         }
+    },
+    {
+        condition: (arg = {}, { getState }) => {
+            const state = getState()?.construction;
+            return !shouldSkipCachedRequest({
+                prefix: "construction/fetchConstructions",
+                params: { force: arg?.force },
+                hasData: Array.isArray(state?.constructions) && state.constructions.length > 0,
+                isLoading: state?.loading,
+            });
+        },
     }
 );
 

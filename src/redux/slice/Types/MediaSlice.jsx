@@ -1,6 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { baseUrl } from "../../../config/api";
 import { apiInstance } from "../../../config/axiosInstance";
+import {
+  markRequestCached,
+  shouldSkipCachedRequest,
+} from "../../utils/fetchCache";
 
 // allmedia
 export const fetchAllMedia = createAsyncThunk(
@@ -25,10 +29,24 @@ export const fetchAllMedia = createAsyncThunk(
       });
       const data = await response.json();
       if (!response.ok) return thunkAPI.rejectWithValue(data.message || data.error || "Failed to fetch media types");
+      markRequestCached("media/fetchAllMedia", { page, limit, search });
       return data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
     }
+  },
+  {
+    condition: (arg = {}, { getState }) => {
+      const { page = 1, limit = 10, search = "" } = arg;
+      const state = getState()?.media;
+      return !shouldSkipCachedRequest({
+        prefix: "media/fetchAllMedia",
+        params: { page, limit, search, force: arg?.force },
+        hasData:
+          Array.isArray(state?.mediaTypes) && state.mediaTypes.length > 0,
+        isLoading: state?.loading,
+      });
+    },
   }
 );
 

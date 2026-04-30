@@ -1,6 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { baseUrl } from "../../config/api";
 import { apiInstance } from "../../config/axiosInstance";
+import {
+  markRequestCached,
+  shouldSkipCachedRequest,
+} from "../utils/fetchCache";
 
 // Fetch all prompts
 export const fetchAllPrompts = createAsyncThunk(
@@ -37,10 +41,42 @@ export const fetchAllPrompts = createAsyncThunk(
         );
       }
 
+      markRequestCached("prompt/fetchAllPrompts", {
+        includeDeleted,
+        onlyActive,
+        feature_id,
+        page,
+        limit,
+      });
       return data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
     }
+  },
+  {
+    condition: (arg = {}, { getState }) => {
+      const {
+        includeDeleted = false,
+        onlyActive = true,
+        feature_id = null,
+        page = 1,
+        limit = 10,
+      } = arg;
+      const state = getState()?.prompt;
+      return !shouldSkipCachedRequest({
+        prefix: "prompt/fetchAllPrompts",
+        params: {
+          includeDeleted,
+          onlyActive,
+          feature_id,
+          page,
+          limit,
+          force: arg?.force,
+        },
+        hasData: Array.isArray(state?.prompts) && state.prompts.length > 0,
+        isLoading: state?.loading,
+      });
+    },
   }
 );
 

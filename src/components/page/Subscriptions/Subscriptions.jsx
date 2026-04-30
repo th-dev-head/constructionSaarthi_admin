@@ -7,6 +7,11 @@ import { useNavigate } from "react-router-dom";
 import CustomSelect from "../../common/CustomSelect";
 import { apiInstance } from "../../../config/axiosInstance";
 import DataTable from "../../common/DataTable";
+import {
+  buildRequestKey,
+  getCachedResponse,
+  setCachedResponse,
+} from "../../../redux/utils/fetchCache";
 
 const Subscriptions = () => {
   const [exportOpen, setExportOpen] = useState(false);
@@ -32,11 +37,21 @@ const Subscriptions = () => {
   const [historyLoading, setHistoryLoading] = useState(false);
 
   // Fetch subscription plans for dropdown
-  const fetchPlans = async () => {
+  const fetchPlans = async ({ force = false } = {}) => {
+    const requestKey = buildRequestKey("subscriptions/fetchPlans", {});
+    if (!force) {
+      const cached = getCachedResponse(requestKey);
+      if (Array.isArray(cached)) {
+        setPlans(cached);
+        return;
+      }
+    }
     try {
       const response = await apiInstance.get(`/api/subscription/getSubscriptionPlans`);
       if (response.data.success) {
-        setPlans(response.data.data || []);
+        const nextPlans = response.data.data || [];
+        setPlans(nextPlans);
+        setCachedResponse(requestKey, nextPlans);
       }
     } catch (err) {
       console.error("Error fetching plans:", err);
@@ -44,7 +59,23 @@ const Subscriptions = () => {
   };
 
   // Fetch purchases
-  const fetchPurchases = async () => {
+  const fetchPurchases = async ({ force = false } = {}) => {
+    const requestKey = buildRequestKey("subscriptions/fetchPurchases", {
+      page: currentPage,
+      limit: rowsPerPage,
+      status: statusFilter,
+      subscription_plan_id: selectedPlanId || "",
+      search: searchQuery || "",
+    });
+    if (!force) {
+      const cached = getCachedResponse(requestKey);
+      if (cached?.purchases && cached?.pagination) {
+        setPurchases(cached.purchases);
+        setPagination(cached.pagination);
+        return;
+      }
+    }
+
     setLoading(true);
     setError(null);
     try {
@@ -59,12 +90,18 @@ const Subscriptions = () => {
       const response = await apiInstance.get(`/api/subscription/purchases`, { params });
 
       if (response.data && response.data.success) {
-        setPurchases(response.data.data || []);
-        setPagination({
+        const nextPurchases = response.data.data || [];
+        const nextPagination = {
           totalRecords: response.data.total || 0,
           totalPages: response.data.totalPages || 1,
           page: response.data.page || currentPage, 
           limit: response.data.limit || rowsPerPage,
+        };
+        setPurchases(nextPurchases);
+        setPagination(nextPagination);
+        setCachedResponse(requestKey, {
+          purchases: nextPurchases,
+          pagination: nextPagination,
         });
       } else {
         setError(response.data?.message || "Failed to fetch purchases");

@@ -1,6 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { apiInstance } from "../../config/axiosInstance";
 import { baseUrl } from "../../config/api";
+import {
+  markRequestCached,
+  shouldSkipCachedRequest,
+} from "../utils/fetchCache";
 
 export const createHelpCategory = createAsyncThunk(
   "help/createHelpCategory",
@@ -23,10 +27,22 @@ export const fetchHelpCategories = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const res = await apiInstance.get(`/api/admin/help/categories`);
+      markRequestCached("help/fetchHelpCategories", {});
       return res.data;
     } catch (err) {
       return thunkAPI.rejectWithValue(err.response?.data?.message || err.message);
     }
+  },
+  {
+    condition: (arg = {}, { getState }) => {
+      const state = getState()?.help;
+      return !shouldSkipCachedRequest({
+        prefix: "help/fetchHelpCategories",
+        params: { force: arg?.force },
+        hasData: Array.isArray(state?.categories) && state.categories.length > 0,
+        isLoading: state?.loading,
+      });
+    },
   }
 );
 

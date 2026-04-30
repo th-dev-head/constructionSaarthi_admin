@@ -1,5 +1,9 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { apiInstance } from "../../config/axiosInstance";
+import {
+    markRequestCached,
+    shouldSkipCachedRequest,
+} from "../utils/fetchCache";
 
 // Fetch all global categories
 export const fetchCategories = createAsyncThunk(
@@ -7,10 +11,22 @@ export const fetchCategories = createAsyncThunk(
     async (_, thunkAPI) => {
         try {
             const response = await apiInstance.get("/api/category/global");
+            markRequestCached("category/fetchCategories", {});
             return response.data;
         } catch (error) {
             return thunkAPI.rejectWithValue(error.response?.data || error.message);
         }
+    },
+    {
+        condition: (arg = {}, { getState }) => {
+            const state = getState()?.category;
+            return !shouldSkipCachedRequest({
+                prefix: "category/fetchCategories",
+                params: { force: arg?.force },
+                hasData: Array.isArray(state?.categories) && state.categories.length > 0,
+                isLoading: state?.loading,
+            });
+        },
     }
 );
 

@@ -1,6 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { baseUrl } from "../../config/api";
 import { apiInstance } from "../../config/axiosInstance";
+import {
+  markRequestCached,
+  shouldSkipCachedRequest,
+} from "../utils/fetchCache";
 
 // Fetch all prompt references
 export const fetchAllPromptReferences = createAsyncThunk(
@@ -31,10 +35,28 @@ export const fetchAllPromptReferences = createAsyncThunk(
         );
       }
 
+      markRequestCached("promptReference/fetchAllPromptReferences", {
+        page,
+        limit,
+      });
       return data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
     }
+  },
+  {
+    condition: (arg = {}, { getState }) => {
+      const { page = 1, limit = 100 } = arg;
+      const state = getState()?.promptReference;
+      return !shouldSkipCachedRequest({
+        prefix: "promptReference/fetchAllPromptReferences",
+        params: { page, limit, force: arg?.force },
+        hasData:
+          Array.isArray(state?.promptReferences) &&
+          state.promptReferences.length > 0,
+        isLoading: state?.loading,
+      });
+    },
   }
 );
 

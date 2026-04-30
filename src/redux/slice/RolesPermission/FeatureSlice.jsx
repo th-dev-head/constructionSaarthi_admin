@@ -1,6 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { baseUrl } from "../../../config/api";
 import { apiInstance } from "../../../config/axiosInstance";
+import {
+  markRequestCached,
+  shouldSkipCachedRequest,
+} from "../../utils/fetchCache";
 
 export const fetchAllFeature = createAsyncThunk(
   "role/fetchAllFeature",
@@ -23,10 +27,23 @@ export const fetchAllFeature = createAsyncThunk(
         },
       });
       const data = await response.json();
+      markRequestCached("role/fetchAllFeature", { page, limit, search });
       return data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
     }
+  },
+  {
+    condition: (arg = {}, { getState }) => {
+      const { page = 1, limit = 100, search = "" } = arg;
+      const state = getState()?.feature;
+      return !shouldSkipCachedRequest({
+        prefix: "role/fetchAllFeature",
+        params: { page, limit, search, force: arg?.force },
+        hasData: Array.isArray(state?.Features) && state.Features.length > 0,
+        isLoading: state?.loading,
+      });
+    },
   }
 );
 

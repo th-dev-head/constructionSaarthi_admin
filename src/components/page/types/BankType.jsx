@@ -3,6 +3,11 @@ import { toast } from "react-toastify";
 import { EllipsisVertical, X, Plus, Calendar, Landmark, Trash2, Edit, Eye, Info, Loader2 } from "lucide-react";
 import { apiInstance } from "../../../config/axiosInstance";
 import DataTable from "../../common/DataTable";
+import {
+  buildRequestKey,
+  getCachedResponse,
+  setCachedResponse,
+} from "../../../redux/utils/fetchCache";
 
 const BankType = () => {
   const [banks, setBanks] = useState([]);
@@ -18,21 +23,31 @@ const BankType = () => {
   const menuRef = useRef(null);
 
   // Fetch all banks
-  const fetchBanks = async () => {
+  const fetchBanks = async ({ force = false } = {}) => {
+    const requestKey = buildRequestKey("bank/fetchBanks", {});
+    if (!force) {
+      const cached = getCachedResponse(requestKey);
+      if (Array.isArray(cached)) {
+        setBanks(cached);
+        return;
+      }
+    }
+
     setLoading(true);
     try {
       const response = await apiInstance.get(`/api/bank`);
+      let nextBanks = [];
       if (response.data) {
         if (response.data.banks && Array.isArray(response.data.banks)) {
-          setBanks(response.data.banks);
+          nextBanks = response.data.banks;
         } else if (response.data.data && Array.isArray(response.data.data)) {
-          setBanks(response.data.data);
+          nextBanks = response.data.data;
         } else if (Array.isArray(response.data)) {
-          setBanks(response.data);
-        } else {
-          setBanks([]);
+          nextBanks = response.data;
         }
       }
+      setBanks(nextBanks);
+      setCachedResponse(requestKey, nextBanks);
     } catch (err) {
       console.error("Error fetching banks:", err);
       toast.error(err.response?.data?.message || "Failed to fetch financial institutions");
@@ -79,7 +94,7 @@ const BankType = () => {
         if (response.status === 200 || response.status === 201 || response.data?.success) {
           toast.success("Institution Protocol Modified!");
           setShowModal(false);
-          fetchBanks();
+          fetchBanks({ force: true });
         } else {
           toast.error(response.data?.message || "Modification Failed");
         }
@@ -89,7 +104,7 @@ const BankType = () => {
           toast.success("Institution Protocol Initialized!");
           setShowModal(false);
           setFormState({ name: "" });
-          fetchBanks();
+          fetchBanks({ force: true });
         } else {
           toast.error(response.data?.message || "Initialization Failed");
         }
@@ -110,7 +125,7 @@ const BankType = () => {
         toast.success("Institution Protocol Dismantled!");
         setShowModal(false);
         setSelectedBank(null);
-        fetchBanks();
+        fetchBanks({ force: true });
       } else {
         toast.error(response.data?.message || "Elimination Failed");
       }

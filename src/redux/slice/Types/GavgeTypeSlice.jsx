@@ -1,6 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { baseUrl } from "../../../config/api";
 import { apiInstance } from "../../../config/axiosInstance";
+import {
+  markRequestCached,
+  shouldSkipCachedRequest,
+} from "../../utils/fetchCache";
 
 // all gavge type
 export const fetchAllGavge = createAsyncThunk(
@@ -26,10 +30,23 @@ export const fetchAllGavge = createAsyncThunk(
 
       const data = await response.json();
       if (!response.ok) return thunkAPI.rejectWithValue(data.message || data.error || "Failed to fetch gauge types");
+      markRequestCached("gavge/fetchAllGavge", { page, limit, search });
       return data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
     }
+  },
+  {
+    condition: (arg = {}, { getState }) => {
+      const { page = 1, limit = 10, search = "" } = arg;
+      const state = getState()?.gavge;
+      return !shouldSkipCachedRequest({
+        prefix: "gavge/fetchAllGavge",
+        params: { page, limit, search, force: arg?.force },
+        hasData: Array.isArray(state?.Gavges) && state.Gavges.length > 0,
+        isLoading: state?.loading,
+      });
+    },
   }
 );
 

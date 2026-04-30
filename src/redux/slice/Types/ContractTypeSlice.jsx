@@ -1,5 +1,9 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { apiInstance } from "../../../config/axiosInstance";
+import {
+    markRequestCached,
+    shouldSkipCachedRequest,
+} from "../../utils/fetchCache";
 
 // Fetch all contract types
 export const fetchContractTypes = createAsyncThunk(
@@ -7,10 +11,22 @@ export const fetchContractTypes = createAsyncThunk(
     async (_, thunkAPI) => {
         try {
             const response = await apiInstance.get("/api/contract-type/admin/get-all");
+            markRequestCached("contractType/fetchContractTypes", {});
             return response.data;
         } catch (error) {
             return thunkAPI.rejectWithValue(error.response?.data || error.message);
         }
+    },
+    {
+        condition: (arg = {}, { getState }) => {
+            const state = getState()?.contractType;
+            return !shouldSkipCachedRequest({
+                prefix: "contractType/fetchContractTypes",
+                params: { force: arg?.force },
+                hasData: Array.isArray(state?.contractTypes) && state.contractTypes.length > 0,
+                isLoading: state?.loading,
+            });
+        },
     }
 );
 

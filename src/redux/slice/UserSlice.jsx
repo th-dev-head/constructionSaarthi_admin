@@ -1,6 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { baseUrl } from "../../config/api";
 import { apiInstance } from "../../config/axiosInstance";
+import {
+  markRequestCached,
+  shouldSkipCachedRequest,
+} from "../utils/fetchCache";
 
 // Fetch all users with optional filters
 export const fetchAllUsers = createAsyncThunk(
@@ -20,7 +24,7 @@ export const fetchAllUsers = createAsyncThunk(
         url.searchParams.append("search", search);
       }
       
-      // Only add role_id if it's provided (not null/undefined)
+   
       if (role_id) {
         url.searchParams.append("role_id", role_id);
       }
@@ -41,10 +45,23 @@ export const fetchAllUsers = createAsyncThunk(
         );
       }
 
+      markRequestCached("user/fetchAllUsers", { page, limit, search, role_id });
       return data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
     }
+  },
+  {
+    condition: (arg = {}, { getState }) => {
+      const { page = 1, limit = 10, search = "", role_id = null } = arg;
+      const state = getState()?.user;
+      return !shouldSkipCachedRequest({
+        prefix: "user/fetchAllUsers",
+        params: { page, limit, search, role_id, force: arg?.force },
+        hasData: Array.isArray(state?.users) && state.users.length > 0,
+        isLoading: state?.loading,
+      });
+    },
   }
 );
 

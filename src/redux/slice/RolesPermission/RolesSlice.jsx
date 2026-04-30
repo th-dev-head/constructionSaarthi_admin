@@ -1,6 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { baseUrl } from "../../../config/api";
 import { apiInstance } from "../../../config/axiosInstance";
+import {
+  markRequestCached,
+  shouldSkipCachedRequest,
+} from "../../utils/fetchCache";
 
 export const fetchAllRoles = createAsyncThunk(
   "role/fetchAllRoles",
@@ -21,10 +25,23 @@ export const fetchAllRoles = createAsyncThunk(
       });
 
       const data = await response.json();
+      markRequestCached("role/fetchAllRoles", { page, limit });
       return data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
     }
+  },
+  {
+    condition: (arg = {}, { getState }) => {
+      const { page = 1, limit = 10 } = arg;
+      const state = getState()?.role;
+      return !shouldSkipCachedRequest({
+        prefix: "role/fetchAllRoles",
+        params: { page, limit, force: arg?.force },
+        hasData: Array.isArray(state?.Roles) && state.Roles.length > 0,
+        isLoading: state?.loading,
+      });
+    },
   }
 );
 

@@ -1,6 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { baseUrl } from "../../config/api";
 import { apiInstance } from "../../config/axiosInstance";
+import {
+    markRequestCached,
+    shouldSkipCachedRequest,
+} from "../utils/fetchCache";
 
 // Fetch all banners
 export const fetchAllBanners = createAsyncThunk(
@@ -9,10 +13,22 @@ export const fetchAllBanners = createAsyncThunk(
         try {
             const response = await apiInstance.get("/api/banner-content");
             // The API response matches the structure provided by the user: { success: true, count: 2, data: [...] }
+            markRequestCached("banner/fetchAllBanners", {});
             return response.data;
         } catch (error) {
             return thunkAPI.rejectWithValue(error.response?.data || error.message);
         }
+    },
+    {
+        condition: (arg = {}, { getState }) => {
+            const state = getState()?.banner;
+            return !shouldSkipCachedRequest({
+                prefix: "banner/fetchAllBanners",
+                params: { force: arg?.force },
+                hasData: Array.isArray(state?.banners) && state.banners.length > 0,
+                isLoading: state?.loading,
+            });
+        },
     }
 );
 

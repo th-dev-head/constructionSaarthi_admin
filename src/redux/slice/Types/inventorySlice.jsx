@@ -328,6 +328,10 @@
 
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { baseUrl } from "../../../config/api";
+import {
+  markRequestCached,
+  shouldSkipCachedRequest,
+} from "../../utils/fetchCache";
 
 // ==================== Thunks ==================== //
 
@@ -347,10 +351,24 @@ export const fetchInventory = createAsyncThunk(
       );
       const data = await res.json();
       if (!res.ok) return thunkAPI.rejectWithValue(data.message || "Fetch failed");
+      markRequestCached("inventory/fetchInventory", { page, limit, search });
       return data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
     }
+  },
+  {
+    condition: (arg = {}, { getState }) => {
+      const { page = 1, limit = 10, search = "" } = arg;
+      const state = getState()?.inventory;
+      return !shouldSkipCachedRequest({
+        prefix: "inventory/fetchInventory",
+        params: { page, limit, search, force: arg?.force },
+        hasData:
+          Array.isArray(state?.inventoryList) && state.inventoryList.length > 0,
+        isLoading: state?.loading,
+      });
+    },
   }
 );
 

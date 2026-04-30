@@ -1,6 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { baseUrl } from "../../config/api";
 import { apiInstance } from "../../config/axiosInstance";
+import {
+  markRequestCached,
+  shouldSkipCachedRequest,
+} from "../utils/fetchCache";
 
 // Fetch all leads
 export const fetchAllLeads = createAsyncThunk(
@@ -16,12 +20,37 @@ export const fetchAllLeads = createAsyncThunk(
           endDate,
         },
       });
+      markRequestCached("lead/fetchAllLeads", {
+        page,
+        limit,
+        search,
+        startDate,
+        endDate,
+      });
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
         error.response?.data?.message || error.message
       );
     }
+  },
+  {
+    condition: (arg = {}, { getState }) => {
+      const {
+        page = 1,
+        limit = 10,
+        search = "",
+        startDate = "",
+        endDate = "",
+      } = arg;
+      const state = getState()?.lead;
+      return !shouldSkipCachedRequest({
+        prefix: "lead/fetchAllLeads",
+        params: { page, limit, search, startDate, endDate, force: arg?.force },
+        hasData: Array.isArray(state?.leads) && state.leads.length > 0,
+        isLoading: state?.loading,
+      });
+    },
   }
 );
 

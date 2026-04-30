@@ -1,6 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { baseUrl } from "../../config/api";
 import { apiInstance } from "../../config/axiosInstance";
+import {
+  markRequestCached,
+  shouldSkipCachedRequest,
+} from "../utils/fetchCache";
 
 // Fetch all PM features
 export const fetchAllPMFeatures = createAsyncThunk(
@@ -32,10 +36,23 @@ export const fetchAllPMFeatures = createAsyncThunk(
         );
       }
 
+      markRequestCached("pmFeature/fetchAllPMFeatures", { page, limit });
       return data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
     }
+  },
+  {
+    condition: (arg = {}, { getState }) => {
+      const { page = 1, limit = 10 } = arg;
+      const state = getState()?.pmFeature;
+      return !shouldSkipCachedRequest({
+        prefix: "pmFeature/fetchAllPMFeatures",
+        params: { page, limit, force: arg?.force },
+        hasData: Array.isArray(state?.pmFeatures) && state.pmFeatures.length > 0,
+        isLoading: state?.loading,
+      });
+    },
   }
 );
 
