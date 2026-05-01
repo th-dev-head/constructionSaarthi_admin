@@ -15,7 +15,6 @@ const DataTable = ({
   onSearch = null,
   rowKey = (r) => r.id,
 }) => {
-  // Use either 'page' or 'currentPage' from the pagination object
   const page = pagination.page || pagination.currentPage || 1;
   const { limit, totalPages, totalRecords } = pagination;
   const [search, setSearch] = useState("");

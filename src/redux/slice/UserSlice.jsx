@@ -51,18 +51,6 @@ export const fetchAllUsers = createAsyncThunk(
       return thunkAPI.rejectWithValue(error.message);
     }
   },
-  {
-    condition: (arg = {}, { getState }) => {
-      const { page = 1, limit = 10, search = "", role_id = null } = arg;
-      const state = getState()?.user;
-      return !shouldSkipCachedRequest({
-        prefix: "user/fetchAllUsers",
-        params: { page, limit, search, role_id, force: arg?.force },
-        hasData: Array.isArray(state?.users) && state.users.length > 0,
-        isLoading: state?.loading,
-      });
-    },
-  }
 );
 
 // Reset user password

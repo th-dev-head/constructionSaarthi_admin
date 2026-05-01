@@ -34,24 +34,6 @@ export const fetchAllLeads = createAsyncThunk(
       );
     }
   },
-  {
-    condition: (arg = {}, { getState }) => {
-      const {
-        page = 1,
-        limit = 10,
-        search = "",
-        startDate = "",
-        endDate = "",
-      } = arg;
-      const state = getState()?.lead;
-      return !shouldSkipCachedRequest({
-        prefix: "lead/fetchAllLeads",
-        params: { page, limit, search, startDate, endDate, force: arg?.force },
-        hasData: Array.isArray(state?.leads) && state.leads.length > 0,
-        isLoading: state?.loading,
-      });
-    },
-  }
 );
 
 const leadSlice = createSlice({
@@ -82,10 +64,10 @@ const leadSlice = createSlice({
         state.loading = false;
         // Adjust based on typical API response structure in this project
         state.leads = action.payload.leads || action.payload.data || [];
-        
+
         const payload = action.payload;
         let page, limit, totalRecords, totalPages;
-        
+
         if (payload.pagination) {
           page = payload.pagination.page || 1;
           limit = payload.pagination.limit || state.pagination.limit;
@@ -97,7 +79,7 @@ const leadSlice = createSlice({
           totalRecords = payload.totalCount || payload.total || payload.totalRecords || 0;
           totalPages = payload.totalPages || Math.ceil(totalRecords / limit) || 1;
         }
-        
+
         state.pagination = {
           page,
           limit,

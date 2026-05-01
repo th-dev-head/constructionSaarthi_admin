@@ -30,22 +30,29 @@ const Pagination = ({
     const pages = [];
     if (totalPages <= 7) {
       for (let i = 1; i <= totalPages; i++) pages.push(i);
-    } else {
-      pages.push(1);
-      if (page <= 3) {
-        for (let i = 2; i <= 4; i++) pages.push(i);
-        pages.push("...");
-        pages.push(totalPages);
-      } else if (page >= totalPages - 2) {
-        pages.push("...");
-        for (let i = totalPages - 3; i <= totalPages; i++) pages.push(i);
-      } else {
-        pages.push("...");
-        for (let i = page - 1; i <= page + 1; i++) pages.push(i);
-        pages.push("...");
-        pages.push(totalPages);
-      }
+      return pages;
     }
+
+    // Always show page 1
+    pages.push(1);
+
+    if (page <= 4) {
+      // Near start: show 2, 3, 4, 5 then ellipsis then last
+      for (let i = 2; i <= 5; i++) pages.push(i);
+      if (totalPages > 6) pages.push("...");
+      pages.push(totalPages);
+    } else if (page >= totalPages - 3) {
+      // Near end: ellipsis then last 5 pages
+      if (totalPages - 5 > 1) pages.push("...");
+      for (let i = Math.max(2, totalPages - 4); i <= totalPages; i++) pages.push(i);
+    } else {
+      // Middle: 1 ... page-1, page, page+1 ... last
+      pages.push("...");
+      for (let i = page - 1; i <= page + 1; i++) pages.push(i);
+      pages.push("...");
+      pages.push(totalPages);
+    }
+
     return pages;
   };
 
@@ -121,7 +128,7 @@ const Pagination = ({
                   key={pageNum}
                   onClick={() => onPageChange(pageNum)}
                   className={`w-9 h-9 rounded-xl flex items-center justify-center text-[12px] md:text-sm font-black transition-all mx-0.5 cursor-pointer shadow-sm active:scale-95 ${isActive
-                    ? "shadow-lg shadow-accent/20 ring-2 ring-accent ring-offset-2"
+                    ? "bg-accent text-white shadow-lg shadow-accent/30 ring-2 ring-accent ring-offset-1"
                     : "text-[#64748B] hover:text-[#0F172A] hover:bg-white border border-[#F1F5F9] bg-gray-50/30"
                     }`}
                 >
