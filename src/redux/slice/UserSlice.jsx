@@ -257,7 +257,6 @@ const userSlice = createSlice({
       });
   },
 });
-
 export const { clearError, clearUserProfile } = userSlice.actions;
 export default userSlice.reducer;
 
