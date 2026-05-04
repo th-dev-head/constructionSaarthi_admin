@@ -195,6 +195,7 @@ const promptSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
+      
       .addCase(fetchPromptById.fulfilled, (state, action) => {
         state.loading = false;
         state.currentPrompt = action.payload.data || action.payload.prompt || action.payload;
