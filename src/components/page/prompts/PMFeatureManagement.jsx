@@ -100,6 +100,8 @@ const PMFeatureManagement = () => {
             { name: "Prompts", path: "/prompts" },
             { name: "PM Features", path: "/prompts/features" },
             { name: "Prompt References", path: "/prompts/references" },
+            { name: "Calculation Formulas", path: "/prompts/formulas" },
+
           ].map((tab) => (
             <button
               key={tab.path}

@@ -18,6 +18,8 @@ import categoryReducer from "./slice/CategorySlice";
 import constructionReducer from "./slice/Types/ConstructionSlice";
 import contractTypeReducer from "./slice/Types/ContractTypeSlice";
 import leadReducer from "./slice/LeadSlice";
+import calculationFormulaReducer from "./slice/CalculationFormulaSlice";
+
 
 export const store = configureStore({
   reducer: {
@@ -40,5 +42,7 @@ export const store = configureStore({
     construction: constructionReducer,
     contractType: contractTypeReducer,
     lead: leadReducer,
+    calculationFormula: calculationFormulaReducer,
+
   },
 });

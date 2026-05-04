@@ -23,6 +23,8 @@ import CreatePrompt from "./page/prompts/CreatePrompt";
 import PromptsList from "./page/prompts/PromptsList";
 import PMFeatureManagement from "./page/prompts/PMFeatureManagement";
 import PromptReferenceManagement from "./page/prompts/PromptReferenceManagement";
+import CalculationFormulaManagement from "./page/prompts/CalculationFormulaManagement";
+
 import Support from "./page/help/Support";
 import BannerManagement from "./page/banner/BannerManagement";
 import CategoryManagement from "./page/category/CategoryManagement";
@@ -63,6 +65,8 @@ const Navigation = () => (
         <Route path="/prompts/view/:id" element={<CreatePrompt />} />
         <Route path="/prompts/features" element={<PMFeatureManagement />} />
         <Route path="/prompts/references" element={<PromptReferenceManagement />} />
+        <Route path="/prompts/formulas" element={<CalculationFormulaManagement />} />
+
         <Route path="/help" element={<Support />} />
         <Route path="/banner-management" element={<BannerManagement />} />
         <Route path="/category-management" element={<CategoryManagement />} />
