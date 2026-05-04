@@ -181,10 +181,10 @@ const promptSlice = createSlice({
       .addCase(fetchAllPrompts.fulfilled, (state, action) => {
         state.loading = false;
         state.prompts = action.payload.data || action.payload.prompts || [];
-        state.total = action.payload.total || 0;
-        state.currentPage = action.payload.currentPage || 1;
-        state.totalPages = action.payload.totalPages || 1;
-        state.limit = action.payload.limit || 10;
+        state.total = action.payload.pagination?.totalCount || action.payload.total || 0;
+        state.currentPage = action.payload.pagination?.currentPage || action.payload.currentPage || 1;
+        state.totalPages = action.payload.pagination?.totalPages || action.payload.totalPages || 1;
+        state.limit = action.payload.pagination?.limit || action.payload.limit || 10;
       })
       .addCase(fetchAllPrompts.rejected, (state, action) => {
         state.loading = false;
