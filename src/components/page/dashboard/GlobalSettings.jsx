@@ -91,16 +91,9 @@ const GlobalSettings = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-6">
-        {settings.length === 0 ? (
-          <div className="bg-amber-50 border border-amber-200 p-6 rounded-2xl flex items-center gap-4 text-amber-800">
-            <AlertCircle />
-            <div>
-              <p className="font-bold">No settings found</p>
-              <p className="text-sm">Click "Add Defaults" to initialize system settings.</p>
-            </div>
-          </div>
-        ) : (
-          settings.filter(s => s.key !== "FREE_MEMBER_LIMIT" && s.key !== "TRIAL_DAYS").map((setting) => (
+        {settings
+          .filter((s) => s.key !== "FREE_MEMBER_LIMIT" && s.key !== "TRIAL_DAYS")
+          .map((setting) => (
             <div key={setting.id} className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex-grow">
@@ -110,15 +103,15 @@ const GlobalSettings = () => {
                     </span>
                   </div>
                   <p className="text-gray-500 text-sm mb-4">{setting.description}</p>
-
+                  
                   <div className="flex items-center gap-4">
-                    <input
+                    <input 
                       type="text"
                       className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 w-full md:w-64 focus:ring-2 focus:ring-[#FB4211] focus:outline-none"
                       defaultValue={setting.value}
                       id={`input-${setting.key}`}
                     />
-                    <button
+                    <button 
                       onClick={() => {
                         const val = document.getElementById(`input-${setting.key}`).value;
                         handleUpdate(setting.key, val, setting.description);
@@ -132,8 +125,7 @@ const GlobalSettings = () => {
                 </div>
               </div>
             </div>
-          ))
-        )}
+          ))}
       </div>
     </div>
   );
