@@ -10,7 +10,6 @@ const GlobalSettings = () => {
 
   // Form states for new/update
   const [newSetting, setNewSetting] = useState({ key: "", value: "", description: "" });
-  const [showAddForm, setShowAddForm] = useState(false);
 
   useEffect(() => {
     fetchSettings();
@@ -89,72 +88,19 @@ const GlobalSettings = () => {
           <p className="text-gray-500 mt-1">Configure system-wide constants like trial days and calculation limits.</p>
         </div>
 
-        <button 
-          onClick={() => setShowAddForm(!showAddForm)}
-          className="flex items-center gap-2 px-4 py-2 bg-[#FB4211] text-white rounded-xl hover:bg-[#d93a0e] transition-colors text-sm font-medium shadow-sm"
-        >
-          {showAddForm ? "Cancel" : "Add New Setting"}
-        </button>
       </div>
 
-      {showAddForm && (
-        <div className="mb-8 bg-white p-6 rounded-3xl shadow-sm border border-gray-100 animate-in fade-in slide-in-from-top-4 duration-300">
-          <h2 className="text-lg font-bold text-[#0F172A] mb-4">Add New Global Setting</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">Key</label>
-              <input 
-                type="text"
-                placeholder="e.g. TRIAL_DAYS"
-                className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 w-full focus:ring-2 focus:ring-[#FB4211] focus:outline-none"
-                value={newSetting.key}
-                onChange={(e) => setNewSetting({...newSetting, key: e.target.value.toUpperCase()})}
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">Value</label>
-              <input 
-                type="text"
-                placeholder="e.g. 7"
-                className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 w-full focus:ring-2 focus:ring-[#FB4211] focus:outline-none"
-                value={newSetting.value}
-                onChange={(e) => setNewSetting({...newSetting, value: e.target.value})}
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">Description</label>
-              <input 
-                type="text"
-                placeholder="Number of trial days"
-                className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 w-full focus:ring-2 focus:ring-[#FB4211] focus:outline-none"
-                value={newSetting.description}
-                onChange={(e) => setNewSetting({...newSetting, description: e.target.value})}
-              />
-            </div>
-          </div>
-          <div className="flex justify-end">
-            <button 
-              onClick={async () => {
-                if (!newSetting.key || !newSetting.value) {
-                  return toast.error("Key and Value are required");
-                }
-                await handleUpdate(newSetting.key, newSetting.value, newSetting.description);
-                setNewSetting({ key: "", value: "", description: "" });
-                setShowAddForm(false);
-              }}
-              disabled={saving}
-              className="flex items-center gap-2 px-8 py-2 bg-[#FB4211] text-white rounded-xl hover:bg-[#d93a0e] transition-colors disabled:opacity-50 font-bold"
-            >
-              {saving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />} Create Setting
-            </button>
-          </div>
-        </div>
-      )}
-
       <div className="grid grid-cols-1 gap-6">
-        {settings
-          .filter((s) => s.key !== "FREE_MEMBER_LIMIT" && s.key !== "TRIAL_DAYS")
-          .map((setting) => (
+        {settings.length === 0 ? (
+          <div className="bg-amber-50 border border-amber-200 p-6 rounded-2xl flex items-center gap-4 text-amber-800">
+            <AlertCircle />
+            <div>
+              <p className="font-bold">No settings found</p>
+              <p className="text-sm">Click "Add Defaults" to initialize system settings.</p>
+            </div>
+          </div>
+        ) : (
+          settings.filter(s => s.key !== "FREE_MEMBER_LIMIT" && s.key !== "TRIAL_DAYS").map((setting) => (
             <div key={setting.id} className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex-grow">
@@ -164,15 +110,15 @@ const GlobalSettings = () => {
                     </span>
                   </div>
                   <p className="text-gray-500 text-sm mb-4">{setting.description}</p>
-                  
+
                   <div className="flex items-center gap-4">
-                    <input 
+                    <input
                       type="text"
                       className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 w-full md:w-64 focus:ring-2 focus:ring-[#FB4211] focus:outline-none"
                       defaultValue={setting.value}
                       id={`input-${setting.key}`}
                     />
-                    <button 
+                    <button
                       onClick={() => {
                         const val = document.getElementById(`input-${setting.key}`).value;
                         handleUpdate(setting.key, val, setting.description);
@@ -186,7 +132,8 @@ const GlobalSettings = () => {
                 </div>
               </div>
             </div>
-          ))}
+          ))
+        )}
       </div>
     </div>
   );
