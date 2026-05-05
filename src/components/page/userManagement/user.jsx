@@ -6,9 +6,12 @@ import {
   fetchAllUsers,
   suspendUser,
   fetchUserById,
+  deleteUser,
+  bulkActionUsers,
   clearError,
   clearUserProfile,
 } from "../../../redux/slice/UserSlice";
+import { Trash2, CheckCircle, ShieldAlert } from "lucide-react";
 import DataTable from "../../common/DataTable";
 import { toPascalCase } from "../../../utils/stringUtils";
 
@@ -35,6 +38,10 @@ const Users = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [selectedUserIds, setSelectedUserIds] = useState([]);
+  const [isBulkActionLoading, setIsBulkActionLoading] = useState(false);
+  const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
+  const [showSingleDeleteModal, setShowSingleDeleteModal] = useState(false);
   const menuRef = useRef(null);
 
   // Fetch roles on component mount
@@ -102,6 +109,7 @@ const Users = () => {
     setActiveTab(tab);
     setCurrentPage(1);
     setOpenMenuId(null);
+    setSelectedUserIds([]);
   };
 
   // Handle view profile
@@ -128,18 +136,54 @@ const Users = () => {
       ).unwrap();
       setShowSuspendModal(false);
       setSelectedUser(null);
-      const roleId = activeTab === "All" ? null : getRoleIdByName(activeTab);
-      dispatch(
-        fetchAllUsers({
-          page: currentPage,
-          limit: rowsPerPage,
-          search: searchQuery,
-          role_id: roleId,
-        })
-      );
     } catch (error) {
       console.error(`Failed to ${action} user:`, error);
     }
+  };
+
+  const handleDeleteUser = async () => {
+    if (!selectedUser) return;
+    try {
+      await dispatch(deleteUser(selectedUser.id || selectedUser.uid)).unwrap();
+      setShowSingleDeleteModal(false);
+      setSelectedUser(null);
+    } catch (error) {
+      console.error("Failed to delete user:", error);
+    }
+  };
+
+  const handleBulkAction = async (action) => {
+    if (selectedUserIds.length === 0) return;
+    
+    if (action === "delete" && !showBulkDeleteModal) {
+      setShowBulkDeleteModal(true);
+      return;
+    }
+
+    setIsBulkActionLoading(true);
+    try {
+      await dispatch(bulkActionUsers({ user_ids: selectedUserIds, action })).unwrap();
+      setSelectedUserIds([]);
+      setShowBulkDeleteModal(false);
+    } catch (error) {
+      console.error(`Bulk ${action} failed:`, error);
+    } finally {
+      setIsBulkActionLoading(false);
+    }
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedUserIds.length === users.length) {
+      setSelectedUserIds([]);
+    } else {
+      setSelectedUserIds(users.map(u => u.id || u.uid));
+    }
+  };
+
+  const toggleSelectUser = (id) => {
+    setSelectedUserIds(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
   };
 
   const isUserSuspended = (user) => {
@@ -160,6 +204,32 @@ const Users = () => {
   };
 
   const columns = [
+    {
+      header: (
+        <div className="flex items-center">
+          <input 
+            type="checkbox" 
+            className="w-4 h-4 rounded border-gray-300 text-accent focus:ring-accent cursor-pointer"
+            checked={users.length > 0 && selectedUserIds.length === users.length}
+            onChange={toggleSelectAll}
+          />
+        </div>
+      ),
+      accessor: "selection",
+      cell: (user) => (
+        <div className="flex items-center">
+          <input 
+            type="checkbox" 
+            className="w-4 h-4 rounded border-gray-300 text-accent focus:ring-accent cursor-pointer"
+            checked={selectedUserIds.includes(user.id || user.uid)}
+            onChange={() => toggleSelectUser(user.id || user.uid)}
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      ),
+      className: "w-10 px-4",
+      cellClass: "px-4"
+    },
     {
       header: "Professional Identity",
       accessor: "name",
@@ -281,6 +351,21 @@ const Users = () => {
                 </span>
               </button>
             </li>
+            <li>
+              <button
+                onClick={() => {
+                  setSelectedUser(user);
+                  setShowSingleDeleteModal(true);
+                  setOpenMenuId(null);
+                }}
+                className="w-full px-3 py-2.5 flex items-center gap-3 hover:bg-[#FEE2E2] rounded-xl transition-all"
+              >
+                <div className="w-8 h-8 rounded-lg bg-[#FEE2E2] text-[#B02E0C] flex items-center justify-center ring-1 ring-rose-100">
+                  <Trash2 size={16} />
+                </div>
+                <span className="text-[#B02E0C]">Delete User</span>
+              </button>
+            </li>
           </ul>
         </div>
       )}
@@ -295,6 +380,46 @@ const Users = () => {
         <div>
           <h1 className="text-xl font-bold text-[#0F172A] tracking-tight">Users Management</h1>
           <p className="text-[#64748B] mt-1 text-sm font-medium">Monitor and manage your platform's growing community of professionals</p>
+        </div>
+        
+        {/* Bulk Actions Toolbar */}
+        <div className={`flex items-center gap-2 bg-white p-2 rounded-2xl border transition-all duration-300 ${selectedUserIds.length > 0 ? 'border-accent/20 shadow-sm' : 'border-gray-100 opacity-60'}`}>
+          <div className="px-3 border-r border-gray-100 mr-1">
+            <p className={`text-[10px] font-black uppercase transition-colors ${selectedUserIds.length > 0 ? 'text-accent' : 'text-gray-400'}`}>
+              {selectedUserIds.length} Selected
+            </p>
+          </div>
+          <button 
+            onClick={() => handleBulkAction("activate")}
+            disabled={isBulkActionLoading || selectedUserIds.length === 0}
+            className="p-2 text-emerald-600 hover:bg-emerald-50 disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed rounded-xl transition-colors"
+            title="Activate Selected"
+          >
+            <CheckCircle size={20} />
+          </button>
+          <button 
+            onClick={() => handleBulkAction("suspend")}
+            disabled={isBulkActionLoading || selectedUserIds.length === 0}
+            className="p-2 text-accent hover:bg-accent/5 disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed rounded-xl transition-colors"
+            title="Suspend Selected"
+          >
+            <Ban size={20} />
+          </button>
+          <button 
+            onClick={() => handleBulkAction("delete")}
+            disabled={isBulkActionLoading || selectedUserIds.length === 0}
+            className="p-2 text-accent hover:bg-accent/5 disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed rounded-xl transition-colors"
+            title="Delete Selected"
+          >
+            <Trash2 size={20} /> 
+          </button>
+          <button 
+            onClick={() => setSelectedUserIds([])}
+            disabled={selectedUserIds.length === 0}
+            className="p-2 text-gray-400 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed rounded-xl transition-colors"
+          >
+            <X size={20} />
+          </button>
         </div>
       </div>
 
@@ -450,6 +575,52 @@ const Users = () => {
             <div className="p-6 pt-0 flex flex-col gap-3">
               <button onClick={handleSuspendUser} className={`w-full py-4 rounded-2xl text-sm font-black uppercase tracking-widest text-white shadow-xl transition-all cursor-pointer ${isUserSuspended(selectedUser) ? "bg-emerald-500 hover:bg-emerald-600" : "bg-accent hover:opacity-90"}`}>{isUserSuspended(selectedUser) ? "Activate Now" : "Confirm Suspension"}</button>
               <button onClick={() => setShowSuspendModal(false)} className="w-full py-4 rounded-2xl text-sm font-black uppercase tracking-widest text-[#64748B] hover:bg-[#F8FAFC] cursor-pointer">Abort Action</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ----------------- Single Delete Modal ----------------- */}
+      {showSingleDeleteModal && selectedUser && (
+        <div className="fixed inset-0 flex items-center justify-center z-[200] p-4 backdrop-blur-md bg-white/30 animate-in fade-in duration-300">
+          <div className="bg-white rounded-[28px] w-full max-w-sm overflow-hidden relative shadow-2xl animate-in zoom-in duration-300 border border-[#E2E8F0]">
+            <div className="h-2 w-full bg-rose-500" />
+            <div className="p-8 text-center">
+              <div className="w-20 h-20 rounded-3xl mx-auto mb-6 flex items-center justify-center bg-rose-50 text-rose-600 shadow-xl shadow-rose-100">
+                <Trash2 size={40} />
+              </div>
+              <h2 className="text-2xl font-black text-[#0F172A] mb-3">Delete Account?</h2>
+              <p className="text-[#64748B] font-medium">This will soft-delete <strong className="text-[#1E293B] font-black">{selectedUser.name || selectedUser.full_name}</strong>. Data remains in DB but user cannot login.</p>
+            </div>
+            <div className="p-6 pt-0 flex flex-col gap-3">
+              <button onClick={handleDeleteUser} className="w-full py-4 rounded-2xl text-sm font-black uppercase tracking-widest text-white bg-rose-500 hover:bg-rose-600 shadow-xl transition-all cursor-pointer">Confirm Delete</button>
+              <button onClick={() => setShowSingleDeleteModal(false)} className="w-full py-4 rounded-2xl text-sm font-black uppercase tracking-widest text-[#64748B] hover:bg-[#F8FAFC] cursor-pointer">Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ----------------- Bulk Delete Modal ----------------- */}
+      {showBulkDeleteModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-[200] p-4 backdrop-blur-md bg-white/30 animate-in fade-in duration-300">
+          <div className="bg-white rounded-[28px] w-full max-w-sm overflow-hidden relative shadow-2xl animate-in zoom-in duration-300 border border-[#E2E8F0]">
+            <div className="h-2 w-full bg-[#B02E0C]" />
+            <div className="p-8 text-center">
+              <div className="w-20 h-20 rounded-3xl mx-auto mb-6 flex items-center justify-center bg-[#FEE2E2] text-[#B02E0C] shadow-xl shadow-rose-200">
+                <ShieldAlert size={40} />
+              </div>
+              <h2 className="text-2xl font-black text-[#0F172A] mb-3">Bulk Delete?</h2>
+              <p className="text-[#64748B] font-medium">Are you sure you want to delete <strong className="text-[#B02E0C] font-black">{selectedUserIds.length} users</strong>? This action cannot be easily undone.</p>
+            </div>
+            <div className="p-6 pt-0 flex flex-col gap-3">
+              <button 
+                onClick={() => handleBulkAction("delete")} 
+                className="w-full py-4 rounded-2xl text-sm font-black uppercase tracking-widest text-white bg-[#B02E0C] hover:bg-[#B02E0C] shadow-xl transition-all cursor-pointer"
+                disabled={isBulkActionLoading}
+              >
+                {isBulkActionLoading ? <Loader2 className="animate-spin mx-auto" /> : "Confirm Bulk Delete"}
+              </button>
+              <button onClick={() => setShowBulkDeleteModal(false)} className="w-full py-4 rounded-2xl text-sm font-black uppercase tracking-widest text-[#64748B] hover:bg-[#F8FAFC] cursor-pointer">Cancel</button>
             </div>
           </div>
         </div>
