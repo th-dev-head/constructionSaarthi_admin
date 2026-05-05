@@ -1,23 +1,31 @@
 import { useState, useEffect } from "react";
 import { apiInstance } from "../../../config/axiosInstance";
 import { Loader2, Users, Calendar, Calculator, Clock } from "lucide-react";
+import Pagination from "../../common/Pagination";
 
 const FreeTrialUsers = () => {
   const [trialUsers, setTrialUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    totalPages: 1,
+    totalRecords: 0
+  });
 
   useEffect(() => {
-    fetchTrialUsers();
-  }, []);
+    fetchTrialUsers(pagination.page, pagination.limit);
+  }, [pagination.page, pagination.limit]);
 
-  const fetchTrialUsers = async () => {
+  const fetchTrialUsers = async (page, limit) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await apiInstance.get("/api/dashboard/admin/free-trial-users");
+      const response = await apiInstance.get(`/api/dashboard/admin/free-trial-users?page=${page}&limit=${limit}`);
       if (response.data.success) {
         setTrialUsers(response.data.trialUsers);
+        setPagination(response.data.pagination);
       } else {
         setError("Failed to fetch trial users");
       }
@@ -26,6 +34,12 @@ const FreeTrialUsers = () => {
       setError(err.response?.data?.message || "Failed to fetch trial users");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= pagination.totalPages) {
+      setPagination(prev => ({ ...prev, page: newPage }));
     }
   };
 
@@ -125,6 +139,16 @@ const FreeTrialUsers = () => {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Controls */}
+        <Pagination
+          page={pagination.page}
+          limit={pagination.limit}
+          totalPages={pagination.totalPages}
+          totalRecords={pagination.totalRecords}
+          onPageChange={(newPage) => setPagination(prev => ({ ...prev, page: newPage }))}
+          onLimitChange={(newLimit) => setPagination(prev => ({ ...prev, limit: newLimit, page: 1 }))}
+        />
       </div>
     </div>
   );
