@@ -91,16 +91,9 @@ const GlobalSettings = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-6">
-        {settings.length === 0 ? (
-          <div className="bg-amber-50 border border-amber-200 p-6 rounded-2xl flex items-center gap-4 text-amber-800">
-            <AlertCircle />
-            <div>
-              <p className="font-bold">No settings found</p>
-              <p className="text-sm">Click "Add Defaults" to initialize system settings.</p>
-            </div>
-          </div>
-        ) : (
-          settings.filter(s => s.key !== "FREE_MEMBER_LIMIT" && s.key !== "TRIAL_DAYS").map((setting) => (
+        {settings
+          .filter((s) => s.key !== "FREE_MEMBER_LIMIT" && s.key !== "TRIAL_DAYS")
+          .map((setting) => (
             <div key={setting.id} className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex-grow">
@@ -132,8 +125,7 @@ const GlobalSettings = () => {
                 </div>
               </div>
             </div>
-          ))
-        )}
+          ))}
       </div>
     </div>
   );
