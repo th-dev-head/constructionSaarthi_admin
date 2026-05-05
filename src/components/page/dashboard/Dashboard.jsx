@@ -63,7 +63,7 @@ export const Dashboard = () => {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh]">
-        <Loader2 className="animate-spin text-[#FB4211]" size={48} />
+        <Loader2 className="animate-spin text-accent" size={48} />
         <span className="mt-4 text-gray-600 font-medium">Preparing your insights...</span>
       </div>
     );
@@ -79,7 +79,7 @@ export const Dashboard = () => {
         <p className="text-red-700 mb-6">{error}</p>
         <button
           onClick={fetchDashboardData}
-          className="px-6 py-2.5 bg-[#FB4211] text-white rounded-xl font-semibold hover:bg-[#d93a0e] transition-colors shadow-lg shadow-red-900/20"
+          className="px-6 py-2.5 bg-accent text-white rounded-xl font-semibold hover:bg-[#d93a0e] transition-colors shadow-lg shadow-red-900/20"
         >
           Try Again
         </button>
@@ -283,7 +283,7 @@ export const Dashboard = () => {
               <div className="mt-6 pt-6 border-t border-gray-100">
                 <div className="flex justify-between items-center text-sm font-medium">
                   <span className="text-gray-500">Coupon Effectiveness</span>
-                  <span className="text-[#FB4211]">High</span>
+                  <span className="text-accent">High</span>
                 </div>
               </div>
             </div>

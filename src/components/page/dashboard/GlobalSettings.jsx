@@ -76,14 +76,14 @@ const GlobalSettings = () => {
     }
   };
 
-  if (loading) return <div className="flex justify-center p-20"><Loader2 className="animate-spin text-[#FB4211]" size={48} /></div>;
+  if (loading) return <div className="flex justify-center p-20"><Loader2 className="animate-spin text-accent" size={48} /></div>;
 
   return (
     <div className="p-4 md:p-8 bg-[#F8FAFC] min-h-screen">
       <div className="mb-8 flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-[#0F172A] flex items-center gap-3">
-            <Settings className="text-[#FB4211]" /> Global System Settings
+            <Settings className="text-accent" /> Global System Settings
           </h1>
           <p className="text-gray-500 mt-1">Configure system-wide constants like trial days and calculation limits.</p>
         </div>
@@ -105,7 +105,7 @@ const GlobalSettings = () => {
               <div className="flex items-center gap-4">
                 <input 
                   type="text"
-                  className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 w-full md:w-64 focus:ring-2 focus:ring-[#FB4211] focus:outline-none"
+                  className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 w-full md:w-64 focus:ring-2 focus:ring-accent focus:outline-none"
                   defaultValue={settings.find(s => s.key === "TRIAL_CALCULATIONS")?.value || ""}
                   placeholder="null"
                   id="input-TRIAL_CALCULATIONS"
@@ -116,7 +116,7 @@ const GlobalSettings = () => {
                     handleUpdate("TRIAL_CALCULATIONS", val, "Number of free calculations (-1 for unlimited)");
                   }}
                   disabled={saving}
-                  className="flex items-center gap-2 px-6 py-2 bg-[#FB4211] text-white rounded-xl hover:bg-[#d93a0e] transition-colors disabled:opacity-50"
+                  className="flex items-center gap-2 px-6 py-2 bg-accent text-white rounded-xl hover:bg-[#d93a0e] transition-colors disabled:opacity-50"
                 >
                   <Save size={18} /> Save
                 </button>
@@ -139,7 +139,7 @@ const GlobalSettings = () => {
               <div className="flex items-center gap-4">
                 <input 
                   type="text"
-                  className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 w-full md:w-64 focus:ring-2 focus:ring-[#FB4211] focus:outline-none"
+                  className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 w-full md:w-64 focus:ring-2 focus:ring-accent focus:outline-none"
                   defaultValue={settings.find(s => s.key === "TRIAL_MEMBER_LIMIT")?.value || ""}
                   placeholder="null"
                   id="input-TRIAL_MEMBER_LIMIT"
@@ -150,7 +150,7 @@ const GlobalSettings = () => {
                     handleUpdate("TRIAL_MEMBER_LIMIT", val, "Number of members allowed during trial (-1 for unlimited)");
                   }}
                   disabled={saving}
-                  className="flex items-center gap-2 px-6 py-2 bg-[#FB4211] text-white rounded-xl hover:bg-[#d93a0e] transition-colors disabled:opacity-50"
+                  className="flex items-center gap-2 px-6 py-2 bg-accent text-white rounded-xl hover:bg-[#d93a0e] transition-colors disabled:opacity-50"
                 >
                   <Save size={18} /> Save
                 </button>
