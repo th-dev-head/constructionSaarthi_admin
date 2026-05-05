@@ -89,43 +89,75 @@ const GlobalSettings = () => {
         </div>
 
       </div>
-
+      
       <div className="grid grid-cols-1 gap-6">
-        {settings
-          .filter((s) => s.key !== "FREE_MEMBER_LIMIT" && s.key !== "TRIAL_DAYS")
-          .map((setting) => (
-            <div key={setting.id} className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex-grow">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="px-2 py-0.5 bg-blue-50 text-blue-600 text-xs font-bold rounded uppercase tracking-wider">
-                      {setting.key}
-                    </span>
-                  </div>
-                  <p className="text-gray-500 text-sm mb-4">{setting.description}</p>
-                  
-                  <div className="flex items-center gap-4">
-                    <input 
-                      type="text"
-                      className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 w-full md:w-64 focus:ring-2 focus:ring-[#FB4211] focus:outline-none"
-                      defaultValue={setting.value}
-                      id={`input-${setting.key}`}
-                    />
-                    <button 
-                      onClick={() => {
-                        const val = document.getElementById(`input-${setting.key}`).value;
-                        handleUpdate(setting.key, val, setting.description);
-                      }}
-                      disabled={saving}
-                      className="flex items-center gap-2 px-6 py-2 bg-[#FB4211] text-white rounded-xl hover:bg-[#d93a0e] transition-colors disabled:opacity-50"
-                    >
-                      <Save size={18} /> Save
-                    </button>
-                  </div>
-                </div>
+        {/* TRIAL_CALCULATIONS Card */}
+        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex-grow">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="px-2 py-0.5 bg-blue-50 text-blue-600 text-xs font-bold rounded uppercase tracking-wider">
+                  TRIAL_CALCULATIONS
+                </span>
+              </div>
+              <p className="text-gray-500 text-sm mb-4">Number of free calculations (-1 for unlimited)</p>
+              
+              <div className="flex items-center gap-4">
+                <input 
+                  type="text"
+                  className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 w-full md:w-64 focus:ring-2 focus:ring-[#FB4211] focus:outline-none"
+                  defaultValue={settings.find(s => s.key === "TRIAL_CALCULATIONS")?.value || ""}
+                  placeholder="null"
+                  id="input-TRIAL_CALCULATIONS"
+                />
+                <button 
+                  onClick={() => {
+                    const val = document.getElementById("input-TRIAL_CALCULATIONS").value;
+                    handleUpdate("TRIAL_CALCULATIONS", val, "Number of free calculations (-1 for unlimited)");
+                  }}
+                  disabled={saving}
+                  className="flex items-center gap-2 px-6 py-2 bg-[#FB4211] text-white rounded-xl hover:bg-[#d93a0e] transition-colors disabled:opacity-50"
+                >
+                  <Save size={18} /> Save
+                </button>
               </div>
             </div>
-          ))}
+          </div>
+        </div>
+
+        {/* TRIAL_MEMBER_LIMIT Card */}
+        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex-grow">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="px-2 py-0.5 bg-blue-50 text-blue-600 text-xs font-bold rounded uppercase tracking-wider">
+                  TRIAL_MEMBER_LIMIT
+                </span>
+              </div>
+              <p className="text-gray-500 text-sm mb-4">Number of members allowed during trial (-1 for unlimited)</p>
+              
+              <div className="flex items-center gap-4">
+                <input 
+                  type="text"
+                  className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 w-full md:w-64 focus:ring-2 focus:ring-[#FB4211] focus:outline-none"
+                  defaultValue={settings.find(s => s.key === "TRIAL_MEMBER_LIMIT")?.value || ""}
+                  placeholder="null"
+                  id="input-TRIAL_MEMBER_LIMIT"
+                />
+                <button 
+                  onClick={() => {
+                    const val = document.getElementById("input-TRIAL_MEMBER_LIMIT").value;
+                    handleUpdate("TRIAL_MEMBER_LIMIT", val, "Number of members allowed during trial (-1 for unlimited)");
+                  }}
+                  disabled={saving}
+                  className="flex items-center gap-2 px-6 py-2 bg-[#FB4211] text-white rounded-xl hover:bg-[#d93a0e] transition-colors disabled:opacity-50"
+                >
+                  <Save size={18} /> Save
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
