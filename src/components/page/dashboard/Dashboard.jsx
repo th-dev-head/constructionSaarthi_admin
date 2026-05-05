@@ -140,6 +140,13 @@ export const Dashboard = () => {
             color="purple"
             description="Last 30 days"
           />
+          <StatCard
+            title="Trial Users"
+            value={stats.users?.inTrial || 0}
+            icon={<Zap className="text-amber-600" />}
+            color="amber"
+            description="Users in active trial"
+          />
         </div>
       </section>
 
