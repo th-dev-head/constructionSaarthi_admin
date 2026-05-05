@@ -131,6 +131,44 @@ export const fetchUserById = createAsyncThunk(
   }
 );
 
+// Delete user
+export const deleteUser = createAsyncThunk(
+  "user/deleteUser",
+  async (userId, thunkAPI) => {
+    try {
+      const response = await apiInstance.delete(
+        `${baseUrl}/api/admin/user/${userId}`
+      );
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || error.message
+      );
+    }
+  }
+);
+
+// Bulk action (suspend, activate, delete)
+export const bulkActionUsers = createAsyncThunk(
+  "user/bulkActionUsers",
+  async ({ user_ids, action }, thunkAPI) => {
+    try {
+      const response = await apiInstance.post(
+        `${baseUrl}/api/admin/users/bulk-action`,
+        {
+          user_ids,
+          action,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || error.message
+      );
+    }
+  }
+);
+
 const userSlice = createSlice({
   name: "user",
   initialState: {
@@ -254,6 +292,49 @@ const userSlice = createSlice({
         state.userProfileLoading = false;
         state.error = action.payload || action.error.message;
         state.userProfile = null;
+      })
+      // Delete user
+      .addCase(deleteUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteUser.fulfilled, (state, action) => {
+        state.loading = false;
+        const userId = action.meta.arg;
+        state.users = state.users.filter(
+          (user) => String(user.id) !== String(userId) && String(user.uid) !== String(userId)
+        );
+      })
+      .addCase(deleteUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || action.error.message;
+      })
+      // Bulk action
+      .addCase(bulkActionUsers.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(bulkActionUsers.fulfilled, (state, action) => {
+        state.loading = false;
+        const { user_ids, action: actionType } = action.meta.arg;
+        
+        if (actionType === "delete") {
+          state.users = state.users.filter(
+            (user) => !user_ids.map(String).includes(String(user.id || user.uid))
+          );
+        } else {
+          const is_active = actionType === "activate";
+          state.users = state.users.map((user) => {
+            if (user_ids.map(String).includes(String(user.id || user.uid))) {
+              return { ...user, is_active };
+            }
+            return user;
+          });
+        }
+      })
+      .addCase(bulkActionUsers.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || action.error.message;
       });
   },
 });

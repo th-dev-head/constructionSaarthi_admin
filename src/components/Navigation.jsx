@@ -3,8 +3,12 @@ import Login from "./page/auth/Login";
 import ForgotPassword from "./page/auth/ForgotPassword";
 import ResetPassword from "./page/auth/ResetPassword";
 import Dashboard from "./page/dashboard/Dashboard";
+import GlobalSettings from "./page/dashboard/GlobalSettings";
 import Users from "./page/userManagement/user";
+
+import FreeTrialUsers from "./page/userManagement/FreeTrialUsers";
 import { DashBoardLayout } from "./DashBoardLayout";
+
 import Subscriptions from "./page/Subscriptions/Subscriptions";
 import ManagePlan from "./page/Subscriptions/ManagePlan";
 import SubscriptionDescription from "./page/Subscriptions/SubscriptionDescription";
@@ -42,7 +46,9 @@ const Navigation = () => (
 
       <Route element={<DashBoardLayout />}>
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/global-settings" element={<GlobalSettings />} />
         <Route path="/users" element={<Users />} />
+        <Route path="/trial-users" element={<FreeTrialUsers />} />
         <Route path="/subscriptions" element={<Subscriptions />} />
         <Route path="/manage-plans" element={<ManagePlan />} />
         <Route path="/subscription-description" element={<SubscriptionDescription />} />

@@ -25,6 +25,11 @@ export const MenuItems = [
     icon: <Users size={22} />,
   },
   {
+    name: "Trial Users",
+    link: "/trial-users",
+    icon: <Users2 size={22} />,
+  },
+  {
     name: "Leads",
     link: "/leads",
     icon: <Users2 size={22} />,
@@ -63,6 +68,11 @@ export const MenuItems = [
     name: "Help Support",
     link: "/help",
     icon: <HelpCircle size={22} />,
+  },
+  {
+    name: "Global Settings",
+    link: "/global-settings",
+    icon: <Settings size={22} />,
   },
   {
     name: "Banner Management",
