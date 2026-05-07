@@ -98,9 +98,9 @@ const CategoryManagement = () => {
         }
     ];
 
-    const filteredCategories = categories.filter(c => 
+    const filteredCategories = Array.isArray(categories) ? categories.filter(c => 
         (c.name || "").toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    ) : [];
 
     const renderActions = (category) => (
         <div className="relative" ref={openMenuId === category.id ? menuRef : null}>

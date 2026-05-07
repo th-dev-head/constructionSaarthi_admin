@@ -84,7 +84,13 @@ const constructionSlice = createSlice({
             })
             .addCase(fetchConstructions.fulfilled, (state, action) => {
                 state.loading = false;
-                state.constructions = action.payload.constructions || action.payload.data || action.payload || [];
+                state.constructions = Array.isArray(action.payload?.constructions) 
+                    ? action.payload.constructions 
+                    : Array.isArray(action.payload?.data) 
+                        ? action.payload.data 
+                        : Array.isArray(action.payload) 
+                            ? action.payload 
+                            : [];
             })
             .addCase(fetchConstructions.rejected, (state, action) => {
                 state.loading = false;

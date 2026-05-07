@@ -164,9 +164,9 @@ const BankType = () => {
     },
   ];
 
-  const filteredBanks = banks.filter(bank => 
+  const filteredBanks = Array.isArray(banks) ? banks.filter(bank => 
     (bank.name || "").toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  ) : [];
 
   const renderActions = (bank) => (
     <div className="relative" ref={openMenuId === bank.id ? menuRef : null}>

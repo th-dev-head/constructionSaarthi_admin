@@ -115,9 +115,9 @@ const ConstructionType = () => {
         },
     ];
 
-    const filteredConstructions = constructions.filter(c => 
+    const filteredConstructions = Array.isArray(constructions) ? constructions.filter(c => 
         (c.name || "").toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    ) : [];
 
     const renderActions = (construction) => (
         <div className="relative" ref={openMenuId === construction.id ? menuRef : null}>

@@ -142,7 +142,7 @@ const CouponManagement = () => {
     try {
       const response = await apiInstance.get("/api/coupon/all");
       if (response.data.success || response.data.message === "Coupons retrieved successfully") {
-        const nextCoupons = response.data.data || [];
+        const nextCoupons = Array.isArray(response.data?.data) ? response.data.data : [];
         setCoupons(nextCoupons);
         setCachedResponse(requestKey, nextCoupons);
       }
@@ -263,7 +263,7 @@ const CouponManagement = () => {
     try {
       const response = await apiInstance.get(`/api/coupon`);
       if (response.data && response.data.data) {
-        const nextCriteria = response.data.data;
+        const nextCriteria = Array.isArray(response.data?.data) ? response.data.data : [];
         setCriteria(nextCriteria);
         setCachedResponse(requestKey, nextCriteria);
       } else {
@@ -628,10 +628,10 @@ const CouponManagement = () => {
     setShowEditModal(true);
   };
 
-  const filteredCoupons = coupons.filter(c =>
+  const filteredCoupons = Array.isArray(coupons) ? coupons.filter(c =>
     c.code?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     c.title?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  ) : [];
 
   const columns = [
     {

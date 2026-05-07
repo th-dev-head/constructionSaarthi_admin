@@ -84,7 +84,13 @@ const contractTypeSlice = createSlice({
             })
             .addCase(fetchContractTypes.fulfilled, (state, action) => {
                 state.loading = false;
-                state.contractTypes = action.payload.contractTypes || action.payload.data || action.payload || [];
+                state.contractTypes = Array.isArray(action.payload?.contractTypes) 
+                    ? action.payload.contractTypes 
+                    : Array.isArray(action.payload?.data) 
+                        ? action.payload.data 
+                        : Array.isArray(action.payload) 
+                            ? action.payload 
+                            : [];
             })
             .addCase(fetchContractTypes.rejected, (state, action) => {
                 state.loading = false;

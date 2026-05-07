@@ -114,9 +114,9 @@ const ContractType = () => {
         },
     ];
 
-    const filteredContractTypes = contractTypes.filter(type => 
+    const filteredContractTypes = Array.isArray(contractTypes) ? contractTypes.filter(type => 
         (type.name || "").toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    ) : [];
 
     const renderActions = (type) => (
         <div className="relative" ref={openMenuId === type.id ? menuRef : null}>

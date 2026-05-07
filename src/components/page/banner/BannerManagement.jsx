@@ -213,14 +213,14 @@ const BannerManagement = () => {
         },
     ];
 
-    const filteredBanners = banners.filter(b => {
+    const filteredBanners = Array.isArray(banners) ? banners.filter(b => {
         const matchesTab = activeTab === "all" || b.type === activeTab;
         const matchesSearch =
             (b.heading || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
             (b.sub_heading || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
             (b.button_text || "").toLowerCase().includes(searchQuery.toLowerCase());
         return matchesTab && matchesSearch;
-    });
+    }) : [];
 
     const renderActions = (banner, idx) => (
         <div className="relative" ref={openMenuId === banner.id ? menuRef : null}>
