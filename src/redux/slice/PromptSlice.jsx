@@ -73,7 +73,11 @@ export const fetchAllPrompts = createAsyncThunk(
           limit,
           force: arg?.force,
         },
-        hasData: Array.isArray(state?.prompts) && state.prompts.length > 0,
+        hasData:
+          state?.currentPage === page &&
+          state?.limit === limit &&
+          Array.isArray(state?.prompts) &&
+          state.prompts.length > 0,
         isLoading: state?.loading,
       });
     },
@@ -181,8 +185,8 @@ const promptSlice = createSlice({
       .addCase(fetchAllPrompts.fulfilled, (state, action) => {
         state.loading = false;
         state.prompts = action.payload.data || action.payload.prompts || [];
-        state.total = action.payload.pagination?.totalCount || action.payload.total || 0;
-        state.currentPage = action.payload.pagination?.currentPage || action.payload.currentPage || 1;
+        state.total = action.payload.pagination?.totalCount || action.payload.pagination?.total || action.payload.total || 0;
+        state.currentPage = action.payload.pagination?.currentPage || action.payload.pagination?.page || action.payload.currentPage || action.payload.page || 1;
         state.totalPages = action.payload.pagination?.totalPages || action.payload.totalPages || 1;
         state.limit = action.payload.pagination?.limit || action.payload.limit || 10;
       })
