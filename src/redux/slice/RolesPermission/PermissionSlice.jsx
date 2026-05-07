@@ -41,7 +41,10 @@ export const fetchAllPermission = createAsyncThunk(
         prefix: "permission/fetchAllPermission",
         params: { page, limit, search, force: arg?.force },
         hasData:
-          Array.isArray(state?.Permissions) && state.Permissions.length > 0,
+          state?.pagination?.page === page &&
+          state?.pagination?.limit === limit &&
+          Array.isArray(state?.Permissions) &&
+          state.Permissions.length > 0,
         isLoading: state?.loading,
       });
     },

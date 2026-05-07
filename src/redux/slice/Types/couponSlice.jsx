@@ -191,7 +191,10 @@ export const fetchCoupons = createAsyncThunk(
         prefix: "coupon/fetchCoupons",
         params: { page, limit, search, force: arg?.force },
         hasData:
-          Array.isArray(state?.couponList) && state.couponList.length > 0,
+          state?.pagination?.currentPage === page &&
+          state?.pagination?.limit === limit &&
+          Array.isArray(state?.couponList) &&
+          state.couponList.length > 0,
         isLoading: state?.loading,
       });
     },

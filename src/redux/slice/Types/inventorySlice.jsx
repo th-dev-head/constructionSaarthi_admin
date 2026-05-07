@@ -365,7 +365,10 @@ export const fetchInventory = createAsyncThunk(
         prefix: "inventory/fetchInventory",
         params: { page, limit, search, force: arg?.force },
         hasData:
-          Array.isArray(state?.inventoryList) && state.inventoryList.length > 0,
+          state?.pagination?.page === page &&
+          state?.pagination?.limit === limit &&
+          Array.isArray(state?.inventoryList) &&
+          state.inventoryList.length > 0,
         isLoading: state?.loading,
       });
     },

@@ -40,7 +40,11 @@ export const fetchAllFeature = createAsyncThunk(
       return !shouldSkipCachedRequest({
         prefix: "role/fetchAllFeature",
         params: { page, limit, search, force: arg?.force },
-        hasData: Array.isArray(state?.Features) && state.Features.length > 0,
+        hasData:
+          state?.pagination?.page === page &&
+          state?.pagination?.limit === limit &&
+          Array.isArray(state?.Features) &&
+          state.Features.length > 0,
         isLoading: state?.loading,
       });
     },

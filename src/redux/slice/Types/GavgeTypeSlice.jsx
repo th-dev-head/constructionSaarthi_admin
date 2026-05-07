@@ -43,7 +43,11 @@ export const fetchAllGavge = createAsyncThunk(
       return !shouldSkipCachedRequest({
         prefix: "gavge/fetchAllGavge",
         params: { page, limit, search, force: arg?.force },
-        hasData: Array.isArray(state?.Gavges) && state.Gavges.length > 0,
+        hasData:
+          state?.pagination?.page === page &&
+          state?.pagination?.limit === limit &&
+          Array.isArray(state?.Gavges) &&
+          state.Gavges.length > 0,
         isLoading: state?.loading,
       });
     },

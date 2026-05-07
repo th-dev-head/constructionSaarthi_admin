@@ -43,7 +43,10 @@ export const fetchAllMedia = createAsyncThunk(
         prefix: "media/fetchAllMedia",
         params: { page, limit, search, force: arg?.force },
         hasData:
-          Array.isArray(state?.mediaTypes) && state.mediaTypes.length > 0,
+          state?.pagination?.page === page &&
+          state?.pagination?.limit === limit &&
+          Array.isArray(state?.mediaTypes) &&
+          state.mediaTypes.length > 0,
         isLoading: state?.loading,
       });
     },

@@ -28,7 +28,11 @@ export const fetchShiftTypes = createAsyncThunk(
       return !shouldSkipCachedRequest({
         prefix: "shiftTypes/fetchShiftTypes",
         params: { page, limit, search, force: arg?.force },
-        hasData: Array.isArray(state?.list) && state.list.length > 0,
+        hasData:
+          state?.pagination?.page === page &&
+          state?.pagination?.limit === limit &&
+          Array.isArray(state?.list) &&
+          state.list.length > 0,
         isLoading: state?.loading,
       });
     },

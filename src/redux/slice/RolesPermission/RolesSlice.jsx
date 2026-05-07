@@ -38,7 +38,11 @@ export const fetchAllRoles = createAsyncThunk(
       return !shouldSkipCachedRequest({
         prefix: "role/fetchAllRoles",
         params: { page, limit, force: arg?.force },
-        hasData: Array.isArray(state?.Roles) && state.Roles.length > 0,
+        hasData:
+          state?.pagination?.page === page &&
+          state?.pagination?.limit === limit &&
+          Array.isArray(state?.Roles) &&
+          state.Roles.length > 0,
         isLoading: state?.loading,
       });
     },
