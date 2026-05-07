@@ -905,7 +905,7 @@ const CouponManagement = () => {
                   <X size={24} />
                 </button>
               </div>
-              
+
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   onClick={() => setShowRules(!showRules)}
@@ -1909,29 +1909,29 @@ const CouponManagement = () => {
                     ></textarea>
                   </div>
 
-                    <CustomDatePicker
-                      selected={couponFormData.start_date ? new Date(couponFormData.start_date) : null}
-                      onChange={(date) => {
-                        setCouponFormData(prev => ({
-                          ...prev,
-                          start_date: date ? date.toISOString().split('T')[0] : ""
-                        }));
-                      }}
-                      label="Start Date"
-                      required
-                    />
-                    <CustomDatePicker
-                      selected={couponFormData.end_date ? new Date(couponFormData.end_date) : null}
-                      onChange={(date) => {
-                        setCouponFormData(prev => ({
-                          ...prev,
-                          end_date: date ? date.toISOString().split('T')[0] : ""
-                        }));
-                      }}
-                      label="End Date"
-                      required
-                      minDate={couponFormData.start_date ? new Date(couponFormData.start_date) : null}
-                    />
+                  <CustomDatePicker
+                    selected={couponFormData.start_date ? new Date(couponFormData.start_date) : null}
+                    onChange={(date) => {
+                      setCouponFormData(prev => ({
+                        ...prev,
+                        start_date: date ? date.toISOString().split('T')[0] : ""
+                      }));
+                    }}
+                    label="Start Date"
+                    required
+                  />
+                  <CustomDatePicker
+                    selected={couponFormData.end_date ? new Date(couponFormData.end_date) : null}
+                    onChange={(date) => {
+                      setCouponFormData(prev => ({
+                        ...prev,
+                        end_date: date ? date.toISOString().split('T')[0] : ""
+                      }));
+                    }}
+                    label="End Date"
+                    required
+                    minDate={couponFormData.start_date ? new Date(couponFormData.start_date) : null}
+                  />
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-gray-100">
                     <CustomSelect

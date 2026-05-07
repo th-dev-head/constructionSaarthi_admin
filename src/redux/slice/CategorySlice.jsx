@@ -58,6 +58,19 @@ export const updateCategory = createAsyncThunk(
     }
 );
 
+// Delete category
+export const deleteCategory = createAsyncThunk(
+    "category/deleteCategory",
+    async (id, thunkAPI) => {
+        try {
+            const response = await apiInstance.delete(`/api/category/delete/${id}`);
+            return response.data;
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error.response?.data || error.message);
+        }
+    }
+);
+
 const categorySlice = createSlice({
     name: "category",
     initialState: {
@@ -82,6 +95,27 @@ const categorySlice = createSlice({
             .addCase(fetchCategories.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
+            })
+            .addCase(addCategory.fulfilled, (state, action) => {
+                const newCategory = action.payload?.category || action.payload;
+                if (newCategory) {
+                    state.categories.unshift(newCategory);
+                }
+            })
+            .addCase(updateCategory.fulfilled, (state, action) => {
+                const updatedCategory = action.payload?.category || action.payload;
+                if (updatedCategory) {
+                    const index = state.categories.findIndex(c => c.id === updatedCategory.id);
+                    if (index !== -1) {
+                        state.categories[index] = updatedCategory;
+                    }
+                }
+            })
+            .addCase(deleteCategory.fulfilled, (state, action) => {
+                // Since the action.payload might just be a message, we use the arg passed to thunk
+                // But createAsyncThunk fulfilled action has 'meta.arg' which contains the id
+                const id = action.meta.arg;
+                state.categories = state.categories.filter(c => c.id !== id);
             });
     },
 });

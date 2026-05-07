@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import { EllipsisVertical, X, Plus, Eye, Edit, Tag, Layers, Database } from "lucide-react";
+import { EllipsisVertical, X, Plus, Eye, Edit, Tag, Layers, Database, Trash2 } from "lucide-react";
 import {
     fetchCategories,
     addCategory,
     updateCategory,
+    deleteCategory,
 } from "../../../redux/slice/CategorySlice";
 import DataTable from "../../common/DataTable";
 
@@ -16,7 +17,7 @@ const CategoryManagement = () => {
 
     const [openMenuId, setOpenMenuId] = useState(null);
     const [showModal, setShowModal] = useState(false);
-    const [modalType, setModalType] = useState("add"); // "add" | "edit" | "view"
+    const [modalType, setModalType] = useState("add"); // "add" | "edit" | "view" | "delete"
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [formState, setFormState] = useState({
         name: "",
@@ -54,7 +55,7 @@ const CategoryManagement = () => {
                 if (res) {
                     toast.success("Category updated successfully");
                     setShowModal(false);
-                    dispatch(fetchCategories());
+                    dispatch(fetchCategories({ force: true }));
                 }
             } else {
                 const res = await dispatch(addCategory({ name: formState.name, categoryId: "" })).unwrap();
@@ -62,11 +63,24 @@ const CategoryManagement = () => {
                     toast.success("Category added successfully");
                     setShowModal(false);
                     setFormState({ name: "" });
-                    dispatch(fetchCategories());
+                    dispatch(fetchCategories({ force: true }));
                 }
             }
         } catch (error) {
             toast.error(error?.message || "Operation failed");
+        }
+    };
+
+    const handleDelete = async () => {
+        try {
+            const res = await dispatch(deleteCategory(selectedCategory.id)).unwrap();
+            if (res) {
+                toast.success("Category deleted successfully");
+                setShowModal(false);
+                dispatch(fetchCategories({ force: true }));
+            }
+        } catch (error) {
+            toast.error(error?.message || "Deletion failed");
         }
     };
 
@@ -92,7 +106,7 @@ const CategoryManagement = () => {
             cell: (r) => (
                 <div className="flex items-center gap-2 text-[10px] font-bold text-[#94A3B8] uppercase">
                     <Database size={12} />
-                    ID: {r.id.slice(0, 8)}...
+                    ID: {String(r.id).slice(0, 8)}
                 </div>
             )
         }
@@ -146,6 +160,20 @@ const CategoryManagement = () => {
                                 <Edit size={16} />
                             </div>
                             Interface
+                        </li>
+                        <li
+                            className="px-4 py-3 flex items-center gap-3 hover:bg-accent/5 hover:text-accent cursor-pointer transition-all mx-2 rounded-xl text-accent"
+                            onClick={() => {
+                                setSelectedCategory(category);
+                                setModalType("delete");
+                                setShowModal(true);
+                                setOpenMenuId(null);
+                            }}
+                        >
+                            <div className="w-8 h-8 rounded-lg bg-accent/5 flex items-center justify-center text-accent border border-accent/10">
+                                <Trash2 size={16} />
+                            </div>
+                            Purge
                         </li>
                     </ul>
                 </div>
@@ -262,6 +290,21 @@ const CategoryManagement = () => {
                                     </div>
                                 </div>
                             )}
+
+                            {modalType === "delete" && selectedCategory && (
+                                <div className="flex flex-col text-center">
+                                    <div className="w-20 h-20 bg-accent/5 rounded-[2.5rem] flex items-center justify-center text-accent mb-6 mx-auto shadow-sm">
+                                        <Trash2 size={40} strokeWidth={2} />
+                                    </div>
+                                    <h3 className="text-2xl font-black text-[#0F172A] tracking-tight mb-2">Eliminate Category?</h3>
+                                    <div className="p-5 bg-accent/5 rounded-3xl border border-accent/10 mt-6 text-left">
+                                        <p className="text-[10px] font-black text-accent uppercase tracking-widest mb-2 italic">Security Assessment</p>
+                                        <p className="text-sm font-medium text-[#64748B] leading-relaxed">
+                                            Removing <span className="text-accent font-black">"{selectedCategory.name}"</span> will permanently dismantle its presence across the organizational ledger.
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Modal Footer */}
@@ -272,7 +315,14 @@ const CategoryManagement = () => {
                             >
                                 {modalType === "view" ? "Dismiss" : "Abort"}
                             </button>
-                            {modalType !== "view" && (
+                            {modalType === "delete" ? (
+                                <button
+                                    onClick={handleDelete}
+                                    className="flex-[2] py-4 px-8 bg-accent text-white rounded-2xl text-sm font-black uppercase tracking-widest hover:bg-[#8D270B] shadow-lg shadow-accent/20 transition-all active:scale-95 cursor-pointer"
+                                >
+                                    Confirm Purge
+                                </button>
+                            ) : modalType !== "view" && (
                                 <button
                                     form="category-form"
                                     type="submit"
