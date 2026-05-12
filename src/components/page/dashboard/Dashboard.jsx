@@ -20,6 +20,8 @@ import {
   BarElement
 } from 'chart.js';
 import { Line, Bar } from 'react-chartjs-2';
+import CustomSelect from "../../../components/common/CustomSelect";
+import CustomDatePicker from "../../../components/common/CustomDatePicker";
 
 ChartJS.register(
   CategoryScale,
@@ -37,16 +39,46 @@ export const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [roles, setRoles] = useState([]);
+  const [filters, setFilters] = useState({
+    startDate: null,
+    endDate: null,
+    roleId: "all"
+  });
+
+  useEffect(() => {
+    fetchRoles();
+  }, []);
 
   useEffect(() => {
     fetchDashboardData();
-  }, []);
+  }, [filters]);
+
+  const fetchRoles = async () => {
+    try {
+      const response = await apiInstance.get("/api/admin/getAllRole");
+      if (response.data.status === 200) {
+        setRoles(response.data.roles || []);
+      }
+    } catch (err) {
+      console.error("Error fetching roles:", err);
+    }
+  };
 
   const fetchDashboardData = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await apiInstance.get("/api/dashboard/admin");
+      const params = new URLSearchParams();
+      if (filters.startDate) {
+        params.append("startDate", filters.startDate.toISOString().split('T')[0]);
+      }
+      if (filters.endDate) {
+        params.append("endDate", filters.endDate.toISOString().split('T')[0]);
+      }
+      if (filters.roleId !== "all") params.append("roleId", filters.roleId);
+
+      const response = await apiInstance.get(`/api/dashboard/admin?${params.toString()}`);
       if (response.data.success && response.data.data) {
         setDashboardData(response.data.data);
       } else {
@@ -60,7 +92,19 @@ export const Dashboard = () => {
     }
   };
 
-  if (loading) {
+  const updateFilter = (name, value) => {
+    setFilters(prev => ({ ...prev, [name]: value }));
+  };
+
+  const resetFilters = () => {
+    setFilters({
+      startDate: null,
+      endDate: null,
+      roleId: "all"
+    });
+  };
+
+  if (loading && !dashboardData) {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh]">
         <Loader2 className="animate-spin text-accent" size={48} />
@@ -69,7 +113,7 @@ export const Dashboard = () => {
     );
   }
 
-  if (error) {
+  if (error && !dashboardData) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-2xl p-8 text-center max-w-2xl mx-auto mt-10">
         <div className="bg-red-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -90,20 +134,67 @@ export const Dashboard = () => {
   // Fallback data if API fields are missing (just for structure safety)
   const stats = dashboardData || {};
 
+  const roleOptions = [
+    { value: "all", label: "All Roles" },
+    ...roles.map(r => ({ value: r.id, label: r.name.charAt(0).toUpperCase() + r.name.slice(1) }))
+  ];
+
   return (
     <div className="space-y-4 md:space-y-6 px-4 lg:px-10 py-4 md:py-8 bg-[#F8FAFC] w-full min-h-screen" style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8 gap-6">
         <div>
-          <h1 className="text-xl font-bold text-[#0F172A] tracking-tight">Admin Dashboard</h1>
-          <p className="text-gray-500 mt-1">Welcome back! Here's what's happening today.</p>
+          <h1 className="text-2xl font-extrabold text-[#0F172A] tracking-tight">Admin Dashboard</h1>
+          <p className="text-gray-500 mt-1">Real-time performance metrics and user insights</p>
         </div>
-        {/* <div className="flex items-center gap-3 bg-white p-1.5 rounded-2xl shadow-sm border border-gray-100">
-          <div className="flex items-center px-4 py-2 bg-gray-50 rounded-xl text-sm font-medium text-gray-600">
-            <Calendar className="mr-2 h-4 w-4" />
-            {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+
+        {/* Filters Bar */}
+        <div className="flex flex-wrap items-end gap-4 bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+          <div className="min-w-[180px]">
+            <CustomSelect
+              label="Role"
+              placeholder="Select Role"
+              options={roleOptions}
+              value={filters.roleId}
+              onChange={(val) => updateFilter("roleId", val)}
+            />
           </div>
-        </div> */}
+
+          <div className="min-w-[180px]">
+            <CustomDatePicker
+              label="From"
+              placeholderText="Start Date"
+              selected={filters.startDate}
+              onChange={(date) => updateFilter("startDate", date)}
+            />
+          </div>
+
+          <div className="min-w-[180px]">
+            <CustomDatePicker
+              label="To"
+              placeholderText="End Date"
+              selected={filters.endDate}
+              onChange={(date) => updateFilter("endDate", date)}
+            />
+          </div>
+
+          <div className="pb-1">
+            <button
+              onClick={resetFilters}
+              className="p-3 text-gray-400 hover:text-accent hover:bg-accent/5 rounded-xl transition-all border border-gray-100"
+              title="Reset Filters"
+            >
+              <Activity size={20} />
+            </button>
+          </div>
+        </div>
       </div>
+
+      {loading && dashboardData && (
+        <div className="flex items-center gap-2 text-accent font-medium text-sm animate-pulse mb-4">
+          <Loader2 size={16} className="animate-spin" />
+          Updating statistics...
+        </div>
+      )}
 
       {/* User Statistics */}
       <section className="mb-10">
