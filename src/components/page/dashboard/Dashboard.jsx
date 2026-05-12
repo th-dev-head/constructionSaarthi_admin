@@ -148,7 +148,7 @@ export const Dashboard = () => {
         </div>
 
         {/* Filters Bar */}
-        <div className="flex flex-wrap items-end gap-4 bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+        <div className="flex flex-wrap items-end gap-4">
           <div className="min-w-[180px]">
             <CustomSelect
               label="Role"
