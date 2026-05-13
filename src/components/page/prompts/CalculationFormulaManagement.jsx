@@ -319,8 +319,8 @@ const CalculationFormulaManagement = () => {
                     <CustomSelect
                       label="Reference ID"
                       options={[
+                        { value: "ADD_NEW_FEATURE", label: "+ Add New Feature" },
                         ...pmFeatures.map(f => ({ value: f.feature || f.name, label: f.feature || f.name })),
-                        { value: "ADD_NEW_FEATURE", label: "+ Add New Feature" }
                       ]}
                       value={formState.ref_id}
                       onChange={(val) => {

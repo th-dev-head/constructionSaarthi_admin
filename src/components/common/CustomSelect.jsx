@@ -53,13 +53,19 @@ const CustomSelect = ({
       backgroundColor: state.isSelected 
         ? "#B02E0C" 
         : state.isFocused 
-          ? "#EEF2FF" 
+          ? "#F8FAFC" 
           : "white",
-      color: state.isSelected ? "white" : "#475569",
-      padding: "10px 15px",
+      color: state.isSelected 
+        ? "white" 
+        : state.data.label?.startsWith("+") 
+          ? "#B02E0C" 
+          : "#475569",
+      padding: "12px 16px",
       fontSize: "0.875rem",
-      fontWeight: state.isSelected ? "800" : "600",
+      fontWeight: (state.isSelected || state.data.label?.startsWith("+")) ? "800" : "600",
       cursor: "pointer",
+      borderBottom: state.data.label?.startsWith("+") ? "1px solid #F1F5F9" : "none",
+      transition: "all 0.2s ease",
       "&:active": {
         backgroundColor: "#B02E0C",
       },
@@ -85,7 +91,13 @@ const CustomSelect = ({
         value={options?.find(opt => opt.value === value) || value}
         onChange={(val) => onChange(isMulti ? val : val.value)}
         placeholder={placeholder}
-        styles={customStyles}
+        menuPortalTarget={typeof document !== "undefined" ? document.body : null}
+        menuPlacement="auto"
+        styles={{
+          ...customStyles,
+          menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+          ...props.styles
+        }}
         isMulti={isMulti}
         isSearchable={isSearchable}
         components={{
