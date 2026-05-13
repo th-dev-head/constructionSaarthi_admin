@@ -23,7 +23,7 @@ const CalculationFormulaManagement = () => {
   const location = useLocation();
 
   // Redux state
-  const { formulas, loading, error } = useSelector((state) => state.calculationFormula);
+  const { formulas, loading, error, pagination } = useSelector((state) => state.calculationFormula);
   const { pmFeatures, loading: featuresLoading } = useSelector((state) => state.pmFeature);
 
 
@@ -45,11 +45,11 @@ const CalculationFormulaManagement = () => {
     ref_id: "",
   });
 
-  // Fetch data on mount
+  // Fetch data on mount and when page/limit changes
   useEffect(() => {
-    dispatch(fetchAllFormulas());
+    dispatch(fetchAllFormulas({ page: currentPage, limit }));
     dispatch(fetchAllPMFeatures({ limit: 100 })); // Fetch all for dropdown
-  }, [dispatch]);
+  }, [dispatch, currentPage, limit]);
 
 
   // Open add modal
@@ -90,7 +90,7 @@ const CalculationFormulaManagement = () => {
       }
       setShowModal(false);
       setFormState({ name: "", formula: "", description: "", ref_id: "" });
-      dispatch(fetchAllFormulas());
+      dispatch(fetchAllFormulas({ page: currentPage, limit }));
     } catch (error) {
       console.error("Failed to save formula:", error);
     }
@@ -104,7 +104,7 @@ const CalculationFormulaManagement = () => {
       await dispatch(deleteFormula(selectedFormula.id)).unwrap();
       setShowDeleteModal(false);
       setSelectedFormula(null);
-      dispatch(fetchAllFormulas());
+      dispatch(fetchAllFormulas({ page: currentPage, limit }));
     } catch (error) {
       console.error("Failed to delete formula:", error);
     }
@@ -228,7 +228,12 @@ const CalculationFormulaManagement = () => {
           ]}
           data={formulas}
           loading={loading}
-          pagination={{ page: currentPage, limit, totalPages: Math.ceil(formulas.length / limit), totalRecords: formulas.length }}
+          pagination={{ 
+            page: currentPage, 
+            limit, 
+            totalPages: pagination.totalPages, 
+            totalRecords: pagination.totalItems 
+          }}
           onPageChange={(p) => setCurrentPage(p)}
           onLimitChange={(l) => { setLimit(l); setCurrentPage(1); }}
           renderActions={(f) => (

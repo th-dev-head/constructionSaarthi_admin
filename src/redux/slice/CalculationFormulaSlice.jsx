@@ -2,12 +2,12 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { baseUrl } from "../../config/api";
 import { apiInstance } from "../../config/axiosInstance";
 
-// Fetch all calculation formulas
+// Fetch all calculation formulas with pagination
 export const fetchAllFormulas = createAsyncThunk(
   "calculationFormula/fetchAllFormulas",
-  async (_, thunkAPI) => {
+  async (params, thunkAPI) => {
     try {
-      const response = await apiInstance.get(`${baseUrl}/api/calculation-formula`);
+      const response = await apiInstance.get(`${baseUrl}/api/calculation-formula`, { params });
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
@@ -74,6 +74,12 @@ const calculationFormulaSlice = createSlice({
     formulas: [],
     loading: false,
     error: null,
+    pagination: {
+      totalItems: 0,
+      totalPages: 0,
+      currentPage: 1,
+      itemsPerPage: 10
+    }
   },
   reducers: {
     clearError: (state) => {
@@ -89,7 +95,8 @@ const calculationFormulaSlice = createSlice({
       })
       .addCase(fetchAllFormulas.fulfilled, (state, action) => {
         state.loading = false;
-        state.formulas = action.payload.data || action.payload || [];
+        state.formulas = action.payload.data || [];
+        state.pagination = action.payload.pagination || state.pagination;
       })
       .addCase(fetchAllFormulas.rejected, (state, action) => {
         state.loading = false;
@@ -103,9 +110,9 @@ const calculationFormulaSlice = createSlice({
       .addCase(createFormula.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload.data) {
-          state.formulas.push(action.payload.data);
+          state.formulas.unshift(action.payload.data);
         } else {
-          state.formulas.push(action.payload);
+          state.formulas.unshift(action.payload);
         }
       })
       .addCase(createFormula.rejected, (state, action) => {
