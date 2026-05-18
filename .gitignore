@@ -9,13 +9,10 @@ node_modules/
 dist/
 dist-ssr/
 *.local
-.env
 .env.*.local
 .DS_Store
 
-.env
-.env.test
-.env.production
 
 .vscode/
 .idea/
+config.bat
