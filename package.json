@@ -28,8 +28,8 @@
     "vite": "^7.2.2"
   },
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "node init && vite",
+    "build": "node init && vite build",
     "preview": "vite preview"
   },
   "keywords": [],
