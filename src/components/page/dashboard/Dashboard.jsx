@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Users, UserCheck, UserX, TrendingUp,
   Briefcase, Layout, CheckCircle,
@@ -330,7 +330,7 @@ export const Dashboard = () => {
                   </div>
                 </div>
               </div>
-              <div className="h-[300px]">
+              <div style={{ height: '300px', position: 'relative' }}>
                 <RevenueChart data={stats.revenueTrends || []} />
               </div>
             </div>
@@ -425,41 +425,56 @@ const StatCard = ({ title, value, icon, color, trend, description, extra, varian
   );
 };
 
+// Gradient plugin at FILE LEVEL — stable reference, Chart.js won't re-register per render
+// beforeDraw guarantees chartArea exists when gradient is created (no flicker/fallback needed)
+const gradientPlugin = {
+  id: 'revenueGradientFill',
+  beforeDraw(chart) {
+    const { ctx, chartArea, data: chartData } = chart;
+    if (!chartArea) return;
+    const dataset = chartData.datasets[0];
+    if (!dataset) return;
+    const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+    gradient.addColorStop(0, 'rgba(176, 46, 12, 0.22)');
+    gradient.addColorStop(1, 'rgba(176, 46, 12, 0.01)');
+    dataset.backgroundColor = gradient;
+  },
+};
+
 // Revenue Trend Chart Component
 const RevenueChart = ({ data }) => {
+  const chartRef = useRef(null);
+
   const formatMonth = (dateStr) => {
     try {
       const date = new Date(dateStr);
-      return date.toLocaleDateString('en-US', { month: 'short' });
+      return date.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' });
     } catch {
       return dateStr;
     }
   };
 
+  const hasData = Array.isArray(data) && data.length > 0;
+  const revenueValues = hasData ? data.map(item => parseFloat(item.revenue) || 0) : [0];
+  const labels = hasData ? data.map(item => formatMonth(item.month)) : ['No Data'];
+
+
   const chartData = {
-    labels: data.length > 0 ? data.map(item => formatMonth(item.month)) : ["No Data"],
+    labels,
     datasets: [
       {
         label: 'Monthly Revenue',
-        data: data.length > 0 ? data.map(item => parseFloat(item.revenue)) : [0],
+        data: revenueValues,
         fill: true,
-        backgroundColor: (context) => {
-          const char = context.chart;
-          const { ctx, chartArea } = char;
-          if (!chartArea) return null;
-          const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
-          gradient.addColorStop(0, 'rgba(176, 46, 12, 0.01)');
-          gradient.addColorStop(1, 'rgba(176, 46, 12, 0.2)');
-          return gradient;
-        },
+        backgroundColor: 'rgba(176, 46, 12, 0.1)', // initial solid fallback, plugin overrides
         borderColor: '#B02E0C',
         borderWidth: 3,
         pointBackgroundColor: '#fff',
         pointBorderColor: '#B02E0C',
         pointBorderWidth: 2,
-        pointRadius: 4,
-        pointHoverRadius: 6,
-        tension: 0.4,
+        pointRadius: hasData ? 5 : 0,
+        pointHoverRadius: 7,
+        tension: hasData && data.length > 1 ? 0.4 : 0,
       },
     ],
   };
@@ -467,51 +482,81 @@ const RevenueChart = ({ data }) => {
   const options = {
     responsive: true,
     maintainAspectRatio: false,
+    // Fix: animation disabled — gradient + animation causes incomplete first paint
+    animation: false,
+    layout: {
+      padding: { top: 10, right: 10 }, // prevent top data point from clipping
+    },
     plugins: {
-      legend: {
-        display: false,
-      },
+      legend: { display: false },
       tooltip: {
         backgroundColor: '#1f2937',
         padding: 12,
-        titleFont: { size: 14, weight: 'bold' },
+        titleFont: { size: 13, weight: 'bold' },
         bodyFont: { size: 13 },
         displayColors: false,
         callbacks: {
-          label: function (context) {
-            return ` ₹${context.parsed.y.toLocaleString()}`;
-          }
-        }
+          // Fix: title is the correct key in Chart.js 4.x callbacks (not a conflict)
+          title: (items) => items[0]?.label ?? '',
+          label: (ctx) => ` ₹${ctx.parsed.y.toLocaleString('en-IN')}`,
+        },
       },
     },
     scales: {
       x: {
-        grid: {
-          display: false,
-        },
+        grid: { display: false },
         ticks: {
-          font: { weight: '500' },
-          color: '#9ca3af'
+          font: { size: 12, weight: '500' },
+          color: '#9ca3af',
+          maxRotation: 0,
         },
+        // Fix: border.display:false is the Chart.js 4.x way (drawBorder is deprecated)
+        border: { display: false },
       },
       y: {
         beginAtZero: true,
+        suggestedMax: hasData ? Math.max(...revenueValues) * 1.15 : undefined,
         grid: {
           color: '#f3f4f6',
+          // Fix: removed deprecated drawBorder:false, border.display:false used below
         },
         ticks: {
-          font: { weight: '500' },
+          font: { size: 12, weight: '500' },
           color: '#9ca3af',
-          callback: function (value) {
-            if (value >= 1000) return '₹' + (value / 1000) + 'k';
+          padding: 8,
+          maxTicksLimit: 7,
+          callback(value) {
+            if (value >= 100000) return '₹' + (value / 100000).toFixed(1) + 'L';
+            if (value >= 1000) return '₹' + Number(value).toLocaleString('en-IN');
             return '₹' + value;
-          }
+          },
         },
+        border: { display: false },
       },
     },
   };
 
-  return <Line data={chartData} options={options} />;
+  if (!hasData) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
+        <svg xmlns="http://www.w3.org/2000/svg" className="mb-3 opacity-30" width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+        <p className="text-sm font-medium">No revenue data available yet</p>
+      </div>
+    );
+  }
+
+  // Gradient plugin defined at file level (stable reference, no re-registration per render)
+  return (
+    <Line
+      ref={chartRef}
+      data={chartData}
+      options={options}
+      plugins={[gradientPlugin]}
+      style={{ width: '100% !important', height: '100% !important' }}
+    />
+  );
 };
 
 export default Dashboard;
